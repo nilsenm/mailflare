@@ -57,7 +57,7 @@ export function EmailClientsSettings() {
 				<form onSubmit={submit} className="flex flex-wrap items-end gap-3">
 					<div className="min-w-56 flex-1 space-y-2">
 						<Label htmlFor="jmap-key-name">{t("settings.emailClients.deviceOrAppName")}</Label>
-						<Input id="jmap-key-name" value={name} onChange={(event) => setName(event.target.value)} placeholder="Phone" />
+						<Input id="jmap-key-name" value={name} onChange={(event) => setName(event.target.value)} placeholder={t("settings.emailClients.keyNamePlaceholder")} />
 					</div>
 					<Button type="submit" disabled={busy}>
 						<KeyRound className="h-4 w-4" />

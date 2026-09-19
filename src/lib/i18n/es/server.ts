@@ -15,7 +15,7 @@ export const server = {
 	"server.chooseProOrTeam": "Elige Pro o Team",
 	"server.chooseValidAccount": "Elige una cuenta válida",
 	"server.codeDidNotMatch": "Ese código no coincide",
-	"server.codeDidNotMatchTime": "Ese código no coincide. Verifique la hora en su dispositivo e intente de nuevo.",
+	"server.codeDidNotMatchTime": "Ese código no coincide. Revisa la hora de tu dispositivo e inténtalo de nuevo.",
 	"server.couldNotApplyMigrations": "No se pudieron aplicar las migraciones de la base de datos",
 	"server.couldNotCheckMigrations": "No se pudieron comprobar las migraciones de la base de datos",
 	"server.couldNotCheckUpdates": "No se pudieron buscar actualizaciones",

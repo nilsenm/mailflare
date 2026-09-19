@@ -134,6 +134,7 @@ export const settings = {
 	"settings.currentMailbox.updateFailed": "Failed to update mailbox",
 
 	"settings.emailClients.description": "Apps that speak JMAP (Mailtemi, Twake Mail, aerc, and others) can read and send your mail. Point the app at this server and sign in with your email address and an API key as the password.",
+	"settings.emailClients.keyNamePlaceholder": "Phone",
 	"settings.emailClients.server": "Server",
 	"settings.emailClients.username": "Username",
 	"settings.emailClients.usernameValue": "any value",
