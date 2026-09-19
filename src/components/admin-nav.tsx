@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  KeyRound,
   DatabaseBackup,
   Globe2,
   Activity,
@@ -50,7 +51,7 @@ export function AdminNav({ className }: { className?: string }) {
       label: t("admin.nav.product"),
       links: [
         { href: "/branding", label: t("admin.nav.branding"), icon: Palette },
-        // { href: "/api-keys", label: t("admin.nav.apiKeys"), icon: KeyRound },
+        { href: "/api-keys", label: t("admin.nav.apiKeys"), icon: KeyRound },
       ],
     },
   ];
