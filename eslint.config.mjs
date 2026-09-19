@@ -5,6 +5,7 @@ const eslintConfig = [
 	{
 		ignores: [
 			".next/**",
+			".local-data/**",
 			".open-next/**",
 			"node_modules/**",
 			"drizzle/**",

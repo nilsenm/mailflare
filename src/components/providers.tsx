@@ -9,8 +9,10 @@ import { useMessagePolling } from "@/hooks/use-message-polling";
 import { clearMessageClientState } from "@/hooks/utils";
 import { clearMessageDetailCache } from "@/lib/messages/detail-cache";
 import { AUTH_SESSION_CHANGED_EVENT } from "@/lib/auth/client";
+import { I18nProvider } from "@/lib/i18n/client";
+import type { Dictionary, Lang } from "@/lib/i18n";
 
-export function Providers({ children }: { children: React.ReactNode }) {
+export function Providers({ children, dictionary, lang }: { children: React.ReactNode; dictionary: Dictionary; lang: Lang }) {
 	const realtime = useMessagePolling();
 
 	const [client] = useState(
@@ -40,6 +42,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 	}, [client]);
 
 	return (
+		<I18nProvider dictionary={dictionary} lang={lang}>
 		<QueryClientProvider client={client}>
 			<BrandingProvider>
 				{children}
@@ -51,5 +54,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
 				)}
 			</BrandingProvider>
 		</QueryClientProvider>
+		</I18nProvider>
 	);
 }

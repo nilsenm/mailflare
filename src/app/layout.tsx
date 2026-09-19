@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "@/components/providers";
 import "./globals.css";
+import { getDictionary } from "@/lib/i18n";
+import { getServerLang } from "@/lib/i18n/server";
 
 const geistSans = Geist({
 	variable: "--font-geist-sans",
@@ -19,14 +21,16 @@ export const metadata: Metadata = {
 	icons: { icon: "/api/branding/icon" },
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+	const lang = await getServerLang();
 	return (
-		<html lang="en">
+		<html lang={lang}>
 			<head>
 				<link rel="icon" href="/api/branding/icon"></link>
 			</head>
 			<body className={`${geistSans.variable} ${geistMono.variable} antialiased light`}>
-				<Providers>{children}</Providers>
+				<Providers lang={lang} dictionary={getDictionary(lang)}>{children}</Providers>
 			</body>
 		</html>
 	);

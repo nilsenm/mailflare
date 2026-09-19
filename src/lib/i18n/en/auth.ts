@@ -1,0 +1,17 @@
+export const auth = {
+	"auth.signIn": "Sign in",
+	"auth.signingIn": "Signing in…",
+	"auth.password": "Password",
+	"auth.forgotPassword": "Forgot password?",
+	"auth.backToSignIn": "Back to sign in",
+	"auth.loginDescription": "Open your mailbox and continue from the same inbox workspace.",
+	"auth.loginFailed": "Login failed",
+	"auth.loginTimeout": "Login timed out. Please try again.",
+	"auth.loginUnavailable": "Unable to reach the login service. Please try again.",
+	"auth.mfaTitle": "Two-factor authentication",
+	"auth.mfaDescription": "Enter the 6-digit code from your authenticator app, or one of your recovery codes.",
+	"auth.code": "Code",
+	"auth.verify": "Verify",
+	"auth.verifying": "Verifying…",
+	"auth.codeMismatch": "That code did not match",
+} as const;

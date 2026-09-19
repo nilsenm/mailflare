@@ -1,0 +1,17 @@
+export const settings = {
+	"settings.accountDetails": "Account details",
+	"settings.accountDescription": "Manage your identity, recovery options, and email preferences.",
+	"settings.forwardingEmail": "Forwarding email",
+	"settings.forwardingDescription": "Send a copy of incoming messages to another email address.",
+	"settings.emailSignature": "Email signature",
+	"settings.signatureDescription": "Configure the signature for the inbox currently selected above.",
+	"settings.security": "Security",
+	"settings.securityDescription": "Manage how you sign in to your account.",
+	"settings.changePassword": "Change password",
+	"settings.passwordDescription": "Use at least 8 characters for your new password.",
+	"settings.mfaDescription": "Require a code from an authenticator app when signing in.",
+	"settings.emailApps": "Email apps",
+	"settings.emailAppsDescription": "Use your mail from a desktop or mobile app over JMAP.",
+	"settings.languageTitle": "Language",
+	"settings.languageDescription": "Choose the language used by Mailflare.",
+} as const;
