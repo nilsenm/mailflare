@@ -45,7 +45,7 @@ export const mail = {
 	"mail.list.showUnreadOnly": "Show unread emails only",
 	"mail.list.showingUnread": "Showing unread emails",
 	"mail.list.noFilterMatches": "No messages match these filters",
-	"mail.bulk.selected": "{count} selected",
+	"mail.bulk.selected": { one: "{count} selected", other: "{count} selected" },
 	"mail.bulk.chooseAction": "Choose an action to apply to the selected emails.",
 	"mail.bulk.moveSelected": "Move selected messages",
 	"mail.bulk.moveTo": "Move to",

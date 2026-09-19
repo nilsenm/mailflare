@@ -95,7 +95,7 @@ export function MessageActions({
 			});
 			openDraftComposer(draftId);
 		} catch (replyError) {
-			setError(t("mail.errors.startReply"));
+			setError(replyError instanceof Error ? replyError.message : t("mail.errors.startReply"));
 		} finally {
 			setPendingAction(null);
 		}
@@ -192,7 +192,7 @@ export function MessageActions({
 			});
 			openDraftComposer(draftId);
 		} catch (forwardError) {
-			setError(t("mail.errors.startForward"));
+			setError(forwardError instanceof Error ? forwardError.message : t("mail.errors.startForward"));
 		} finally {
 			setPendingAction(null);
 		}
@@ -212,7 +212,7 @@ export function MessageActions({
 			router.push("/trash");
 			router.refresh();
 		} catch (blockError) {
-			setError(t("mail.errors.blockContact"));
+			setError(blockError instanceof Error ? blockError.message : t("mail.errors.blockContact"));
 		} finally {
 			setPendingAction(null);
 		}

@@ -29,10 +29,10 @@ export const ACTION_KEYS: Record<DomainRule["action"], TranslationKey> = {
 	reject: "settings.domainRouting.actionReject",
 };
 
-async function readJson<T>(res: Response, t: (key: TranslationKey) => string): Promise<T> {
+async function readJson<T>(res: Response, t?: (key: TranslationKey) => string): Promise<T> {
 	const json = (await res.json()) as T & { error?: unknown };
 	if (!res.ok) {
-		throw new Error(typeof json.error === "string" ? json.error : t("settings.domainRouting.requestFailed"));
+		throw new Error(typeof json.error === "string" ? json.error : t ? t("settings.domainRouting.requestFailed") : "Request failed");
 	}
 	return json;
 }
@@ -44,7 +44,7 @@ export async function fetchDomainRules(
 	const params = new URLSearchParams({ domainId });
 	if (mailboxId) params.set("mailboxId", mailboxId);
 	const res = await authFetch(`/api/routing-rules/domain?${params}`);
-	const json = (await res.json()) as { rules: DomainRule[]; mailboxes: DomainRuleMailbox[] };
+	const json = await readJson<{ rules: DomainRule[]; mailboxes: DomainRuleMailbox[] }>(res);
 	return { rules: json.rules ?? [], mailboxes: json.mailboxes ?? [] };
 }
 
