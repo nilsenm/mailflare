@@ -7,6 +7,8 @@ import { requireSessionUser } from "@/lib/api/auth";
 import { getEnv } from "@/lib/cloudflare";
 import type { UpdateShortcutsSettingsInput } from "./types";
 import { parseUpdateShortcutsSettingsRequest } from "./utils";
+import { getServerLang } from "@/lib/i18n/server";
+import { getDictionary, translate } from "@/lib/i18n";
 
 export async function GET(request: Request) {
 	const env = getEnv();
@@ -28,7 +30,9 @@ export async function PATCH(request: Request) {
 		if (error instanceof ZodError) {
 			return NextResponse.json({ error: error.flatten() }, { status: 400 });
 		}
-		return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+		const lang = await getServerLang(request);
+		const dict = getDictionary(lang);
+		return NextResponse.json({ error: translate(dict, "server.invalidRequest") }, { status: 400 });
 	}
 
 	await getDb(env)

@@ -5,6 +5,7 @@ import { formatEmailAddress, normalizeEmailAddress } from "@/lib/email/address";
 import { resolveInboundAddress } from "@/lib/email/routing";
 import { sendEmail } from "@/lib/email/send";
 import { newId } from "@/lib/ids";
+import { getDictionary, translate } from "@/lib/i18n";
 import type { MailboxAutoReplyInput } from "./auto-reply-types";
 
 const autoReplyIntervalMs = 24 * 60 * 60 * 1000;
@@ -57,7 +58,7 @@ export async function sendMailboxAutoReply(
 		mailboxId: input.mailboxId,
 		from: formatEmailAddress(deliveredAddress, mailbox.displayName),
 		to: recipient,
-		subject: mailbox.autoReplySubject.trim() || "Out of office",
+		subject: mailbox.autoReplySubject.trim() || translate(getDictionary("es"), "settings.autoReply.defaultSubject"),
 		text: mailbox.autoReplyBody.trim(),
 		headers,
 	});

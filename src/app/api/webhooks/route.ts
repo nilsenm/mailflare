@@ -10,6 +10,8 @@ import { newId } from "@/lib/ids";
 import { webhookSchema } from "@/lib/validators";
 import { readJsonBody } from "@/lib/http/request";
 import { RequestBodyTooLargeError } from "@/lib/http/errors";
+import { getServerLang } from "@/lib/i18n/server";
+import { getDictionary, translate } from "@/lib/i18n";
 
 export async function GET(request: Request) {
 	const env = getEnv();
@@ -57,8 +59,10 @@ export async function POST(request: Request) {
 	try {
 		body = await readJsonBody(request, 16 * 1024);
 	} catch (error) {
+		const lang = await getServerLang(request);
+		const dict = getDictionary(lang);
 		const status = error instanceof RequestBodyTooLargeError ? 413 : 400;
-		return NextResponse.json({ error: "Invalid webhook request" }, { status });
+		return NextResponse.json({ error: translate(dict, "server.invalidWebhookRequest") }, { status });
 	}
 	const parsed = webhookSchema.safeParse(body);
 	if (!parsed.success) {

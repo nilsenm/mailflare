@@ -35,6 +35,7 @@ import {
 } from "@/lib/folders/colors";
 import type { FolderColor } from "@/lib/folders/types";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n/client";
 import { NavItem } from "./components-nav";
 import type { NavLink } from "./components-nav-types";
 import type { CustomFolder } from "./dashboard-nav-types";
@@ -47,24 +48,19 @@ import { SidebarFooter } from "./sidebar-footer";
 import { SidebarHeader } from "./sidebar-header";
 import { useSidebar } from "./sidebar-state";
 
-const links = [
-  { href: "/compose", label: "Compose", icon: MailPlus, primary: true },
-  { href: "/inbox", label: "Inbox", icon: Inbox, preloadMessages: true },
-  { href: "/starred", label: "Starred", icon: Star, preloadMessages: true },
-  { href: "/snoozed", label: "Snoozed", icon: Clock, preloadMessages: true },
-  { href: "/sent", label: "Sent", icon: Send, preloadMessages: true },
-  { href: "/drafts", label: "Drafts", icon: FileText, preloadMessages: true },
-  {
-    href: "/archived",
-    label: "Archived",
-    icon: Archive,
-    preloadMessages: true,
-  },
-  { href: "/spam", label: "Spam", icon: ShieldAlert, preloadMessages: true },
-  { href: "/trash", label: "Trash", icon: Trash2, preloadMessages: true },
-];
-
 export function DashboardNav({ className }: { className?: string }) {
+  const { t } = useT();
+  const links = [
+    { href: "/compose", label: t("nav.compose"), icon: MailPlus, primary: true },
+    { href: "/inbox", label: t("nav.inbox"), icon: Inbox, preloadMessages: true },
+    { href: "/starred", label: t("nav.starred"), icon: Star, preloadMessages: true },
+    { href: "/snoozed", label: t("nav.snoozed"), icon: Clock, preloadMessages: true },
+    { href: "/sent", label: t("nav.sent"), icon: Send, preloadMessages: true },
+    { href: "/drafts", label: t("nav.drafts"), icon: FileText, preloadMessages: true },
+    { href: "/archived", label: t("nav.archive"), icon: Archive, preloadMessages: true },
+    { href: "/spam", label: t("nav.spam"), icon: ShieldAlert, preloadMessages: true },
+    { href: "/trash", label: t("nav.trash"), icon: Trash2, preloadMessages: true },
+  ];
   const { minimal } = useSidebar();
   const { selectedMailbox, isLoading } = useSelectedMailbox();
   const { counts } = useMessageCounts(selectedMailbox?.id, !isLoading);
@@ -178,7 +174,7 @@ export function DashboardNav({ className }: { className?: string }) {
       {!minimal && (
         <div className="mt-2 flex h-8 items-center justify-between px-3">
           <span className="text-xs font-medium uppercase tracking-wide text-neutral-400">
-            Folders
+            {t("mail.folders.title")}
           </span>
           {selectedMailbox && (
             <Dialog open={folderDialogOpen} onOpenChange={setFolderDialogOpen}>
@@ -186,35 +182,35 @@ export function DashboardNav({ className }: { className?: string }) {
                 <button
                   type="button"
                   className="flex h-7 w-7 items-center justify-center rounded-lg text-neutral-500 hover:bg-blue-50 hover:text-blue-700"
-                  aria-label="Create folder"
+                  aria-label={t("mail.folders.create")}
                 >
                   <Plus className="h-4 w-4" />
                 </button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Create folder</DialogTitle>
+                  <DialogTitle>{t("mail.folders.create")}</DialogTitle>
                   <DialogDescription>
-                    Add a folder to the selected mailbox.
+                    {t("mail.folders.description")}
                   </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={createFolder} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="folderName">Folder name</Label>
+                    <Label htmlFor="folderName">{t("mail.folders.name")}</Label>
                     <Input
                       id="folderName"
                       value={newFolderName}
                       onChange={(event) => setNewFolderName(event.target.value)}
-                      placeholder="Receipts"
+                      placeholder={t("mail.folders.placeholder")}
                       autoFocus
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Color</Label>
+                    <Label>{t("mail.folders.color")}</Label>
                     <div
                       className="flex flex-wrap gap-2"
                       role="radiogroup"
-                      aria-label="Folder color"
+                      aria-label={t("mail.folders.color")}
                     >
                       {FOLDER_COLOR_OPTIONS.map((option) => (
                         <button
@@ -239,7 +235,7 @@ export function DashboardNav({ className }: { className?: string }) {
                     type="submit"
                     disabled={addingFolder || !newFolderName.trim()}
                   >
-                    {addingFolder ? "Creating..." : "Create folder"}
+                    {addingFolder ? t("mail.folders.creating") : t("mail.folders.create")}
                   </Button>
                 </form>
               </DialogContent>
@@ -249,7 +245,7 @@ export function DashboardNav({ className }: { className?: string }) {
       )}
       {!minimal && folders.length === 0 && (
         <div className="mx-3 rounded-lg border border-dashed border-neutral-200 px-3 py-3 text-xs text-neutral-400">
-          No folders yet
+          {t("mail.folders.empty")}
         </div>
       )}
       {folders.map((folder) => (

@@ -13,6 +13,6 @@ export async function GET(request: Request) {
 			headers: { "Cache-Control": "no-store" },
 		});
 	} catch (error) {
-		return getLicenseErrorResponse(error);
+		return await getLicenseErrorResponse(error, request);
 	}
 }

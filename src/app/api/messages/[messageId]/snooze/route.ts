@@ -7,6 +7,8 @@ import { getEnv } from "@/lib/cloudflare";
 import { getMailboxAccessLevel } from "@/lib/mailboxes/access";
 import type { SnoozeMessagePayload } from "./types";
 import { getSnoozedUntil } from "./utils";
+import { getServerLang } from "@/lib/i18n/server";
+import { getDictionary, translate } from "@/lib/i18n";
 
 export async function POST(
 	request: Request,
@@ -14,13 +16,15 @@ export async function POST(
 ) {
 	const { messageId } = await params;
 	const env = getEnv();
+	const lang = await getServerLang(request);
+	const dict = getDictionary(lang);
 	const user = await getCurrentUser(env, request);
-	if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+	if (!user) return NextResponse.json({ error: translate(dict, "server.unauthorized") }, { status: 401 });
 
 	const payload = (await request.json()) as SnoozeMessagePayload;
 	const snoozedUntil = getSnoozedUntil(payload.snoozedUntil);
 	if (!snoozedUntil) {
-		return NextResponse.json({ error: "Choose a future snooze time" }, { status: 400 });
+		return NextResponse.json({ error: translate(dict, "server.chooseFutureSnoozeTime") }, { status: 400 });
 	}
 
 	const db = getDb(env);
@@ -30,11 +34,11 @@ export async function POST(
 		.where(and(eq(messages.id, messageId), eq(messages.direction, "inbound")))
 		.limit(1);
 	if (!message?.mailboxId || message.status !== "received") {
-		return NextResponse.json({ error: "Message not found" }, { status: 404 });
+		return NextResponse.json({ error: translate(dict, "server.messageNotFound") }, { status: 404 });
 	}
 
 	const access = await getMailboxAccessLevel(db, user, message.mailboxId);
-	if (!access?.canManage) return NextResponse.json({ error: "Message not found" }, { status: 404 });
+	if (!access?.canManage) return NextResponse.json({ error: translate(dict, "server.messageNotFound") }, { status: 404 });
 
 	await db
 		.update(messages)
@@ -50,8 +54,10 @@ export async function DELETE(
 ) {
 	const { messageId } = await params;
 	const env = getEnv();
+	const lang = await getServerLang(request);
+	const dict = getDictionary(lang);
 	const user = await getCurrentUser(env, request);
-	if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+	if (!user) return NextResponse.json({ error: translate(dict, "server.unauthorized") }, { status: 401 });
 
 	const db = getDb(env);
 	const [message] = await db
@@ -59,10 +65,10 @@ export async function DELETE(
 		.from(messages)
 		.where(and(eq(messages.id, messageId), eq(messages.direction, "inbound")))
 		.limit(1);
-	if (!message?.mailboxId) return NextResponse.json({ error: "Message not found" }, { status: 404 });
+	if (!message?.mailboxId) return NextResponse.json({ error: translate(dict, "server.messageNotFound") }, { status: 404 });
 
 	const access = await getMailboxAccessLevel(db, user, message.mailboxId);
-	if (!access?.canManage) return NextResponse.json({ error: "Message not found" }, { status: 404 });
+	if (!access?.canManage) return NextResponse.json({ error: translate(dict, "server.messageNotFound") }, { status: 404 });
 
 	await db.update(messages).set({ snoozedUntil: null }).where(eq(messages.id, message.id));
 	return NextResponse.json({ ok: true });

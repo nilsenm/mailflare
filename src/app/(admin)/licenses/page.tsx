@@ -1,5 +1,4 @@
 import { Check, ExternalLink } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,22 +7,48 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { getServerLang } from "@/lib/i18n/server";
+import { getDictionary, translate } from "@/lib/i18n";
 import { LicenseActivation } from "./license-activation";
 import { LICENSE_PLANS } from "./utils";
 
-export default function LicensesPage() {
+export default async function LicensesPage() {
+  const lang = await getServerLang();
+  const dict = getDictionary(lang);
+  const t = (key: Parameters<typeof translate>[1], vars?: Record<string, string | number>) =>
+    translate(dict, key, vars);
+
+  const planDescriptions: Record<string, string> = {
+    Pro: t("admin.licenses.proDescription"),
+    Team: t("admin.licenses.teamDescription"),
+  };
+
+  const planFeatures: Record<string, string[]> = {
+    Pro: [
+      t("admin.licenses.featCustomBranding"),
+      t("admin.licenses.featFuturePro"),
+      t("admin.licenses.featKeepForever"),
+    ],
+    Team: [
+      t("admin.licenses.featEverythingPro"),
+      t("admin.licenses.featManageAccounts"),
+      t("admin.licenses.featSharedMailbox"),
+      t("admin.licenses.featKeepForever"),
+    ],
+  };
+
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-medium text-neutral-900">Licenses</h1>
+        <h1 className="text-3xl font-medium text-neutral-900">{t("admin.licenses.title")}</h1>
         <p className="mt-2 text-sm text-neutral-500">
-          Choose a one-time license. Each purchase includes updates released
-          during the first year.
+          {t("admin.licenses.description")}
         </p>
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         {LICENSE_PLANS.map((plan) => {
           const Icon = plan.icon;
+          const features = planFeatures[plan.name] ?? plan.features;
           return (
             <Card
               key={plan.name}
@@ -47,10 +72,10 @@ export default function LicensesPage() {
                     )}
                   </p>
                 </div>
-                <CardDescription>{plan.description}</CardDescription>
+                <CardDescription>{planDescriptions[plan.name] ?? plan.description}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3 pt-6 flex flex-col flex-1 min-h-0">
-                {plan.features.map((feature) => (
+                {features.map((feature) => (
                   <p
                     key={feature}
                     className="flex gap-2 text-sm text-neutral-600"
@@ -66,7 +91,7 @@ export default function LicensesPage() {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    Get {plan.name}
+                    {t("admin.licenses.getAction", { name: plan.name })}
                     <ExternalLink className="h-4 w-4" />
                   </a>
                 </Button>

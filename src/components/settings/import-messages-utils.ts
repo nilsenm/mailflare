@@ -1,5 +1,16 @@
 import { getAuthHeaders } from "@/lib/auth/client";
+import { getDictionary, LANG_COOKIE, resolveLang, translate } from "@/lib/i18n";
 import type { ImportMessagesResult, ImportProgressHandler } from "./import-messages-types";
+
+/** Client-side fallback error text, translated from the language cookie (no React context available here). */
+function currentDict() {
+	if (typeof document === "undefined") return getDictionary("es");
+	const cookieLang = document.cookie
+		.split(";")
+		.map((part) => part.trim().split("="))
+		.find(([name]) => name === LANG_COOKIE)?.[1];
+	return getDictionary(resolveLang(cookieLang));
+}
 
 export async function importMessageFiles(
 	mailboxId: string,
@@ -21,11 +32,11 @@ export async function importMessageFiles(
 		request.upload.onprogress = (event) => {
 			if (event.lengthComputable) onProgress?.(Math.round((event.loaded / event.total) * 70));
 		};
-		request.onerror = () => reject(new Error("Import upload failed"));
+		request.onerror = () => reject(new Error(translate(currentDict(), "settings.importMessages.uploadFailed")));
 		request.onload = () => {
 			const data = JSON.parse(request.responseText || "{}") as ImportMessagesResult;
 			if (request.status < 200 || request.status >= 300) {
-				reject(new Error(data.error ?? "Import failed"));
+				reject(new Error(data.error ?? translate(currentDict(), "settings.importMessages.failed")));
 				return;
 			}
 			onProgress?.(100);
@@ -37,5 +48,5 @@ export async function importMessageFiles(
 
 export function getImportSummary(result: ImportMessagesResult | null): string {
 	if (!result) return "";
-	return `${result.imported ?? 0} imported, ${result.skipped ?? 0} skipped`;
+	return translate(currentDict(), "settings.import.resultSummary", { imported: result.imported ?? 0, skipped: result.skipped ?? 0 });
 }

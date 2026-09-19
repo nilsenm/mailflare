@@ -7,6 +7,7 @@ import { normalizeEmailAddress } from "@/lib/email/address";
 import { Input } from "@/components/ui/input";
 import { ContactAvatar } from "./contact-avatar";
 import type { ContactAvatarFormProps } from "./contact-avatar-form-types";
+import { useT } from "@/lib/i18n/client";
 import {
 	CONTACT_AVATAR_ACCEPT,
 	removeContactAvatar,
@@ -21,6 +22,7 @@ export function ContactAvatarForm({
 	hasAvatar,
 	onAvatarChange,
 }: ContactAvatarFormProps) {
+	const { t } = useT();
 	const inputRef = useRef<HTMLInputElement>(null);
 	const [busy, setBusy] = useState(false);
 	const [status, setStatus] = useState<string | null>(null);
@@ -42,7 +44,7 @@ export function ContactAvatarForm({
 			onAvatarChange(true);
 			dispatchContactAvatarChanged({ email: normalizeEmailAddress(address), hasAvatar: true });
 		} catch (error) {
-			setStatus(error instanceof Error ? error.message : "Upload failed");
+			setStatus(t("mail.contacts.uploadError"));
 		} finally {
 			setBusy(false);
 		}
@@ -56,7 +58,7 @@ export function ContactAvatarForm({
 			onAvatarChange(false);
 			dispatchContactAvatarChanged({ email: normalizeEmailAddress(address), hasAvatar: false });
 		} catch (error) {
-			setStatus(error instanceof Error ? error.message : "Unable to remove profile picture");
+			setStatus(t("mail.contacts.removePhotoError"));
 		} finally {
 			setBusy(false);
 		}
@@ -85,11 +87,11 @@ export function ContactAvatarForm({
 					</span>
 				</button>
 				<div>
-					<p className="text-sm font-medium text-neutral-900">Profile picture</p>
-					<p className="text-xs text-neutral-500">Upload a custom contact photo.</p>
+					<p className="text-sm font-medium text-neutral-900">{t("mail.contacts.profilePicture")}</p>
+					<p className="text-xs text-neutral-500">{t("mail.contacts.uploadPhoto")}</p>
 					{hasAvatar && (
 						<button type="button" onClick={() => void onRemove()} disabled={busy} className="mt-1 text-xs font-medium text-blue-600 hover:underline disabled:text-neutral-400">
-							Remove photo
+							{t("mail.contacts.removePhoto")}
 						</button>
 					)}
 				</div>

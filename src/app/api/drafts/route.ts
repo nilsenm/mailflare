@@ -10,6 +10,8 @@ import { readJsonBody } from "@/lib/http/request";
 import { copyMessageAttachments } from "@/lib/email/attachments";
 import { getMailboxAccessLevel } from "@/lib/mailboxes/access";
 import { RequestBodyTooLargeError } from "@/lib/http/errors";
+import { getServerLang } from "@/lib/i18n/server";
+import { getDictionary, translate } from "@/lib/i18n";
 import type { DraftPayload } from "./types";
 import { getDraftSender } from "./utils";
 
@@ -38,16 +40,18 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
 	const env = getEnv();
+	const lang = await getServerLang(request);
+	const dict = getDictionary(lang);
 	const user = await requireUser(env, request);
 	let input: DraftPayload;
 	try {
 		input = await readJsonBody<DraftPayload>(request, 1024 * 1024);
 	} catch (error) {
 		const status = error instanceof RequestBodyTooLargeError ? 413 : 400;
-		return NextResponse.json({ error: "Invalid draft request" }, { status });
+		return NextResponse.json({ error: translate(dict, "server.invalidDraftRequest") }, { status });
 	}
 	const db = getDb(env);
-	const sender = await getDraftSender(env, user.id, input);
+	const sender = await getDraftSender(env, user.id, input, dict);
 	if ("error" in sender) {
 		return NextResponse.json({ error: sender.error }, { status: 403 });
 	}
@@ -61,7 +65,7 @@ export async function POST(request: Request) {
 			.limit(1);
 		const sourceAccess = source?.mailboxId ? await getMailboxAccessLevel(db, user, source.mailboxId) : null;
 		if (!source || !sourceAccess?.canRead) {
-			return NextResponse.json({ error: "Message not found" }, { status: 404 });
+			return NextResponse.json({ error: translate(dict, "server.messageNotFound") }, { status: 404 });
 		}
 		forwardSourceId = source.id;
 	}

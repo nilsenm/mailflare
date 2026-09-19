@@ -19,8 +19,10 @@ import {
   submitRegistration,
 } from "./utils";
 import type { DomainPreflight, DomainSetupResult, SetupRequirementCheck } from "./types";
+import { useT } from "@/lib/i18n/client";
 
 export function RegisterClient() {
+  const { t } = useT();
   const router = useRouter();
   const [hasAdminAccount, setHasAdminAccount] = useState<boolean | null>(null);
   const [hasPrimaryDomain, setHasPrimaryDomain] = useState<boolean | null>(
@@ -65,7 +67,7 @@ export function RegisterClient() {
         if (!active) return;
         setMxChecking(false);
         if (!ok || data.hasExistingMx === undefined) {
-          setError(typeof data.error === "string" ? data.error : "Could not check existing MX records");
+          setError(typeof data.error === "string" ? data.error : t("auth.register.mxCheckFailed"));
           return;
         }
         setMxRecordsExist(data.hasExistingMx);
@@ -73,7 +75,7 @@ export function RegisterClient() {
       .catch((error: unknown) => {
         if (!active) return;
         setMxChecking(false);
-        setError(error instanceof Error ? error.message : "Could not check existing MX records");
+        setError(error instanceof Error ? error.message : t("auth.register.mxCheckFailed"));
       });
 
     return () => {
@@ -91,7 +93,7 @@ export function RegisterClient() {
       setChecks(preparation.data.checks ?? []);
       setDatabaseMigrated(!!preparation.data.migrated);
       if (!preparation.ok) {
-        setError(preparation.data.error ?? "Complete the missing configuration before continuing.");
+        setError(preparation.data.error ?? t("auth.register.completeConfig"));
         return;
       }
 
@@ -102,7 +104,7 @@ export function RegisterClient() {
       setPrimaryDomainSendingRequested(data.primaryDomain?.sendingRequested ?? null);
       setPreparationComplete(true);
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Installation preparation failed");
+      setError(error instanceof Error ? error.message : t("auth.register.preparationFailed"));
     } finally {
       setLoading(false);
     }
@@ -122,7 +124,7 @@ export function RegisterClient() {
     setLoading(false);
     if (!ok || !data.domain) {
       setError(
-        typeof data.error === "string" ? data.error : "Domain setup failed",
+        typeof data.error === "string" ? data.error : t("auth.register.domainSetupFailed"),
       );
       return;
     }
@@ -142,7 +144,7 @@ export function RegisterClient() {
     if (!ok || !data.domain) {
       setDomainCheck(null);
       setEnableSending(false);
-      setError(typeof data.error === "string" ? data.error : "Domain check failed");
+      setError(typeof data.error === "string" ? data.error : t("auth.onboarding.domainCheckFailed"));
       return;
     }
 
@@ -159,7 +161,7 @@ export function RegisterClient() {
     const domain = setupDomain ?? primaryDomain;
     if (!domain) {
       setLoading(false);
-      setError("Domain setup is not complete");
+      setError(t("auth.register.domainNotComplete"));
       return;
     }
 
@@ -181,7 +183,7 @@ export function RegisterClient() {
         return;
       }
       setError(
-        typeof data.error === "string" ? data.error : "Registration failed",
+        typeof data.error === "string" ? data.error : t("auth.register.registrationFailed"),
       );
       setTurnstileReset((value) => value + 1);
       return;
@@ -195,27 +197,27 @@ export function RegisterClient() {
     return (
       <AuthShell
         icon={MailPlus}
-        title="Account registration is closed"
+        title={t("auth.register.closedTitle")}
         footer={
           <Link
             href="/login"
             className="inline-flex items-center gap-2 hover:underline"
           >
-            Sign in instead
+            {t("auth.register.signInInstead")}
             <ArrowRight className="h-4 w-4" />
           </Link>
         }
       >
         <div className="space-y-5">
           <p className="text-sm leading-6 text-neutral-600">
-            This installation already has an account for {primaryDomain ?? "this workspace"}.
+            {t("auth.register.alreadyHasAccount", { domain: primaryDomain ?? t("auth.register.thisWorkspaceFallback") })}
           </p>
           <Button
             type="button"
             className="h-11 w-full rounded-full px-6 active:scale-[0.98]"
             onClick={() => router.push("/login")}
           >
-            Go to login
+            {t("auth.register.goToLogin")}
           </Button>
         </div>
       </AuthShell>
@@ -225,7 +227,7 @@ export function RegisterClient() {
   return (
     <AuthShell
       icon={MailPlus}
-      title={step === 1 ? "Prepare installation" : showDomainStep ? "Add your domain" : "Create your mailbox"}
+      title={step === 1 ? t("auth.register.titlePrepare") : showDomainStep ? t("auth.register.titleAddDomain") : t("auth.register.titleCreateMailbox")}
       // description={
       // 	showDomainStep
       // 		? "Connect the primary Cloudflare zone first so routing records can be created before the first mailbox."
@@ -233,22 +235,22 @@ export function RegisterClient() {
       // }
       steps={
         [
-          { label: "System", active: step === 1 },
-          { label: "Domain", active: step === 2 },
-          { label: "Account", active: step === 3 },
+          { label: t("auth.register.stepSystem"), active: step === 1 },
+          { label: t("auth.register.stepDomain"), active: step === 2 },
+          { label: t("auth.register.stepAccount"), active: step === 3 },
         ]
       }
     >
       {step === 1 ? (
         <div className="space-y-5">
           <p className="text-sm leading-6 text-neutral-600">
-            Mailflare checks its required Cloudflare configuration and initializes a clean D1 database before setup continues.
+            {t("auth.register.prepDescription")}
           </p>
           <div className="space-y-2">
             {loading && checks.length === 0 && (
               <div className="flex items-center gap-3 rounded-2xl bg-neutral-50 px-4 py-3 text-sm text-neutral-600">
                 <LoaderCircle className="h-4 w-4 animate-spin" />
-                Checking installation
+                {t("auth.register.checkingInstallation")}
               </div>
             )}
             {checks.map((check) => (
@@ -267,7 +269,7 @@ export function RegisterClient() {
             {preparationComplete && (
               <div className="flex items-center gap-3 rounded-2xl bg-green-50 px-4 py-3 text-sm text-green-700">
                 <CheckCircle2 className="h-4 w-4" />
-                {databaseMigrated ? "Clean database migrated successfully" : "Database schema is ready"}
+                {databaseMigrated ? t("auth.register.dbMigrated") : t("auth.register.dbReady")}
               </div>
             )}
           </div>
@@ -282,7 +284,7 @@ export function RegisterClient() {
               className="h-11 w-full rounded-full px-6 active:scale-[0.98]"
               onClick={() => setStep(hasPrimaryDomain ? 3 : 2)}
             >
-              Continue
+              {t("auth.register.continue")}
             </Button>
           ) : (
             <Button
@@ -292,14 +294,14 @@ export function RegisterClient() {
               disabled={loading}
               onClick={() => void runPreparation()}
             >
-              {loading ? "Checking..." : "Check again"}
+              {loading ? t("auth.register.checking") : t("auth.register.checkAgain")}
             </Button>
           )}
         </div>
       ) : showDomainStep ? (
         <form method="post" onSubmit={onDomainSubmit} className="space-y-5">
           <div className="space-y-2">
-            <Label htmlFor="domain">Primary domain</Label>
+            <Label htmlFor="domain">{t("auth.register.primaryDomainLabel")}</Label>
             <Input
               id="domain"
               name="domain"
@@ -315,20 +317,20 @@ export function RegisterClient() {
               }}
             />
             <p className="text-xs leading-5 text-neutral-500">
-              The domain must already be a Cloudflare zone on this account.
+              {t("auth.register.domainMustBeZone")}
             </p>
           </div>
           <div className="flex items-center justify-between gap-4 rounded-2xl bg-neutral-50 px-4 py-3">
             <div>
-              <Label htmlFor="setup-enable-sending">Enable sending</Label>
+              <Label htmlFor="setup-enable-sending">{t("auth.onboarding.enableSending")}</Label>
               <p className="mt-1 text-xs leading-5 text-neutral-500">
                 {domainChecking
-                  ? "Checking Cloudflare access..."
+                  ? t("auth.onboarding.checkingCloudflareAccess")
                   : domainCheck
                     ? enableSending
-                      ? "Required to send email."
-                      : "Receive-only mode."
-                    : "Enter the domain and leave the field to verify it."}
+                      ? t("auth.onboarding.requiredToSend")
+                      : t("auth.onboarding.receiveOnlyMode")
+                    : t("auth.register.enterDomainToVerify")}
               </p>
             </div>
             <Switch
@@ -341,7 +343,7 @@ export function RegisterClient() {
           {domainCheck && (
             <div className="flex items-center gap-3 rounded-2xl bg-green-50 px-4 py-3 text-sm text-green-700">
               <CheckCircle2 className="h-4 w-4" />
-              Domain found in Cloudflare as {domainCheck.zone.name}
+              {t("auth.onboarding.domainFoundAs", { zone: domainCheck.zone.name })}
             </div>
           )}
           {error && (
@@ -354,7 +356,7 @@ export function RegisterClient() {
             className="h-11 w-full rounded-full px-6 active:scale-[0.98]"
             disabled={loading || domainChecking}
           >
-            {loading ? "Adding domain..." : "Continue"}
+            {loading ? t("auth.register.addingDomain") : t("auth.register.continue")}
           </Button>
         </form>
       ) : (
@@ -362,13 +364,13 @@ export function RegisterClient() {
 					{mxChecking && (
 						<div className="flex items-center gap-3 rounded-2xl bg-neutral-50 px-4 py-3 text-sm text-neutral-600">
 							<LoaderCircle className="h-4 w-4 animate-spin" />
-							Checking existing MX records
+							{t("auth.register.checkingMxRecords")}
 						</div>
 					)}
 					{mxRecordsExist === false && (
 						<div className="flex items-center gap-3 rounded-2xl bg-green-50 px-4 py-3 text-sm text-green-700">
 							<CheckCircle2 className="h-4 w-4" />
-							No existing MX records found
+							{t("auth.register.noMxRecordsFound")}
 						</div>
 					)}
 					{mxRecordsExist === true && (
@@ -381,16 +383,16 @@ export function RegisterClient() {
 							<span>
 								<span className="flex items-center gap-2 text-sm font-medium">
 									<AlertTriangle className="h-4 w-4" />
-									Replace existing MX records
+									{t("auth.register.replaceMxTitle")}
 								</span>
 								<span className="mt-1 block text-xs leading-5">
-									This deletes the current mail provider's MX records and replaces them with Cloudflare Email Routing. The previous provider will stop receiving mail.
+									{t("auth.register.replaceMxDescription")}
 								</span>
 							</span>
 						</label>
 					)}
           <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
+            <Label htmlFor="username">{t("auth.register.usernameLabel")}</Label>
             <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 relative">
               <Input
                 id="username"
@@ -406,7 +408,7 @@ export function RegisterClient() {
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{t("auth.password")}</Label>
             <Input
               id="password"
               name="password"
@@ -418,7 +420,7 @@ export function RegisterClient() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="resetEmail">Recovery email</Label>
+            <Label htmlFor="resetEmail">{t("auth.register.recoveryEmailLabel")}</Label>
             <Input
               id="resetEmail"
               name="resetEmail"
@@ -441,7 +443,7 @@ export function RegisterClient() {
 							className="h-11 w-full rounded-full px-6 active:scale-[0.98]"
 							onClick={() => setMxCheckRevision((value) => value + 1)}
 						>
-							Check MX records again
+							{t("auth.register.checkMxAgain")}
 						</Button>
 					)}
           <TurnstileField resetSignal={turnstileReset} />
@@ -450,7 +452,7 @@ export function RegisterClient() {
 						className="h-11 w-full rounded-full px-6 active:scale-[0.98] mt-8"
 						disabled={loading || mxChecking || mxRecordsExist === null || (mxRecordsExist && !replaceMxRecords) || hasAdminAccount === null || hasPrimaryDomain === null}
 					>
-						{loading ? "Creating..." : "Create account"}
+						{loading ? t("auth.onboarding.creating") : t("auth.register.createAccount")}
 					</Button>
         </form>
       )}

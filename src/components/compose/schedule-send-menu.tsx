@@ -8,8 +8,10 @@ import {
 	parseDateTimeLocal,
 } from "./schedule-send-utils";
 import type { ScheduleSendMenuProps } from "./schedule-send-types";
+import { useT } from "@/lib/i18n/client";
 
 export function ScheduleSendMenu({ disabled, value, onChange }: ScheduleSendMenuProps) {
+	const { t, lang } = useT();
 	const options = getScheduleSendOptions();
 	const minimum = new Date(Date.now() + 5 * 60 * 1000);
 
@@ -18,7 +20,7 @@ export function ScheduleSendMenu({ disabled, value, onChange }: ScheduleSendMenu
 			<DropdownMenu.Trigger
 				type="button"
 				disabled={disabled}
-				aria-label="Schedule send options"
+				aria-label={t("compose.schedule.options")}
 				className="inline-flex h-8 items-center justify-center rounded-r-lg border-l border-blue-500 bg-blue-600 px-2 text-white transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
 			>
 				<ChevronDown className="h-4 w-4" />
@@ -36,7 +38,7 @@ export function ScheduleSendMenu({ disabled, value, onChange }: ScheduleSendMenu
 								className="flex cursor-pointer items-center rounded-md px-3 py-2 outline-none hover:bg-neutral-100 focus:bg-neutral-100"
 							>
 								<X className="mr-2 h-4 w-4" />
-								Clear schedule
+								{t("compose.schedule.clear")}
 							</DropdownMenu.Item>
 							<DropdownMenu.Separator className="my-1 h-px bg-neutral-100" />
 						</>
@@ -47,15 +49,19 @@ export function ScheduleSendMenu({ disabled, value, onChange }: ScheduleSendMenu
 							onSelect={() => onChange(option.value)}
 							className="cursor-pointer rounded-md px-3 py-2 outline-none hover:bg-neutral-100 focus:bg-neutral-100"
 						>
-							{option.label}
+							{option.label === "Later today"
+								? t("compose.schedule.laterToday")
+								: option.label === "Tomorrow morning"
+									? t("compose.schedule.tomorrowMorning")
+									: t("compose.schedule.mondayMorning")}
 							<span className="ml-2 text-xs text-neutral-400">
-								{option.value?.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+								{option.value?.toLocaleTimeString(lang === "es" ? "es-PE" : "en-US", { hour: "numeric", minute: "2-digit" })}
 							</span>
 						</DropdownMenu.Item>
 					))}
 					<DropdownMenu.Separator className="my-1 h-px bg-neutral-100" />
 					<DropdownMenu.Label className="px-3 pb-1 pt-2 text-xs font-medium text-neutral-500">
-						Pick date &amp; time
+						{t("compose.schedule.pickDateTime")}
 					</DropdownMenu.Label>
 					<input
 						type="datetime-local"

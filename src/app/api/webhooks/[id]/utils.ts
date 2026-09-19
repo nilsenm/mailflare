@@ -4,6 +4,8 @@ import { getDb } from "@/db";
 import { webhooks } from "@/db/schema";
 import { requireSessionUser } from "@/lib/api/auth";
 import { getEnv } from "@/lib/cloudflare";
+import { getServerLang } from "@/lib/i18n/server";
+import { getDictionary, translate } from "@/lib/i18n";
 
 /** Loads a webhook owned by the caller, or the 404 response to return instead. */
 export async function loadOwnedWebhook(request: Request, id: string) {
@@ -19,7 +21,9 @@ export async function loadOwnedWebhook(request: Request, id: string) {
 		.limit(1);
 
 	if (!hook) {
-		return { error: NextResponse.json({ error: "Webhook not found" }, { status: 404 }) } as const;
+		const lang = await getServerLang(request);
+		const dict = getDictionary(lang);
+		return { error: NextResponse.json({ error: translate(dict, "server.webhookNotFound") }, { status: 404 }) } as const;
 	}
 	return { env, db, user, hook, error: null } as const;
 }

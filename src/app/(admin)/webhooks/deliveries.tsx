@@ -4,9 +4,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { RotateCw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useT } from "@/lib/i18n/client";
 import type { WebhookDelivery } from "./types";
 import {
-	DELIVERY_STATUS_LABELS,
 	fetchDeliveries,
 	formatDuration,
 	formatTimestamp,
@@ -23,6 +23,7 @@ const STATUS_STYLES: Record<WebhookDelivery["status"], string> = {
 };
 
 export function WebhookDeliveries({ webhookId }: { webhookId: string }) {
+	const { t } = useT();
 	const qc = useQueryClient();
 	const deliveries = useQuery({
 		queryKey: ["webhook-deliveries", webhookId],
@@ -40,24 +41,32 @@ export function WebhookDeliveries({ webhookId }: { webhookId: string }) {
 	});
 
 	if (deliveries.isLoading) {
-		return <p className="text-sm text-neutral-500">Loading deliveries…</p>;
+		return <p className="text-sm text-neutral-500">{t("admin.webhooks.deliveries.loading")}</p>;
 	}
 
 	if (!deliveries.data?.length) {
-		return <p className="text-sm text-neutral-500">No deliveries recorded yet.</p>;
+		return <p className="text-sm text-neutral-500">{t("admin.webhooks.deliveries.empty")}</p>;
 	}
+
+	const statusLabels: Record<WebhookDelivery["status"], string> = {
+		pending: t("admin.webhooks.status.pending"),
+		delivered: t("admin.webhooks.status.delivered"),
+		failed: t("admin.webhooks.status.failed"),
+		retrying: t("admin.webhooks.status.retrying"),
+		exhausted: t("admin.webhooks.status.exhausted"),
+	};
 
 	return (
 		<div className="overflow-x-auto rounded-xl border border-neutral-200">
 			<table className="w-full min-w-[820px] text-left text-sm">
 				<thead className="bg-neutral-50 text-xs uppercase tracking-wide text-neutral-500">
 					<tr>
-						<th className="px-3 py-2 font-medium">Event</th>
-						<th className="px-3 py-2 font-medium">Status</th>
-						<th className="px-3 py-2 font-medium">Attempts</th>
-						<th className="px-3 py-2 font-medium">Response</th>
-						<th className="px-3 py-2 font-medium">Last attempt</th>
-						<th className="px-3 py-2 font-medium">Next retry</th>
+						<th className="px-3 py-2 font-medium">{t("admin.webhooks.deliveries.thEvent")}</th>
+						<th className="px-3 py-2 font-medium">{t("admin.webhooks.deliveries.thStatus")}</th>
+						<th className="px-3 py-2 font-medium">{t("admin.webhooks.deliveries.thAttempts")}</th>
+						<th className="px-3 py-2 font-medium">{t("admin.webhooks.deliveries.thResponse")}</th>
+						<th className="px-3 py-2 font-medium">{t("admin.webhooks.deliveries.thLastAttempt")}</th>
+						<th className="px-3 py-2 font-medium">{t("admin.webhooks.deliveries.thNextRetry")}</th>
 						<th className="px-3 py-2 font-medium" />
 					</tr>
 				</thead>
@@ -72,7 +81,7 @@ export function WebhookDeliveries({ webhookId }: { webhookId: string }) {
 							</td>
 							<td className="px-3 py-2">
 								<Badge className={STATUS_STYLES[delivery.status]}>
-									{DELIVERY_STATUS_LABELS[delivery.status] ?? delivery.status}
+									{statusLabels[delivery.status] ?? delivery.status}
 								</Badge>
 							</td>
 							<td className="px-3 py-2 whitespace-nowrap">
@@ -109,7 +118,7 @@ export function WebhookDeliveries({ webhookId }: { webhookId: string }) {
 										disabled={retry.isPending}
 										onClick={() => retry.mutate(delivery.id)}
 									>
-										<RotateCw className="h-3 w-3" /> Retry
+										<RotateCw className="h-3 w-3" /> {t("admin.webhooks.deliveries.retry")}
 									</Button>
 								)}
 							</td>

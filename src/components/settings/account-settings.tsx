@@ -57,8 +57,8 @@ export function AccountSettings() {
 				<div className="rounded-3xl bg-white p-6"><LanguageSelector /></div>
 			</section>
 			{/* <div>
-				<h1 className="text-3xl font-medium text-neutral-900">Account</h1>
-				<p className="mt-1 text-sm text-neutral-500">Manage your account details and sign-in password.</p>
+				<h1 className="text-3xl font-medium text-neutral-900">{t("settings.account.title")}</h1>
+				<p className="mt-1 text-sm text-neutral-500">{t("settings.account.description")}</p>
 			</div> */}
 
 			<section className="space-y-4">

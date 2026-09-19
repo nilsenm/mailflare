@@ -14,6 +14,8 @@ import {
 	isUploadedAvatarFile,
 } from "@/app/api/profile/avatar/utils";
 import { getPersonalIdentityForAddress, syncPersonalIdentity } from "@/lib/profile/sync";
+import { getServerLang } from "@/lib/i18n/server";
+import { getDictionary, translate } from "@/lib/i18n";
 import { contactAvatarKeyFor } from "./utils";
 
 export async function GET(request: Request) {
@@ -48,12 +50,14 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
 	const env = getEnv();
+	const lang = await getServerLang(request);
+	const dict = getDictionary(lang);
 	const user = await requireUser(env, request);
 	let form: FormData;
 	try {
 		form = await request.formData();
 	} catch {
-		return NextResponse.json({ error: "Expected multipart form data" }, { status: 400 });
+		return NextResponse.json({ error: translate(dict, "server.expectedMultipart") }, { status: 400 });
 	}
 	const mailboxEntry = form.get("mailboxId");
 	const addressEntry = form.get("address");
@@ -61,22 +65,22 @@ export async function POST(request: Request) {
 	const email = normalizeEmailAddress(typeof addressEntry === "string" ? addressEntry : "");
 	const file = form.get("file");
 	if (!mailboxId || !email || !isUploadedAvatarFile(file)) {
-		return NextResponse.json({ error: "Mailbox, contact, and image file are required" }, { status: 400 });
+		return NextResponse.json({ error: translate(dict, "server.mailboxContactImageRequired") }, { status: 400 });
 	}
 	if (!ALLOWED_AVATAR_TYPES.includes(file.type)) {
-		return NextResponse.json({ error: "Use a JPEG, PNG, WebP, or GIF image" }, { status: 400 });
+		return NextResponse.json({ error: translate(dict, "server.useJpegPngWebpGif") }, { status: 400 });
 	}
 	if (file.size > MAX_AVATAR_SIZE) {
-		return NextResponse.json({ error: "Image must be 2 MB or smaller" }, { status: 413 });
+		return NextResponse.json({ error: translate(dict, "server.imageTooLarge") }, { status: 413 });
 	}
 
 	const db = getDb(env);
 	const access = await getMailboxAccessLevel(db, user, mailboxId);
-	if (!access?.canManage) return NextResponse.json({ error: "Mailbox not found" }, { status: 404 });
+	if (!access?.canManage) return NextResponse.json({ error: translate(dict, "server.mailboxNotFound") }, { status: 404 });
 	const account = await getPersonalIdentityForAddress(db, access.mailbox.userId, email);
 	if (account) {
 		if (account.userId !== user.id) {
-			return NextResponse.json({ error: "Only the account owner can change this contact" }, { status: 403 });
+			return NextResponse.json({ error: translate(dict, "server.onlyOwnerCanChangeContact") }, { status: 403 });
 		}
 		const key = avatarKeyFor(account.userId);
 		await env.BUCKET.put(key, await file.arrayBuffer(), {
@@ -112,19 +116,21 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
 	const env = getEnv();
+	const lang = await getServerLang(request);
+	const dict = getDictionary(lang);
 	const user = await requireUser(env, request);
 	const url = new URL(request.url);
 	const mailboxId = url.searchParams.get("mailboxId");
 	const email = normalizeEmailAddress(url.searchParams.get("address") ?? "");
-	if (!mailboxId || !email) return NextResponse.json({ error: "Mailbox and contact are required" }, { status: 400 });
+	if (!mailboxId || !email) return NextResponse.json({ error: translate(dict, "server.mailboxAndContactRequired") }, { status: 400 });
 
 	const db = getDb(env);
 	const access = await getMailboxAccessLevel(db, user, mailboxId);
-	if (!access?.canManage) return NextResponse.json({ error: "Mailbox not found" }, { status: 404 });
+	if (!access?.canManage) return NextResponse.json({ error: translate(dict, "server.mailboxNotFound") }, { status: 404 });
 	const account = await getPersonalIdentityForAddress(db, access.mailbox.userId, email);
 	if (account) {
 		if (account.userId !== user.id) {
-			return NextResponse.json({ error: "Only the account owner can change this contact" }, { status: 403 });
+			return NextResponse.json({ error: translate(dict, "server.onlyOwnerCanChangeContact") }, { status: 403 });
 		}
 		if (account.avatarKey) await env.BUCKET.delete(account.avatarKey);
 		await syncPersonalIdentity(db, { ...account, avatarKey: null });

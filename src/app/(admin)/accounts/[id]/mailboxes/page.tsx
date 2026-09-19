@@ -6,6 +6,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { useT } from "@/lib/i18n/client";
 import type { ManagedAccount, ManagedDomain, ManagedMailbox } from "../types";
 import {
   addManagedMailbox,
@@ -16,6 +17,7 @@ import {
 } from "../utils";
 
 export default function AccountMailboxesPage() {
+  const { t } = useT();
   const { id } = useParams<{ id: string }>();
   const [account, setAccount] = useState<ManagedAccount | null>(null);
   const [mailboxes, setMailboxes] = useState<ManagedMailbox[]>([]);
@@ -40,10 +42,10 @@ export default function AccountMailboxesPage() {
   useEffect(() => {
     void load().catch((error) =>
       setMessage(
-        error instanceof Error ? error.message : "Unable to load mailboxes",
+        error instanceof Error ? error.message : t("admin.accountMailboxes.loadError"),
       ),
     );
-  }, [id]);
+  }, [id, t]);
 
   async function addMailbox(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -56,7 +58,7 @@ export default function AccountMailboxesPage() {
       await load();
     } catch (error) {
       setMessage(
-        error instanceof Error ? error.message : "Unable to add mailbox",
+        error instanceof Error ? error.message : t("admin.accountMailboxes.addError"),
       );
     } finally {
       setSaving(false);
@@ -70,7 +72,7 @@ export default function AccountMailboxesPage() {
       await load();
     } catch (error) {
       setMessage(
-        error instanceof Error ? error.message : "Unable to remove mailbox",
+        error instanceof Error ? error.message : t("admin.accountMailboxes.removeError"),
       );
     }
   }
@@ -78,9 +80,11 @@ export default function AccountMailboxesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-medium text-neutral-900">Mailboxes</h1>
+        <h1 className="text-3xl font-medium text-neutral-900">{t("admin.accountMailboxes.title")}</h1>
         <p className="mt-2 text-sm text-neutral-500">
-          Manage inboxes owned by {account?.name ?? "this account"}.
+          {t("admin.accountMailboxes.description", {
+            name: account?.name ?? t("admin.accountMailboxes.thisAccount"),
+          })}
         </p>
       </div>
       <section className="space-y-4 rounded-3xl bg-white p-6">
@@ -101,23 +105,23 @@ export default function AccountMailboxesPage() {
               <Button
                 type="button"
                 variant="ghost"
-                size="icon"
+                size="sm"
                 onClick={() => void removeMailbox(mailbox.id)}
-                aria-label="Remove inbox"
+                aria-label={t("admin.accountMailboxes.removeInboxAria")}
               >
                 <Trash2 className="h-4 w-4 text-red-600" />
               </Button>
             </div>
           ))}
           {account && mailboxes.length === 0 && (
-            <p className="text-sm text-neutral-500">No mailboxes yet.</p>
+            <p className="text-sm text-neutral-500">{t("admin.accountMailboxes.empty")}</p>
           )}
         </div>
         <form onSubmit={addMailbox} className="flex gap-2">
           <Input
             value={localPart}
             onChange={(event) => setLocalPart(event.target.value)}
-            placeholder="inbox"
+            placeholder={t("admin.accountMailboxes.inboxPlaceholder")}
             required
           />
           <Select
@@ -133,7 +137,7 @@ export default function AccountMailboxesPage() {
           </Select>
           <Button type="submit" disabled={!account || !domainId || saving}>
             <Plus className="h-4 w-4" />
-            {saving ? "Adding..." : "Add inbox"}
+            {saving ? t("admin.accountMailboxes.adding") : t("admin.accountMailboxes.addAction")}
           </Button>
         </form>
       </section>

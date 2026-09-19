@@ -11,8 +11,10 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ProfileAvatarForm } from "./profile-avatar-form";
 import { getMailboxAddress, updateCurrentMailboxName } from "./utils";
+import { useT } from "@/lib/i18n/client";
 
 export function CurrentMailboxForm() {
+	const { t } = useT();
 	const { selectedMailbox, setSelectedMailbox, isLoading } = useSelectedMailbox();
 	const [displayName, setDisplayName] = useState("");
 	const [savedDisplayName, setSavedDisplayName] = useState("");
@@ -37,9 +39,9 @@ export function CurrentMailboxForm() {
 			setSelectedMailbox(updated);
 			setSavedDisplayName(updated.displayName ?? "");
 			setDisplayName(updated.displayName ?? "");
-			setStatus("Saved");
+			setStatus(t("settings.saved"));
 		} catch (err) {
-			setStatus(err instanceof Error ? err.message : "Failed to update mailbox");
+			setStatus(err instanceof Error ? err.message : t("settings.currentMailbox.updateFailed"));
 		} finally {
 			setSaving(false);
 		}
@@ -63,10 +65,10 @@ export function CurrentMailboxForm() {
 	if (!selectedMailbox) {
 		return (
 			<div className="space-y-6">
-				<h1 className="text-3xl font-medium text-neutral-900">Settings</h1>
+				<h1 className="text-3xl font-medium text-neutral-900">{t("settings.nav.settings")}</h1>
 				<Card className="rounded-3xl border-0 bg-white p-6">
 					<CardContent className="p-6 text-sm text-neutral-500">
-						Select a mailbox to view its settings.
+						{t("settings.currentMailbox.selectMailbox")}
 					</CardContent>
 				</Card>
 			</div>
@@ -79,7 +81,7 @@ export function CurrentMailboxForm() {
 	return (
 		<div className="space-y-8">
 			<div>
-				<h1 className="text-3xl font-medium text-neutral-900">Settings</h1>
+				<h1 className="text-3xl font-medium text-neutral-900">{t("settings.nav.settings")}</h1>
 				<p className="mt-1 text-sm text-neutral-500">{address}</p>
 			</div>
 
@@ -91,7 +93,7 @@ export function CurrentMailboxForm() {
 					/>
 					<form onSubmit={onSubmit} className="space-y-4">
 						<div className="space-y-2">
-							<Label htmlFor="displayName">Name</Label>
+							<Label htmlFor="displayName">{t("settings.currentMailbox.nameLabel")}</Label>
 							<Input
 								id="displayName"
 								value={displayName}
@@ -103,7 +105,7 @@ export function CurrentMailboxForm() {
 						<div className="flex items-center gap-3">
 							<Button type="submit" disabled={saving || !hasChanges}>
 								<Save className="h-4 w-4" />
-								{saving ? "Saving..." : "Save changes"}
+								{saving ? t("settings.saving") : t("settings.currentMailbox.saveChanges")}
 							</Button>
 							{status && <p className="text-sm text-neutral-500">{status}</p>}
 						</div>

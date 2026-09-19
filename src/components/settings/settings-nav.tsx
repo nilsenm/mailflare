@@ -4,17 +4,19 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { isActiveSettingsPath, settingsNavSections } from "./settings-nav-utils";
+import { useT } from "@/lib/i18n/client";
 
 export function SettingsNav() {
+	const { t } = useT();
 	const pathname = usePathname();
 
 	return (
 		<aside className="min-h-full border-r border-blue-100/70 px-4 py-10 w-64">
 			<div className="sticky top-6 space-y-7">
 				{settingsNavSections.map((section) => (
-					<div key={section.label} className="space-y-3">
+					<div key={section.labelKey} className="space-y-3">
 						<h2 className="px-4 text-xs font-semibold uppercase tracking-wide text-neutral-500">
-							{section.label}
+							{t(section.labelKey)}
 						</h2>
 						<nav className="space-y-px">
 							{section.items.map((item) => {
@@ -30,7 +32,7 @@ export function SettingsNav() {
 												: "text-neutral-600 hover:bg-white/70 hover:text-neutral-900",
 										)}
 									>
-										{item.label}
+										{t(item.labelKey)}
 									</Link>
 								);
 							})}

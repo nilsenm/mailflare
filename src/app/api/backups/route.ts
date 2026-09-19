@@ -10,6 +10,8 @@ import {
 	updateBackupSettings,
 } from "@/lib/backups/service";
 import { getEnv } from "@/lib/cloudflare";
+import { getServerLang } from "@/lib/i18n/server";
+import { getDictionary, translate } from "@/lib/i18n";
 import { parseBackupSettingsInput } from "./utils";
 
 async function requireAdmin(request: Request) {
@@ -32,19 +34,23 @@ export async function GET(request: Request) {
 			configuration: getBackupConfigurationStatus(env),
 		});
 	} catch {
-		return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+		const lang = await getServerLang(request);
+		const dict = getDictionary(lang);
+		return NextResponse.json({ error: translate(dict, "server.forbidden") }, { status: 403 });
 	}
 }
 
 export async function PUT(request: Request) {
+	const lang = await getServerLang(request);
+	const dict = getDictionary(lang);
 	try {
 		const { env } = await requireAdmin(request);
 		const input = parseBackupSettingsInput(await request.json());
-		if (!input) return NextResponse.json({ error: "Invalid backup settings" }, { status: 400 });
+		if (!input) return NextResponse.json({ error: translate(dict, "server.invalidBackupSettings") }, { status: 400 });
 		await updateBackupSettings(env, input);
 		return NextResponse.json({ ok: true });
 	} catch {
-		return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+		return NextResponse.json({ error: translate(dict, "server.forbidden") }, { status: 403 });
 	}
 }
 
@@ -55,7 +61,9 @@ export async function POST(request: Request) {
 		await runDatabaseBackup(env, backupId);
 		return NextResponse.json({ backupId });
 	} catch (error) {
-		const message = error instanceof Error ? error.message : "Failed to run backup";
+		const lang = await getServerLang(request);
+		const dict = getDictionary(lang);
+		const message = error instanceof Error ? error.message : translate(dict, "server.failedRunBackup");
 		return NextResponse.json({ error: message }, { status: 400 });
 	}
 }

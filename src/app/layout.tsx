@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "@/components/providers";
 import "./globals.css";
-import { getDictionary } from "@/lib/i18n";
+import { getDictionary, translate } from "@/lib/i18n";
 import { getServerLang } from "@/lib/i18n/server";
 
 const geistSans = Geist({
@@ -15,12 +15,14 @@ const geistMono = Geist_Mono({
 	subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-	title: "Mailflare",
-	description: "Multi-tenant email on Cloudflare",
-	icons: { icon: "/api/branding/icon" },
-};
-
+export async function generateMetadata(): Promise<Metadata> {
+	const lang = await getServerLang();
+	return {
+		title: "Mailflare",
+		description: translate(getDictionary(lang), "settings.ui.meta.description"),
+		icons: { icon: "/api/branding/icon" },
+	};
+}
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
 	const lang = await getServerLang();

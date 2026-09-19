@@ -17,12 +17,16 @@ import { readJsonBody } from "@/lib/http/request";
 import { RequestBodyTooLargeError } from "@/lib/http/errors";
 import { verifyTurnstileToken } from "@/lib/auth/turnstile";
 import { getDomainProvisioningError } from "@/lib/domains/errors";
+import { getServerLang } from "@/lib/i18n/server";
+import { getDictionary, translate } from "@/lib/i18n";
 
 export async function POST(request: Request) {
 	const env = getEnv();
+	const lang = await getServerLang(request);
+	const dict = getDictionary(lang);
 	const db = getDb(env);
 	if (await hasAdminAccount(env)) {
-		return NextResponse.json({ error: "Registration is closed after the first account is created" }, { status: 403 });
+		return NextResponse.json({ error: translate(dict, "server.registrationClosed") }, { status: 403 });
 	}
 
 	let body: unknown;
@@ -30,14 +34,14 @@ export async function POST(request: Request) {
 		body = await readJsonBody(request, 16 * 1024);
 	} catch (error) {
 		const status = error instanceof RequestBodyTooLargeError ? 413 : 400;
-		return NextResponse.json({ error: "Invalid registration request" }, { status });
+		return NextResponse.json({ error: translate(dict, "server.invalidRegistrationRequest") }, { status });
 	}
 	const firstRunParsed = firstRunRegisterSchema.safeParse(body);
 	if (!firstRunParsed.success) {
 		return NextResponse.json({ error: firstRunParsed.error.flatten() }, { status: 400 });
 	}
 	if (!(await verifyTurnstileToken(env, request, (body as Record<string, unknown>).turnstileToken))) {
-		return NextResponse.json({ error: "Verification failed. Please try again." }, { status: 400 });
+		return NextResponse.json({ error: translate(dict, "server.verificationFailed") }, { status: 400 });
 	}
 
 	const domainName = firstRunParsed.data.domain.toLowerCase().trim();
@@ -48,7 +52,7 @@ export async function POST(request: Request) {
 
 	const [existing] = await db.select().from(users).where(eq(users.email, email)).limit(1);
 	if (existing) {
-		return NextResponse.json({ error: "Email already registered" }, { status: 409 });
+		return NextResponse.json({ error: translate(dict, "server.emailAlreadyRegistered") }, { status: 409 });
 	}
 
 	const userId = newId("usr");
@@ -94,9 +98,12 @@ export async function POST(request: Request) {
 		} catch (cleanupError) {
 			console.warn("Failed to remove the partial user after registration failure", cleanupError);
 		}
-		const failure = getDomainProvisioningError(err, "Domain setup failed", 502);
+		const failure = getDomainProvisioningError(err, translate(dict, "server.domainSetupFailed"), 502);
+		const errorMessage = failure.code === "MX_RECORDS_CONFLICT"
+			? translate(dict, "server.mxRecordsConflict")
+			: failure.message;
 		return NextResponse.json(
-			{ error: failure.message, code: failure.code },
+			{ error: errorMessage, code: failure.code },
 			{ status: failure.status },
 		);
 	}

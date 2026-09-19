@@ -30,6 +30,7 @@ import {
 	getMailboxName,
 	isAdminPath,
 } from "./mailbox-selector-utils";
+import { useT } from "@/lib/i18n/client";
 
 function AccountAvatar({
 	name,
@@ -71,6 +72,7 @@ function AccountAvatar({
 }
 
 function MailboxAccountRow({ mailbox, unread, avatarUrl, onSelect }: MailboxAccountRowProps) {
+	const { t } = useT();
 	const name = getMailboxName(mailbox);
 
 	return (
@@ -88,8 +90,8 @@ function MailboxAccountRow({ mailbox, unread, avatarUrl, onSelect }: MailboxAcco
 				<div className="flex items-center gap-1.5">
 					<p className="truncate text-sm font-semibold text-neutral-900">{name}</p>
 					{mailbox.type === "shared" && (
-						<Tooltip label="Shared inbox">
-							<span title="Shared inbox" aria-label="Shared inbox" className="shrink-0 text-blue-600">
+						<Tooltip label={t("mail.navigation.sharedInbox")}>
+							<span title={t("mail.navigation.sharedInbox")} aria-label={t("mail.navigation.sharedInbox")} className="shrink-0 text-blue-600">
 								<UsersRound className="h-3.5 w-3.5" />
 							</span>
 						</Tooltip>
@@ -107,6 +109,7 @@ function MailboxAccountRow({ mailbox, unread, avatarUrl, onSelect }: MailboxAcco
 }
 
 export function MailboxSelector() {
+	const { t } = useT();
 	const { selectedMailbox, setSelectedMailbox, mailboxes, isLoading } = useSelectedMailbox();
 	const pathname = usePathname();
 	const router = useRouter();
@@ -187,7 +190,7 @@ export function MailboxSelector() {
 		return <Skeleton className="h-10 w-10 rounded-full" />;
 	}
 
-	const selectedName = selectedMailbox ? getMailboxName(selectedMailbox) : user?.name ?? "Account";
+	const selectedName = selectedMailbox ? getMailboxName(selectedMailbox) : user?.name ?? t("mail.navigation.account");
 	const selectedEmail = selectedMailbox ? getMailboxAddress(selectedMailbox) : user?.email ?? "";
 	const selectedMailboxAvatarUrl = selectedMailbox
 		? mailboxAvatarUrls[selectedMailbox.id]
@@ -214,7 +217,7 @@ export function MailboxSelector() {
 				type="button"
 				onClick={() => setOpen((value) => !value)}
 				className="rounded-full p-1 transition-colors hover:bg-neutral-200"
-				aria-label="Open account menu"
+				aria-label={t("mail.navigation.openAccountMenu")}
 				aria-expanded={open}
 			>
 				<AccountAvatar
@@ -244,8 +247,8 @@ export function MailboxSelector() {
 								<div className="flex items-center gap-2">
 									<p className="truncate text-lg font-semibold text-neutral-900">{selectedName}</p>
 									{selectedMailbox?.type === "shared" && (
-										<Tooltip label="Shared inbox">
-											<span title="Shared inbox" aria-label="Shared inbox" className="shrink-0 text-blue-600">
+									<Tooltip label={t("mail.navigation.sharedInbox")}>
+										<span title={t("mail.navigation.sharedInbox")} aria-label={t("mail.navigation.sharedInbox")} className="shrink-0 text-blue-600">
 												<UsersRound className="h-4 w-4" />
 											</span>
 										</Tooltip>
@@ -263,7 +266,7 @@ export function MailboxSelector() {
 							className="mt-4 flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-[#f2f6fc]"
 						>
 							<CalendarDays className="h-5 w-5 text-neutral-600" />
-							Calendar
+							{t("mail.navigation.calendar")}
 						</Link>
 						<Link
 							href="/settings/account"
@@ -271,14 +274,14 @@ export function MailboxSelector() {
 							className="mt-1 flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-[#f2f6fc]"
 						>
 							<Settings className="h-5 w-5 text-neutral-600" />
-							Settings
+							{t("mail.navigation.settings")}
 						</Link>
 					</div>
 
 					{otherMailboxes.length > 0 && (
 						<div className="mt-2 rounded-[22px] bg-white/55 p-1">
 							<p className="px-4 pb-1 pt-3 text-xs font-semibold uppercase tracking-wide text-neutral-500">
-								Other accounts
+								{t("mail.navigation.otherAccounts")}
 							</p>
 							{otherMailboxes.map((mailbox) => {
 								const mailboxCount = counts.mailboxes.find((count) => count.mailboxId === mailbox.id);
@@ -306,7 +309,7 @@ export function MailboxSelector() {
 								className={`flex items-center gap-3 border-t border-neutral-100 px-5 py-4 text-sm font-medium text-neutral-800 hover:bg-[#f2f6fc] ${adminActive ? "bg-blue-50" : ""}`}
 							>
 								<ShieldCheck className="h-5 w-5 text-neutral-600" />
-								Admin
+								{t("mail.navigation.admin")}
 								{adminActive && <Check className="ml-auto h-4 w-4 text-blue-600" />}
 							</Link>
 						)}
@@ -316,7 +319,7 @@ export function MailboxSelector() {
 							className="flex w-full items-center gap-3 border-t border-neutral-100 px-5 py-4 text-left text-sm font-medium text-neutral-800 hover:bg-[#f2f6fc]"
 						>
 							<LogOut className="h-5 w-5 text-neutral-600" />
-							Sign out
+							{t("mail.navigation.signOut")}
 						</button>
 					</div>
 				</div>

@@ -1,4 +1,5 @@
 import { authFetch } from "@/lib/auth/client";
+import { getDictionary, LANG_COOKIE, resolveLang, translate, type TranslationKey } from "@/lib/i18n";
 import type {
 	ImapFormState,
 	ImportFolderSummary,
@@ -7,6 +8,16 @@ import type {
 	ImportSourceOption,
 	ImportSourceSection,
 } from "./types";
+
+/** Client-side fallback error text, translated from the language cookie (no React context available here). */
+function fallbackText(key: TranslationKey, vars?: Record<string, string | number>): string {
+	if (typeof document === "undefined") return translate(getDictionary("es"), key, vars);
+	const cookieLang = document.cookie
+		.split(";")
+		.map((part) => part.trim().split("="))
+		.find(([name]) => name === LANG_COOKIE)?.[1];
+	return translate(getDictionary(resolveLang(cookieLang)), key, vars);
+}
 
 export const importSourceOptions: ImportSourceOption[] = [
 	{ value: "inbox", label: "Inbox", imapFolder: "INBOX", destination: "system:inbox", system: true },
@@ -83,7 +94,7 @@ export async function ensureImportDestination(
 		body: JSON.stringify({ mailboxId, name: source.folderName }),
 	});
 	const data = (await response.json()) as ImportFolderSummary & { error?: string };
-	if (!response.ok) throw new Error(data.error ?? `Unable to create folder ${source.folderName}`);
+	if (!response.ok) throw new Error(data.error ?? fallbackText("settings.import.createFolderFailed", { folder: source.folderName ?? "" }));
 	return `folder:${data.id}`;
 }
 
@@ -91,7 +102,7 @@ async function fetchMailboxFolders(mailboxId: string): Promise<ImportFolderSumma
 	const params = new URLSearchParams({ mailboxId });
 	const response = await authFetch(`/api/folders?${params.toString()}`);
 	const data = (await response.json()) as { folders?: ImportFolderSummary[]; error?: string };
-	if (!response.ok) throw new Error(data.error ?? "Unable to load folders");
+	if (!response.ok) throw new Error(data.error ?? fallbackText("settings.import.loadFoldersFailed"));
 	return data.folders ?? [];
 }
 
@@ -116,7 +127,7 @@ export async function importFromImap(
 		}),
 	});
 	const data = (await response.json()) as ImportResult;
-	if (!response.ok) throw new Error(data.error ?? "IMAP import failed");
+	if (!response.ok) throw new Error(data.error ?? fallbackText("settings.import.imapImportFailed"));
 	return data;
 }
 
@@ -133,13 +144,13 @@ export async function fetchImapFolders(form: ImapFormState): Promise<string[]> {
 		}),
 	});
 	const data = (await response.json()) as { folders?: string[]; error?: string };
-	if (!response.ok) throw new Error(data.error ?? "Unable to list IMAP folders");
+	if (!response.ok) throw new Error(data.error ?? fallbackText("settings.import.listImapFoldersFailed"));
 	return data.folders ?? [];
 }
 
 export function formatImportResult(result: ImportResult | null): string {
 	if (!result) return "";
-	return `${result.imported ?? 0} imported, ${result.skipped ?? 0} skipped`;
+	return fallbackText("settings.import.resultSummary", { imported: result.imported ?? 0, skipped: result.skipped ?? 0 });
 }
 
 function findFolderMatch(folders: string[], aliases: string[]): string | null {

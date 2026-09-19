@@ -19,6 +19,7 @@ import {
 import { toggleMessageStar } from "./message-list-row-actions-utils";
 import type { ThreadMessageActionsProps } from "./thread-message-actions-types";
 import type { ReplyMode } from "@/components/message-actions/types";
+import { useT } from "@/lib/i18n/client";
 
 export function ThreadMessageActions({
 	message,
@@ -26,6 +27,7 @@ export function ThreadMessageActions({
 	ownAddress,
 	ownAddresses = [],
 }: ThreadMessageActionsProps) {
+	const { t } = useT();
 	const { openDraftComposer } = useCompose();
 	const [starred, setStarred] = useState(message.starred);
 	const [moreOpen, setMoreOpen] = useState(false);
@@ -45,7 +47,7 @@ export function ThreadMessageActions({
 		try {
 			setStarred(await toggleMessageStar(message.id));
 		} catch (nextError) {
-			setError(nextError instanceof Error ? nextError.message : "Unable to update star");
+			setError(nextError instanceof Error ? nextError.message : t("mail.errors.updateStar"));
 		} finally {
 			setPending(false);
 		}
@@ -69,7 +71,7 @@ export function ThreadMessageActions({
 			});
 			openDraftComposer(draftId);
 		} catch (nextError) {
-			setError(nextError instanceof Error ? nextError.message : "Could not start reply");
+			setError(nextError instanceof Error ? nextError.message : t("mail.errors.startReply"));
 		} finally {
 			setPending(false);
 		}
@@ -89,7 +91,7 @@ export function ThreadMessageActions({
 			});
 			openDraftComposer(draftId);
 		} catch (nextError) {
-			setError(nextError instanceof Error ? nextError.message : "Could not start forward");
+			setError(nextError instanceof Error ? nextError.message : t("mail.errors.startForward"));
 		} finally {
 			setPending(false);
 		}
@@ -102,7 +104,7 @@ export function ThreadMessageActions({
 		try {
 			await runSingleMessageAction(message.id, action);
 		} catch (nextError) {
-			setError(nextError instanceof Error ? nextError.message : "Could not update message");
+			setError(nextError instanceof Error ? nextError.message : t("mail.errors.updateMessage"));
 		} finally {
 			setPending(false);
 		}
@@ -117,7 +119,7 @@ export function ThreadMessageActions({
 			await blockMessageContact({ mailboxId, senderAddress: message.fromAddr });
 			await runSingleMessageAction(message.id, "trash");
 		} catch (nextError) {
-			setError(nextError instanceof Error ? nextError.message : "Could not block contact");
+			setError(nextError instanceof Error ? nextError.message : t("mail.errors.blockContact"));
 		} finally {
 			setPending(false);
 		}
@@ -126,13 +128,13 @@ export function ThreadMessageActions({
 	return (
 		<div className="flex items-center gap-0.5">
 			{error && <span className="mr-1 max-w-32 truncate text-xs text-red-600" title={error}>{error}</span>}
-			<Tooltip label={starred ? "Remove star" : "Star"}>
+			<Tooltip label={starred ? t("mail.actions.removeStar") : t("mail.actions.star")}>
 				<Button
 					type="button"
 					variant="ghost"
 					size="sm"
 					className="h-8 w-8 px-0"
-					aria-label={starred ? "Remove star" : "Star"}
+					aria-label={starred ? t("mail.actions.removeStar") : t("mail.actions.star")}
 					aria-pressed={starred}
 					disabled={pending}
 					onClick={() => void onToggleStar()}
@@ -140,13 +142,13 @@ export function ThreadMessageActions({
 					<Star className={starred ? "h-4 w-4 fill-amber-400 text-amber-400" : "h-4 w-4"} />
 				</Button>
 			</Tooltip>
-			<Tooltip label="Reply">
+			<Tooltip label={t("mail.actions.reply")}>
 				<Button
 					type="button"
 					variant="ghost"
 					size="sm"
 					className="h-8 w-8 px-0"
-					aria-label="Reply"
+					aria-label={t("mail.actions.reply")}
 					disabled={pending}
 					onClick={() => void onReply("reply")}
 				>
@@ -154,13 +156,13 @@ export function ThreadMessageActions({
 				</Button>
 			</Tooltip>
 			<div className="relative">
-				<Tooltip label="More actions">
+				<Tooltip label={t("mail.actions.more")}>
 					<Button
 						type="button"
 						variant="ghost"
 						size="sm"
 						className="h-8 w-8 px-0"
-						aria-label="More actions"
+						aria-label={t("mail.actions.more")}
 						aria-expanded={moreOpen}
 						disabled={pending}
 						onClick={() => setMoreOpen((open) => !open)}
@@ -171,20 +173,20 @@ export function ThreadMessageActions({
 				{moreOpen && (
 					<div className="absolute right-0 z-30 mt-1 w-56 rounded-xl border border-neutral-200 bg-white p-2 text-neutral-700 shadow-lg">
 						<button type="button" className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-neutral-100" onClick={() => void onReply("reply")}>
-							<Reply className="h-4 w-4" /> Reply
+							<Reply className="h-4 w-4" /> {t("mail.actions.reply")}
 						</button>
 						{canReplyAll && (
 							<button type="button" className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-neutral-100" onClick={() => void onReply("replyAll")}>
-								<ReplyAll className="h-4 w-4" /> Reply all
+								<ReplyAll className="h-4 w-4" /> {t("mail.actions.replyAll")}
 							</button>
 						)}
 						<button type="button" className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-neutral-100" onClick={() => void onForward()}>
-							<Forward className="h-4 w-4" /> Forward
+							<Forward className="h-4 w-4" /> {t("mail.actions.forward")}
 						</button>
 						<hr className="my-1 border-neutral-100" />
 						<button type="button" className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-neutral-100" onClick={() => void onMessageAction(message.read ? "unread" : "read")}>
 							{message.read ? <Mail className="h-4 w-4" /> : <MailOpen className="h-4 w-4" />}
-							{message.read ? "Mark as unread" : "Mark as read"}
+							{message.read ? t("mail.actions.markUnread") : t("mail.actions.markRead")}
 						</button>
 						{moveActions.map((item) => (
 							<button key={item.action} type="button" className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-neutral-100" onClick={() => void onMessageAction(item.action)}>
@@ -195,7 +197,7 @@ export function ThreadMessageActions({
 							<>
 								<hr className="my-1 border-neutral-100" />
 								<button type="button" className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-neutral-100" onClick={() => void onBlock()}>
-									<Ban className="h-4 w-4" /> Block contact
+									<Ban className="h-4 w-4" /> {t("mail.actions.blockContact")}
 								</button>
 							</>
 						)}

@@ -9,8 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { requestPasswordReset } from "./utils";
+import { useT } from "@/lib/i18n/client";
 
 export function ForgotPasswordClient() {
+	const { t } = useT();
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [sent, setSent] = useState(false);
@@ -23,13 +25,13 @@ export function ForgotPasswordClient() {
 		try {
 			const result = await requestPasswordReset(new FormData(event.currentTarget));
 			if (!result.ok) {
-				setError(result.error ?? "Something went wrong. Please try again.");
+				setError(result.error ?? t("auth.genericRetryError"));
 				setTurnstileReset((value) => value + 1);
 				return;
 			}
 			setSent(true);
 		} catch {
-			setError("Unable to reach the server. Please try again.");
+			setError(t("auth.serverUnavailable"));
 			setTurnstileReset((value) => value + 1);
 		} finally {
 			setLoading(false);
@@ -39,22 +41,22 @@ export function ForgotPasswordClient() {
 	return (
 		<AuthShell
 			icon={KeyRound}
-			title="Reset your password"
+			title={t("auth.resetPasswordTitle")}
 			description={
 				sent
-					? "If that account has a recovery email, a reset link is on its way. It works for 30 minutes."
-					: "Enter the address you sign in with. We will send a reset link to the recovery email on the account."
+					? t("auth.resetLinkSentDescription")
+					: t("auth.resetRequestDescription")
 			}
 			footer={
 				<Link href="/login" className="text-sm text-neutral-500 hover:text-neutral-800">
-					Back to sign in
+					{t("auth.backToSignIn")}
 				</Link>
 			}
 		>
 			{!sent && (
 				<form onSubmit={onSubmit} className="space-y-5">
 					<div className="space-y-2">
-						<Label htmlFor="email">Email</Label>
+						<Label htmlFor="email">{t("common.email")}</Label>
 						<Input id="email" name="email" type="email" autoComplete="email" required autoFocus />
 					</div>
 					{error && (
@@ -62,7 +64,7 @@ export function ForgotPasswordClient() {
 					)}
 					<TurnstileField resetSignal={turnstileReset} />
 					<Button type="submit" className="h-11 w-full rounded-full px-6 active:scale-[0.98]" disabled={loading}>
-						{loading ? "Sending..." : "Send reset link"}
+						{loading ? t("auth.sending") : t("auth.sendResetLink")}
 					</Button>
 				</form>
 			)}

@@ -10,6 +10,8 @@ import { tracksAccountIdentity } from "@/lib/profile/identity-utils";
 import { mailboxSchema } from "@/lib/validators";
 import { ensureMailboxDomainRouting, getMailboxDomainAddresses } from "@/lib/mailboxes/domain-addresses";
 import { ensurePersonalMailbox } from "./utils";
+import { getServerLang } from "@/lib/i18n/server";
+import { getDictionary, translate } from "@/lib/i18n";
 
 export async function GET(request: Request) {
 	const env = getEnv();
@@ -38,24 +40,26 @@ export async function POST(request: Request) {
 	}
 
 	const db = getDb(env);
+	const lang = await getServerLang(request);
+	const dict = getDictionary(lang);
 	const mailboxType = parsed.data.type ?? "personal";
 	if (mailboxType === "shared") {
 		const entitlements = await getLicenseEntitlements(env);
 		if (user.role !== "admin" || !entitlements.canManageAccounts) {
-			return NextResponse.json({ error: "A Team license is required to create shared inboxes" }, { status: 403 });
+			return NextResponse.json({ error: translate(dict, "server.licenseRequiredSharedInboxes") }, { status: 403 });
 		}
 	}
 	const ownerUserId = mailboxType === "shared" ? user.id : parsed.data.ownerUserId ?? user.id;
 	if (ownerUserId !== user.id) {
 		if (user.role !== "admin") {
-			return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+			return NextResponse.json({ error: translate(dict, "server.forbidden") }, { status: 403 });
 		}
 		const [owner] = await db
 			.select({ id: users.id })
 			.from(users)
 			.where(and(eq(users.id, ownerUserId), eq(users.createdByUserId, user.id)))
 			.limit(1);
-		if (!owner) return NextResponse.json({ error: "Account not found" }, { status: 404 });
+		if (!owner) return NextResponse.json({ error: translate(dict, "server.accountNotFound") }, { status: 404 });
 	}
 	const [domain] = await db
 		.select()
@@ -67,7 +71,7 @@ export async function POST(request: Request) {
 		(user.canManageMailboxes && !!user.createdByUserId && domain.userId === user.createdByUserId)
 	);
 	if (!canUseDomain) {
-		return NextResponse.json({ error: "Domain not found" }, { status: 404 });
+		return NextResponse.json({ error: translate(dict, "server.domainNotFound") }, { status: 404 });
 	}
 
 	const localPart = parsed.data.localPart.toLowerCase();
@@ -77,7 +81,7 @@ export async function POST(request: Request) {
 		.where(and(eq(mailboxes.domainId, domain.id), eq(mailboxes.localPart, localPart)))
 		.limit(1);
 	if (existing) {
-		return NextResponse.json({ error: "Mailbox already exists" }, { status: 409 });
+		return NextResponse.json({ error: translate(dict, "server.mailboxAlreadyExists") }, { status: 409 });
 	}
 	const [existingAlias] = await db
 		.select({ id: mailboxAliases.id })
@@ -85,7 +89,7 @@ export async function POST(request: Request) {
 		.where(and(eq(mailboxAliases.domainId, domain.id), eq(mailboxAliases.localPart, localPart)))
 		.limit(1);
 	if (existingAlias) {
-		return NextResponse.json({ error: "An alias already uses this address" }, { status: 409 });
+		return NextResponse.json({ error: translate(dict, "server.aliasAlreadyUsesAddress") }, { status: 409 });
 	}
 
 	const id = newId("mbx");
@@ -101,7 +105,7 @@ export async function POST(request: Request) {
 		await ensureMailboxDomainRouting(env, db, { id, domainId: domain.id, localPart, useAllDomains: true });
 	} catch (err) {
 		await db.delete(mailboxes).where(eq(mailboxes.id, id));
-		const message = err instanceof Error ? err.message : "Failed to create Cloudflare routing rule";
+		const message = err instanceof Error ? err.message : translate(dict, "server.failedCreateRoutingRule");
 		return NextResponse.json({ error: message }, { status: 502 });
 	}
 

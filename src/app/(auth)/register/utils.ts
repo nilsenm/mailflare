@@ -1,4 +1,5 @@
 import { clearClientSessionToken } from "@/lib/auth/client";
+import { getDictionary, LANG_COOKIE, resolveLang, translate } from "@/lib/i18n";
 import type {
 	DomainSetupResult,
 	MxCheckResult,
@@ -15,10 +16,18 @@ export async function prepareSetup(): Promise<{ ok: boolean; data: SetupPreparat
 	};
 }
 
+function clientLangFallbackMessage(): string {
+	const cookieLang = document.cookie
+		.split(";")
+		.map((part) => part.trim().split("="))
+		.find(([name]) => name === LANG_COOKIE)?.[1];
+	return translate(getDictionary(resolveLang(cookieLang)), "auth.register.setupStatusFailed");
+}
+
 export async function getSetupStatus(): Promise<SetupStatus> {
 	const res = await fetch("/api/setup/status");
 	const data = (await res.json()) as SetupStatus;
-	if (!res.ok) throw new Error(data.error ?? "Could not load setup status");
+	if (!res.ok) throw new Error(data.error ?? clientLangFallbackMessage());
 	return data;
 }
 

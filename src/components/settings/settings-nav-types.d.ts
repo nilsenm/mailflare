@@ -1,9 +1,11 @@
+import type { TranslationKey } from "@/lib/i18n";
+
 export type SettingsNavItem = {
 	href: string;
-	label: string;
+	labelKey: TranslationKey;
 };
 
 export type SettingsNavSection = {
-	label: string;
+	labelKey: TranslationKey;
 	items: SettingsNavItem[];
 };

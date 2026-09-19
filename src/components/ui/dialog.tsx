@@ -4,6 +4,7 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n/client";
 
 export const Dialog = DialogPrimitive.Root;
 export const DialogTrigger = DialogPrimitive.Trigger;
@@ -14,6 +15,7 @@ export function DialogContent({
 	children,
 	...props
 }: React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>) {
+	const { t } = useT();
 	return (
 		<DialogPrimitive.Portal>
 			<DialogPrimitive.Overlay className="dialog-overlay fixed inset-0 z-50 bg-black/35" />
@@ -27,7 +29,7 @@ export function DialogContent({
 				{children}
 				<DialogPrimitive.Close className="absolute right-4 top-4 rounded-full p-1 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900">
 					<X className="h-4 w-4" />
-					<span className="sr-only">Close</span>
+					<span className="sr-only">{t("settings.ui.close")}</span>
 				</DialogPrimitive.Close>
 			</DialogPrimitive.Content>
 		</DialogPrimitive.Portal>

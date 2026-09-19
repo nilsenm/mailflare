@@ -8,6 +8,8 @@ import { getLicenseEntitlements } from "@/lib/licenses/service";
 import type { AccountRouteParams } from "./types";
 import { selectAccountById, updateAccountCredentials } from "./utils";
 import { deleteUserSessions } from "@/lib/auth/session";
+import { getServerLang } from "@/lib/i18n/server";
+import { getDictionary, translate } from "@/lib/i18n";
 
 export async function GET(request: Request, { params }: AccountRouteParams) {
 	const access = await requireTeamAdmin(request);
@@ -15,7 +17,9 @@ export async function GET(request: Request, { params }: AccountRouteParams) {
 	const { id } = await params;
 	const account = await selectAccountById(getDb(access.env), id);
 	if (!account || (account.id !== access.user!.id && account.createdByUserId !== access.user!.id)) {
-		return NextResponse.json({ error: "Account not found" }, { status: 404 });
+		const lang = await getServerLang(request);
+		const dict = getDictionary(lang);
+		return NextResponse.json({ error: translate(dict, "server.accountNotFound") }, { status: 404 });
 	}
 	return NextResponse.json({
 		account: {
@@ -37,15 +41,17 @@ export async function PATCH(request: Request, { params }: AccountRouteParams) {
 	if (access.error) return access.error;
 	const { id } = await params;
 	const db = getDb(access.env);
+	const lang = await getServerLang(request);
+	const dict = getDictionary(lang);
 	const account = await selectAccountById(db, id);
 	if (!account || (account.id !== access.user!.id && account.createdByUserId !== access.user!.id)) {
-		return NextResponse.json({ error: "Account not found" }, { status: 404 });
+		return NextResponse.json({ error: translate(dict, "server.accountNotFound") }, { status: 404 });
 	}
 	const parsed = updateManagedAccountSchema.safeParse(await request.json());
 	if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 	const canForwardEmail = (await getLicenseEntitlements(access.env)).canForwardEmail;
 	if (!canForwardEmail && parsed.data.forwardingEmail && parsed.data.forwardingEmail !== account.forwardingEmail) {
-		return NextResponse.json({ error: "A Pro or Team license is required for email forwarding" }, { status: 403 });
+		return NextResponse.json({ error: translate(dict, "server.licenseRequiredForwarding") }, { status: 403 });
 	}
 	await updateAccountCredentials(db, id, { name: parsed.data.name, password: parsed.data.password ?? null });
 	// A password set by an admin is a reset: whoever held the old one is signed out.

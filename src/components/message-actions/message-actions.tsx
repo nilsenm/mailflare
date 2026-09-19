@@ -23,6 +23,7 @@ import {
 	openUnsubscribeUrl,
 	runSingleMessageAction,
 } from "./utils";
+import { useT } from "@/lib/i18n/client";
 
 export function MessageActions({
 	messageId,
@@ -40,6 +41,7 @@ export function MessageActions({
 	messageMeta,
 	bodyHtml,
 }: MessageActionsProps) {
+	const { t } = useT();
 	const router = useRouter();
 	const { openDraftComposer } = useCompose();
 	const { shortcutsEnabled } = useShortcuts();
@@ -59,11 +61,11 @@ export function MessageActions({
 			if (redirect) router.push(redirect);
 			router.refresh();
 		} catch {
-			setError("Could not update message");
+			setError(t("mail.errors.updateMessage"));
 		} finally {
 			setPendingAction(null);
 		}
-	}, [messageId, direction, router]);
+	}, [messageId, direction, router, t]);
 
 	const replyable = useMemo(() => message ?? {
 		direction,
@@ -93,11 +95,11 @@ export function MessageActions({
 			});
 			openDraftComposer(draftId);
 		} catch (replyError) {
-			setError(replyError instanceof Error ? replyError.message : "Could not start reply");
+			setError(t("mail.errors.startReply"));
 		} finally {
 			setPendingAction(null);
 		}
-	}, [mailboxId, senderAddress, ownAddress, subject, bodyText, bodyHtml, messageMeta?.createdAt, replyable, ownAddresses, openDraftComposer]);
+	}, [mailboxId, senderAddress, ownAddress, subject, bodyText, bodyHtml, messageMeta?.createdAt, replyable, ownAddresses, openDraftComposer, t]);
 
 	const shortcuts = useMemo(
 		() => [
@@ -162,7 +164,7 @@ export function MessageActions({
 		if (!confirmTrashWithoutUnsubscribe()) return;
 		setPendingAction("unsubscribe");
 		if (!mailboxId) {
-			setError("Could not create trash rule");
+			setError(t("mail.errors.createTrashRule"));
 			setPendingAction(null);
 			return;
 		}
@@ -171,7 +173,7 @@ export function MessageActions({
 			await createTrashSenderRule({ mailboxId, senderAddress });
 			await runAction("trash");
 		} catch {
-			setError("Could not create trash rule");
+			setError(t("mail.errors.createTrashRule"));
 			setPendingAction(null);
 		}
 	}
@@ -190,7 +192,7 @@ export function MessageActions({
 			});
 			openDraftComposer(draftId);
 		} catch (forwardError) {
-			setError(forwardError instanceof Error ? forwardError.message : "Could not start forward");
+			setError(t("mail.errors.startForward"));
 		} finally {
 			setPendingAction(null);
 		}
@@ -199,7 +201,7 @@ export function MessageActions({
 		setMoreOpen(false);
 		setError(null);
 		if (!mailboxId) {
-			setError("Could not block contact");
+			setError(t("mail.errors.blockContact"));
 			return;
 		}
 
@@ -210,7 +212,7 @@ export function MessageActions({
 			router.push("/trash");
 			router.refresh();
 		} catch (blockError) {
-			setError(blockError instanceof Error ? blockError.message : "Could not block contact");
+			setError(t("mail.errors.blockContact"));
 		} finally {
 			setPendingAction(null);
 		}
@@ -224,12 +226,12 @@ export function MessageActions({
 		<div className="flex items-center gap-3 text-neutral-600">
 			{error && <span className="text-xs text-red-600">{error}</span>}
 			<div className="flex items-center gap-2">
-				<Tooltip label={shortcutsEnabled ? "Reply (r)" : "Reply"}>
+		<Tooltip label={shortcutsEnabled ? `${t("mail.actions.reply")} (r)` : t("mail.actions.reply")}>
 					<Button
 						type="button"
 						variant="ghost"
 						size="sm"
-						aria-label={shortcutsEnabled ? "Reply (r)" : "Reply"}
+			aria-label={shortcutsEnabled ? `${t("mail.actions.reply")} (r)` : t("mail.actions.reply")}
 						disabled={disabled}
 						onClick={() => handleReply("reply")}
 					>
@@ -237,12 +239,12 @@ export function MessageActions({
 					</Button>
 				</Tooltip>
 				{canReplyAll && (
-					<Tooltip label="Reply all">
+			<Tooltip label={t("mail.actions.replyAll")}>
 						<Button
 							type="button"
 							variant="ghost"
 							size="sm"
-							aria-label="Reply all"
+				aria-label={t("mail.actions.replyAll")}
 							disabled={disabled}
 							onClick={() => handleReply("replyAll")}
 						>
@@ -251,12 +253,12 @@ export function MessageActions({
 					</Tooltip>
 				)}
 				{message && messageMeta && (
-					<Tooltip label="Forward">
+		<Tooltip label={t("mail.actions.forward")}>
 						<Button
 							type="button"
 							variant="ghost"
 							size="sm"
-							aria-label="Forward"
+			aria-label={t("mail.actions.forward")}
 							disabled={disabled}
 							onClick={() => void handleForward()}
 						>
@@ -264,44 +266,44 @@ export function MessageActions({
 						</Button>
 					</Tooltip>
 				)}
-				<Tooltip label={shortcutsEnabled ? "Archive (e)" : "Archive"}>
+		<Tooltip label={shortcutsEnabled ? `${t("mail.actions.archive")} (e)` : t("mail.actions.archive")}>
 					<Button
 						variant="ghost"
 						size="sm"
-						aria-label={shortcutsEnabled ? "Archive (e)" : "Archive"}
+			aria-label={shortcutsEnabled ? `${t("mail.actions.archive")} (e)` : t("mail.actions.archive")}
 						disabled={disabled || status === "archived"}
 						onClick={() => runAction("archive")}
 					>
 						<Archive className="h-5 w-5" />
 					</Button>
 				</Tooltip>
-				<Tooltip label={shortcutsEnabled ? "Report spam (!)" : "Report spam"}>
+		<Tooltip label={shortcutsEnabled ? `${t("mail.actions.reportSpam")} (!)` : t("mail.actions.reportSpam")}>
 					<Button
 						variant="ghost"
 						size="sm"
-						aria-label={shortcutsEnabled ? "Report spam (!)" : "Report spam"}
+			aria-label={shortcutsEnabled ? `${t("mail.actions.reportSpam")} (!)` : t("mail.actions.reportSpam")}
 						disabled={disabled || status === "spam" || direction !== "inbound"}
 						onClick={() => runAction("spam")}
 					>
 						<ShieldAlert className="h-5 w-5" />
 					</Button>
 				</Tooltip>
-				<Tooltip label={shortcutsEnabled ? "Delete (#)" : "Delete"}>
+		<Tooltip label={shortcutsEnabled ? `${t("mail.actions.delete")} (#)` : t("mail.actions.delete")}>
 					<Button
 						variant="ghost"
 						size="sm"
-						aria-label={shortcutsEnabled ? "Move to trash (#)" : "Move to trash"}
+			aria-label={shortcutsEnabled ? `${t("mail.actions.moveTrash")} (#)` : t("mail.actions.moveTrash")}
 						disabled={disabled || status === "trash"}
 						onClick={() => runAction("trash")}
 					>
 						<Trash2 className="h-5 w-5" />
 					</Button>
 				</Tooltip>
-				<Tooltip label={read ? "Mark as unread" : "Mark as read"}>
+		<Tooltip label={read ? t("mail.actions.markUnread") : t("mail.actions.markRead")}>
 					<Button
 						variant="ghost"
 						size="sm"
-						aria-label={read ? "Mark as unread" : "Mark as read"}
+			aria-label={read ? t("mail.actions.markUnread") : t("mail.actions.markRead")}
 						disabled={disabled}
 						onClick={() => runAction(markAction)}
 					>
@@ -309,12 +311,12 @@ export function MessageActions({
 					</Button>
 				</Tooltip>
 				<div className="relative">
-					<Tooltip label="More actions">
+					<Tooltip label={t("mail.actions.more")}>
 						<Button
 							type="button"
 							variant="ghost"
 							size="sm"
-							aria-label="More actions"
+			aria-label={t("mail.actions.more")}
 							aria-expanded={moreOpen}
 							disabled={disabled}
 							onClick={() => setMoreOpen((open) => !open)}
@@ -333,7 +335,7 @@ export function MessageActions({
 									onClick={() => void onUnsubscribe()}
 								>
 									<BellOff className="h-4 w-4 shrink-0" />
-									Unsubscribe
+					{t("mail.actions.unsubscribe")}
 									</button>
 									<button
 										type="button"
@@ -341,7 +343,7 @@ export function MessageActions({
 										onClick={() => void onBlockContact()}
 									>
 										<Ban className="h-4 w-4" />
-										Block contact
+					{t("mail.actions.blockContact")}
 									</button>
 							<hr className="my-1 border-neutral-100" />
 								</>

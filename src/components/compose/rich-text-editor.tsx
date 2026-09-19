@@ -16,6 +16,7 @@ import {
 import { Tooltip } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import type { RichTextEditorProps, ToolbarCommand } from "./rich-text-editor-types";
+import { useT } from "@/lib/i18n/client";
 
 const COMMANDS: ToolbarCommand[] = [
 	{ command: "bold", label: "Bold (⌘B)", icon: Bold },
@@ -43,6 +44,7 @@ export function RichTextEditor({
 	toolbarStart,
 	toolbarEnd,
 }: RichTextEditorProps) {
+	const { t } = useT();
 	const editorRef = useRef<HTMLDivElement | null>(null);
 	const [active, setActive] = useState<Record<string, boolean>>({});
 	const [linkOpen, setLinkOpen] = useState(false);
@@ -135,7 +137,7 @@ export function RichTextEditor({
 					id={id}
 					role="textbox"
 					aria-multiline="true"
-					aria-label="Message body"
+					aria-label={t("compose.editor.messageBody")}
 					contentEditable={!disabled}
 					suppressContentEditableWarning
 					data-placeholder={placeholder}
@@ -156,7 +158,7 @@ export function RichTextEditor({
 							onClick={() => setShowQuoted((open) => !open)}
 							aria-expanded={showQuoted}
 							className="rounded-full border border-neutral-200 bg-neutral-100 px-2 text-xs leading-5 text-neutral-500 hover:bg-neutral-200"
-							title={showQuoted ? "Hide quoted text" : "Show quoted text"}
+							title={showQuoted ? t("compose.editor.hideQuoted") : t("compose.editor.showQuoted")}
 						>
 							•••
 						</button>
@@ -189,10 +191,10 @@ export function RichTextEditor({
 						</button>
 					</Tooltip>
 				))}
-				<Tooltip label="Insert link (⌘K)">
+				<Tooltip label={`${t("compose.editor.insertLink")} (⌘K)`}>
 					<button
 						type="button"
-						aria-label="Insert link"
+						aria-label={t("compose.editor.insertLink")}
 						disabled={disabled}
 						onMouseDown={(event) => event.preventDefault()}
 						onClick={openLink}
@@ -201,10 +203,10 @@ export function RichTextEditor({
 						<Link2 className="h-4 w-4" />
 					</button>
 				</Tooltip>
-				<Tooltip label="Clear formatting">
+				<Tooltip label={t("compose.editor.clearFormatting")}>
 					<button
 						type="button"
-						aria-label="Clear formatting"
+						aria-label={t("compose.editor.clearFormatting")}
 						disabled={disabled}
 						onMouseDown={(event) => event.preventDefault()}
 						onClick={() => run("removeFormat")}
@@ -233,7 +235,7 @@ export function RichTextEditor({
 							className="h-8 w-64 rounded-md border border-neutral-200 px-2 text-sm outline-none focus:border-blue-400"
 						/>
 						<button type="submit" className="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700">
-							Apply
+							{t("compose.editor.apply")}
 						</button>
 					</form>
 				)}

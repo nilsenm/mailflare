@@ -9,22 +9,26 @@ import { ensureMailboxDomainRouting, removeMailboxDomainRouting } from "@/lib/ma
 import { isPrimaryMailbox, tracksAccountIdentity } from "@/lib/profile/identity-utils";
 import { syncPersonalIdentity } from "@/lib/profile/sync";
 import { updateMailboxSchema } from "@/lib/validators";
+import { getServerLang } from "@/lib/i18n/server";
+import { getDictionary, translate } from "@/lib/i18n";
 import type { MailboxRouteParams } from "./types";
 import { getMailboxUpdateValues, selectMailboxForUser } from "./utils";
 
 export async function GET(request: Request, { params }: MailboxRouteParams) {
 	const { id } = await params;
 	const env = getEnv();
+	const lang = await getServerLang(request);
+	const dict = getDictionary(lang);
 	const user = await requireUser(env, request);
 	const db = getDb(env);
 	const access = await getMailboxAccessLevel(db, user, id);
 	if (!access?.canRead) {
-		return NextResponse.json({ error: "Mailbox not found" }, { status: 404 });
+		return NextResponse.json({ error: translate(dict, "server.mailboxNotFound") }, { status: 404 });
 	}
 	const [mailbox] = await selectMailboxForUser(db, user.id, id);
 
 	if (!mailbox) {
-		return NextResponse.json({ error: "Mailbox not found" }, { status: 404 });
+		return NextResponse.json({ error: translate(dict, "server.mailboxNotFound") }, { status: 404 });
 	}
 	const { avatarKey, ownerName, ownerAvatarKey, ...mailboxDetails } = mailbox;
 	const identity = tracksAccountIdentity(mailbox, user.email);
@@ -51,11 +55,13 @@ export async function PATCH(request: Request, { params }: MailboxRouteParams) {
 	}
 
 	const db = getDb(env);
+	const lang = await getServerLang(request);
+	const dict = getDictionary(lang);
 	const access = await getMailboxAccessLevel(db, user, id);
 	const [existing] = await selectMailboxForUser(db, user.id, id);
 
 	if (!existing || !access?.canManage) {
-		return NextResponse.json({ error: "Mailbox not found" }, { status: 404 });
+		return NextResponse.json({ error: translate(dict, "server.mailboxNotFound") }, { status: 404 });
 	}
 
 	const updateValues = getMailboxUpdateValues(parsed.data);
@@ -64,7 +70,7 @@ export async function PATCH(request: Request, { params }: MailboxRouteParams) {
 	if (tracksAccountIdentity(existing, user.email) && "displayName" in parsed.data) {
 		const name = parsed.data.displayName?.trim();
 		if (!name) {
-			return NextResponse.json({ error: "A valid account name is required" }, { status: 400 });
+			return NextResponse.json({ error: translate(dict, "server.validAccountNameRequired") }, { status: 400 });
 		}
 		await syncPersonalIdentity(db, {
 			userId: existing.userId,
@@ -84,7 +90,7 @@ export async function PATCH(request: Request, { params }: MailboxRouteParams) {
 		} catch (error) {
 			console.error("ensureMailboxDomainRouting", error);
 			return NextResponse.json(
-				{ error: "Failed to configure inbound routing for all domains. Please try saving again." },
+				{ error: translate(dict, "server.failedConfigureInboundRouting") },
 				{ status: 502 },
 			);
 		}
@@ -114,17 +120,19 @@ export async function PATCH(request: Request, { params }: MailboxRouteParams) {
 export async function DELETE(request: Request, { params }: MailboxRouteParams) {
 	const { id } = await params;
 	const env = getEnv();
+	const lang = await getServerLang(request);
+	const dict = getDictionary(lang);
 	const user = await requireUser(env, request);
 	const db = getDb(env);
 	const [mailbox] = await db.select().from(mailboxes).where(eq(mailboxes.id, id)).limit(1);
-	if (!mailbox) return NextResponse.json({ error: "Mailbox not found" }, { status: 404 });
+	if (!mailbox) return NextResponse.json({ error: translate(dict, "server.mailboxNotFound") }, { status: 404 });
 
 	let allowed = mailbox.userId === user.id && user.canManageMailboxes;
 	if (!allowed && user.role === "admin") {
 		const [owner] = await db.select({ createdByUserId: users.createdByUserId }).from(users).where(eq(users.id, mailbox.userId)).limit(1);
 		allowed = mailbox.userId === user.id || owner?.createdByUserId === user.id;
 	}
-	if (!allowed) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+	if (!allowed) return NextResponse.json({ error: translate(dict, "server.forbidden") }, { status: 403 });
 
 	try {
 		await removeMailboxDomainRouting(env, db, {
@@ -134,7 +142,7 @@ export async function DELETE(request: Request, { params }: MailboxRouteParams) {
 			useAllDomains: mailbox.useAllDomains,
 		});
 	} catch (err) {
-		const message = err instanceof Error ? err.message : "Failed to remove Cloudflare routing rule";
+		const message = err instanceof Error ? err.message : translate(dict, "server.failedRemoveRoutingRule");
 		return NextResponse.json({ error: message }, { status: 502 });
 	}
 

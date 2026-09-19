@@ -1,16 +1,21 @@
 import { NextResponse } from "next/server";
+import { getServerLang } from "@/lib/i18n/server";
+import { getDictionary, translate } from "@/lib/i18n";
 
-const accountsRemovedResponse = () =>
-	NextResponse.json({ error: "Multiple accounts are not available in this build" }, { status: 410 });
-
-export async function GET() {
-	return accountsRemovedResponse();
+async function accountsRemovedResponse(request: Request) {
+	const lang = await getServerLang(request);
+	const dict = getDictionary(lang);
+	return NextResponse.json({ error: translate(dict, "server.multipleAccountsNotAvailable") }, { status: 410 });
 }
 
-export async function POST() {
-	return accountsRemovedResponse();
+export async function GET(request: Request) {
+	return accountsRemovedResponse(request);
 }
 
-export async function DELETE() {
-	return accountsRemovedResponse();
+export async function POST(request: Request) {
+	return accountsRemovedResponse(request);
+}
+
+export async function DELETE(request: Request) {
+	return accountsRemovedResponse(request);
 }

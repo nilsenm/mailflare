@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { assertAdmin } from "@/lib/auth/admin";
 import { requireSessionUser } from "@/lib/api/auth";
 import { getEnv } from "@/lib/cloudflare";
+import { getServerLang } from "@/lib/i18n/server";
+import { getDictionary, translate } from "@/lib/i18n";
 import { getSearchIndexStatus, rebuildSearchIndex } from "@/lib/search/index-admin";
 
 /** Row counts for the index versus the messages table, to spot drift. */
@@ -12,7 +14,9 @@ export async function GET(request: Request) {
 	try {
 		assertAdmin(auth.user);
 	} catch {
-		return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+		const lang = await getServerLang(request);
+		const dict = getDictionary(lang);
+		return NextResponse.json({ error: translate(dict, "server.forbidden") }, { status: 403 });
 	}
 	return NextResponse.json(await getSearchIndexStatus(env));
 }
@@ -25,7 +29,9 @@ export async function POST(request: Request) {
 	try {
 		assertAdmin(auth.user);
 	} catch {
-		return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+		const lang = await getServerLang(request);
+		const dict = getDictionary(lang);
+		return NextResponse.json({ error: translate(dict, "server.forbidden") }, { status: 403 });
 	}
 	await rebuildSearchIndex(env);
 	return NextResponse.json(await getSearchIndexStatus(env));

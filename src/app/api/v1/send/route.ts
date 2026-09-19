@@ -7,12 +7,16 @@ import { decodeBase64Content } from "@/lib/email/attachments";
 import { readJsonBody } from "@/lib/http/request";
 import { RequestBodyTooLargeError } from "@/lib/http/errors";
 import { getSendErrorStatus } from "@/app/api/send/error-utils";
+import { getServerLang } from "@/lib/i18n/server";
+import { getDictionary, translate } from "@/lib/i18n";
 
 export async function POST(request: Request) {
 	const env = getEnv();
+	const lang = await getServerLang(request);
+	const dict = getDictionary(lang);
 	const auth = await authenticateApiKey(env, request.headers.get("authorization"));
 	if (!auth || !requireScope(auth.scopes, "send")) {
-		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+		return NextResponse.json({ error: translate(dict, "server.unauthorized") }, { status: 401 });
 	}
 
 	let body: unknown;
@@ -20,7 +24,7 @@ export async function POST(request: Request) {
 		body = await readJsonBody(request, 30 * 1024 * 1024);
 	} catch (error) {
 		const status = error instanceof RequestBodyTooLargeError ? 413 : 400;
-		return NextResponse.json({ error: "Invalid send request" }, { status });
+		return NextResponse.json({ error: translate(dict, "server.invalidSendRequest") }, { status });
 	}
 	const parsed = sendEmailSchema.safeParse(body);
 	if (!parsed.success) {
@@ -41,7 +45,12 @@ export async function POST(request: Request) {
 		});
 		return NextResponse.json(result);
 	} catch (err) {
-		const message = err instanceof Error ? err.message : "Send failed";
-		return NextResponse.json({ error: message }, { status: getSendErrorStatus(message) });
+		const raw = err instanceof Error ? err.message : "Send failed";
+		const status = getSendErrorStatus(raw);
+		let message = raw;
+		if (raw === "Mailbox is required") message = translate(dict, "server.mailboxRequired");
+		else if (raw === "Mailbox not found") message = translate(dict, "server.mailboxNotFound");
+		else if (raw === "Send failed") message = translate(dict, "server.sendFailed");
+		return NextResponse.json({ error: message }, { status });
 	}
 }

@@ -22,9 +22,9 @@ import { CardGridSkeleton } from "@/components/page-skeletons";
 import { useSelectedMailbox } from "@/components/mailbox-provider";
 import type { DomainRoutingProps, DomainRule, DomainRuleInput } from "./types";
 import {
-	ACTION_LABELS,
-	MATCH_FIELD_LABELS,
-	MATCH_OPERATOR_LABELS,
+	ACTION_KEYS,
+	MATCH_FIELD_KEYS,
+	MATCH_OPERATOR_KEYS,
 	createDomainRule,
 	deleteDomainRule,
 	describeRule,
@@ -34,6 +34,7 @@ import {
 	ruleToInput,
 	updateDomainRule,
 } from "./utils";
+import { useT } from "@/lib/i18n/client";
 
 const ACTION_ICONS = {
 	store: Inbox,
@@ -42,6 +43,7 @@ const ACTION_ICONS = {
 } as const;
 
 export function DomainRouting({ domain }: DomainRoutingProps = {}) {
+	const { t } = useT();
 	const qc = useQueryClient();
 	const { selectedMailbox, isLoading: isMailboxLoading } = useSelectedMailbox();
 	const [dialogOpen, setDialogOpen] = useState(false);
@@ -68,8 +70,8 @@ export function DomainRouting({ domain }: DomainRoutingProps = {}) {
 		mutationFn: () => {
 			const payload: DomainRuleInput = { ...form, domainId };
 			return editing
-				? updateDomainRule(editing.id, payload, mailboxAccessId)
-				: createDomainRule(payload, mailboxAccessId);
+				? updateDomainRule(editing.id, payload, t, mailboxAccessId)
+				: createDomainRule(payload, t, mailboxAccessId);
 		},
 		onSuccess: () => {
 			setDialogOpen(false);
@@ -81,13 +83,13 @@ export function DomainRouting({ domain }: DomainRoutingProps = {}) {
 	});
 
 	const remove = useMutation({
-		mutationFn: (id: string) => deleteDomainRule(id, mailboxAccessId),
+		mutationFn: (id: string) => deleteDomainRule(id, t, mailboxAccessId),
 		onSuccess: () => qc.invalidateQueries({ queryKey: rulesQueryKey }),
 	});
 
 	const toggle = useMutation({
 		mutationFn: (rule: DomainRule) =>
-			updateDomainRule(rule.id, { ...ruleToInput(rule), enabled: !rule.enabled }, mailboxAccessId),
+			updateDomainRule(rule.id, { ...ruleToInput(rule), enabled: !rule.enabled }, t, mailboxAccessId),
 		onSuccess: () => qc.invalidateQueries({ queryKey: rulesQueryKey }),
 	});
 
@@ -113,18 +115,18 @@ export function DomainRouting({ domain }: DomainRoutingProps = {}) {
 			<div className="flex flex-wrap items-end justify-between gap-4">
 				<div>
 					<div className="flex items-center gap-2">
-						<h2 className="text-2xl font-semibold">Domain routing</h2>
-						<Tooltip label="Block, forward, or deliver mail arriving at this domain.">
-							<button type="button" aria-label="About domain routing" className="text-neutral-400 hover:text-neutral-700">
+						<h2 className="text-2xl font-semibold">{t("settings.domainRouting.title")}</h2>
+						<Tooltip label={t("settings.domainRouting.aboutTooltip")}>
+							<button type="button" aria-label={t("settings.domainRouting.aboutAria")} className="text-neutral-400 hover:text-neutral-700">
 								<Info className="h-4 w-4" />
 							</button>
 						</Tooltip>
 					</div>
-					<p className="mt-1 text-sm text-neutral-500">Rules for {hostname || "Select an inbox"}</p>
+					<p className="mt-1 text-sm text-neutral-500">{t("settings.domainRouting.rulesFor", { hostname: hostname || t("settings.domainRouting.selectInboxFallback") })}</p>
 				</div>
 				<div className="flex items-end gap-2">
 					<Button onClick={openCreate} disabled={!domainId || (!domain && !mailboxId) || !canManage}>
-						<Plus className="h-4 w-4" /> Add route
+						<Plus className="h-4 w-4" /> {t("settings.domainRouting.addRoute")}
 					</Button>
 				</div>
 			</div>
@@ -134,21 +136,21 @@ export function DomainRouting({ domain }: DomainRoutingProps = {}) {
 			) : !domain && !mailboxId ? (
 				<Card>
 					<CardContent className="pt-6 text-sm text-neutral-500">
-						Select an inbox before creating routing rules.
+						{t("settings.domainRouting.selectInboxBeforeRules")}
 					</CardContent>
 				</Card>
 			) : !canManage ? (
 				<Card>
 					<CardContent className="pt-6 text-sm text-neutral-500">
-						Full access to the selected inbox is required to manage domain routing.
+						{t("settings.domainRouting.fullAccessRequired")}
 					</CardContent>
 				</Card>
 			) : (
 				<div className="space-y-1 overflow-hidden rounded-3xl">
 					<RuleSection
 						className="rounded-b-lg rounded-t-3xl"
-						title="Block rules"
-						description="Evaluated before delivery. Matching mail is rejected at the edge."
+						title={t("settings.domainRouting.blockRulesTitle")}
+						description={t("settings.domainRouting.blockRulesDescription")}
 						rules={blockRules}
 						hostname={hostname}
 						mailboxes={mailboxes}
@@ -158,8 +160,8 @@ export function DomainRouting({ domain }: DomainRoutingProps = {}) {
 					/>
 					<RuleSection
 						className="rounded-b-3xl rounded-t-lg"
-						title="Catch-all and forwarding"
-						description="Evaluated only when no mailbox on the domain matched the recipient."
+						title={t("settings.domainRouting.catchAllTitle")}
+						description={t("settings.domainRouting.catchAllDescription")}
 						rules={fallbackRules}
 						hostname={hostname}
 						mailboxes={mailboxes}
@@ -174,8 +176,8 @@ export function DomainRouting({ domain }: DomainRoutingProps = {}) {
 				{/* The form grows when the action changes, so the dialog must scroll rather than overflow the viewport. */}
 				<DialogContent className="max-h-[calc(100vh-4rem)] overflow-y-auto sm:max-w-[560px]">
 					<DialogHeader>
-						<DialogTitle>{editing ? "Edit rule" : "Add routing rule"}</DialogTitle>
-						<DialogDescription>Choose what happens to matching mail.</DialogDescription>
+						<DialogTitle>{editing ? t("settings.domainRouting.editRule") : t("settings.domainRouting.addRuleTitle")}</DialogTitle>
+						<DialogDescription>{t("settings.domainRouting.chooseWhatHappens")}</DialogDescription>
 					</DialogHeader>
 
 					<form
@@ -187,17 +189,17 @@ export function DomainRouting({ domain }: DomainRoutingProps = {}) {
 					>
 						<div className="grid grid-cols-1 items-end gap-4 sm:grid-cols-2">
 						<div className="grid min-w-0 gap-2">
-							<Label htmlFor="rule-name">Name</Label>
+							<Label htmlFor="rule-name">{t("settings.domainRouting.nameLabel")}</Label>
 							<Input
 								id="rule-name"
 								value={form.name ?? ""}
-								placeholder="Optional label"
+								placeholder={t("settings.domainRouting.optionalLabel")}
 								onChange={(e) => setForm({ ...form, name: e.target.value })}
 							/>
 						</div>
 
 						<div className="grid min-w-0 gap-2">
-							<Label htmlFor="rule-action">Action</Label>
+							<Label htmlFor="rule-action">{t("settings.domainRouting.actionLabel")}</Label>
 							<RoutingRuleSelect
 								id="rule-action"
 								value={form.action}
@@ -205,9 +207,9 @@ export function DomainRouting({ domain }: DomainRoutingProps = {}) {
 									setForm({ ...form, action: e.target.value as DomainRuleInput["action"] })
 								}
 							>
-								{Object.entries(ACTION_LABELS).map(([value, label]) => (
+								{Object.entries(ACTION_KEYS).map(([value, key]) => (
 									<option key={value} value={value}>
-										{label}
+										{t(key)}
 									</option>
 								))}
 							</RoutingRuleSelect>
@@ -216,7 +218,7 @@ export function DomainRouting({ domain }: DomainRoutingProps = {}) {
 
 						<div className="grid grid-cols-1 items-end gap-4 sm:grid-cols-2">
 							<div className="grid min-w-0 gap-2">
-								<Label htmlFor="rule-field">Match on</Label>
+								<Label htmlFor="rule-field">{t("settings.domainRouting.matchOnLabel")}</Label>
 								<RoutingRuleSelect
 									id="rule-field"
 									value={form.matchField}
@@ -224,15 +226,15 @@ export function DomainRouting({ domain }: DomainRoutingProps = {}) {
 										setForm({ ...form, matchField: e.target.value as DomainRuleInput["matchField"] })
 									}
 								>
-									{Object.entries(MATCH_FIELD_LABELS).map(([value, label]) => (
+									{Object.entries(MATCH_FIELD_KEYS).map(([value, key]) => (
 										<option key={value} value={value}>
-											{label}
+											{t(key)}
 										</option>
 									))}
 								</RoutingRuleSelect>
 							</div>
 							<div className="grid min-w-0 gap-2">
-								<Label htmlFor="rule-operator">Condition</Label>
+								<Label htmlFor="rule-operator">{t("settings.domainRouting.conditionLabel")}</Label>
 								<RoutingRuleSelect
 									id="rule-operator"
 									value={form.matchOperator}
@@ -243,9 +245,9 @@ export function DomainRouting({ domain }: DomainRoutingProps = {}) {
 										})
 									}
 								>
-									{Object.entries(MATCH_OPERATOR_LABELS).map(([value, label]) => (
+									{Object.entries(MATCH_OPERATOR_KEYS).map(([value, key]) => (
 										<option key={value} value={value}>
-											{label}
+											{t(key)}
 										</option>
 									))}
 								</RoutingRuleSelect>
@@ -255,8 +257,8 @@ export function DomainRouting({ domain }: DomainRoutingProps = {}) {
 						<div className="grid grid-cols-1 items-end gap-4 sm:grid-cols-2">
 							<div className="grid min-w-0 gap-2">
 								<div className="flex items-center gap-2">
-									<Label htmlFor="rule-value">Match value</Label>
-									<Tooltip label="Use * to match every message.">
+									<Label htmlFor="rule-value">{t("settings.domainRouting.matchValueLabel")}</Label>
+									<Tooltip label={t("settings.domainRouting.matchEverythingTooltip")}>
 										<span className="text-neutral-400"><Info className="h-4 w-4" /></span>
 									</Tooltip>
 								</div>
@@ -264,14 +266,14 @@ export function DomainRouting({ domain }: DomainRoutingProps = {}) {
 									id="rule-value"
 									required
 									value={form.matchValue}
-									placeholder="* to match everything"
+									placeholder={t("settings.domainRouting.matchValuePlaceholder")}
 									onChange={(e) => setForm({ ...form, matchValue: e.target.value })}
 								/>
 							</div>
 							<div className="grid min-w-0 gap-2">
 								<div className="flex items-center gap-2">
-									<Label htmlFor="rule-priority">Priority</Label>
-									<Tooltip label="Higher numbers run first.">
+									<Label htmlFor="rule-priority">{t("settings.domainRouting.priorityLabel")}</Label>
+									<Tooltip label={t("settings.domainRouting.priorityTooltip")}>
 										<span className="text-neutral-400"><Info className="h-4 w-4" /></span>
 									</Tooltip>
 								</div>
@@ -290,25 +292,25 @@ export function DomainRouting({ domain }: DomainRoutingProps = {}) {
 							<div className={form.action === "forward" ? "grid grid-cols-1 items-end gap-4 sm:grid-cols-2" : "grid min-w-0 gap-2"}>
 							<div className="grid min-w-0 gap-2">
 								<Label htmlFor="rule-mailbox">
-									{form.action === "forward" ? "Mailbox for the kept copy" : "Destination mailbox"}
+									{form.action === "forward" ? t("settings.domainRouting.forwardMailboxLabel") : t("settings.domainRouting.destinationMailboxLabel")}
 								</Label>
 								<RoutingRuleSelect
 									id="rule-mailbox"
 									value={form.mailboxId ?? ""}
 									onChange={(e) => setForm({ ...form, mailboxId: e.target.value || null })}
 								>
-									<option value="">Select a mailbox</option>
+									<option value="">{t("settings.domainRouting.selectMailbox")}</option>
 									{mailboxes.map((mailbox) => (
 										<option key={mailbox.id} value={mailbox.id}>
 											{mailbox.localPart}@{hostname}
-											{mailbox.disabled ? " (disabled)" : ""}
+											{mailbox.disabled ? t("settings.domainRouting.disabledSuffix") : ""}
 										</option>
 									))}
 								</RoutingRuleSelect>
 							</div>
 							{form.action === "forward" && (
 								<div className="grid min-w-0 gap-2">
-									<Label htmlFor="rule-forward">Forward to</Label>
+									<Label htmlFor="rule-forward">{t("settings.domainRouting.forwardToLabel")}</Label>
 									<Input
 										id="rule-forward"
 										type="email"
@@ -325,8 +327,8 @@ export function DomainRouting({ domain }: DomainRoutingProps = {}) {
 							<div className="flex items-center justify-between rounded-lg border border-neutral-200 px-3 py-2">
 								<div>
 									<div className="flex items-center gap-2">
-										<p className="text-sm font-medium">Keep a copy</p>
-										<Tooltip label="Also store the message in the selected inbox.">
+										<p className="text-sm font-medium">{t("settings.domainRouting.keepCopyTitle")}</p>
+										<Tooltip label={t("settings.domainRouting.keepCopyTooltip")}>
 											<span className="text-neutral-400"><Info className="h-4 w-4" /></span>
 										</Tooltip>
 									</div>
@@ -340,11 +342,11 @@ export function DomainRouting({ domain }: DomainRoutingProps = {}) {
 
 						{form.action === "reject" && (
 							<div className="grid min-w-0 gap-2">
-								<Label htmlFor="rule-reason">Rejection reason</Label>
+								<Label htmlFor="rule-reason">{t("settings.domainRouting.rejectReasonLabel")}</Label>
 								<Input
 									id="rule-reason"
 									value={form.rejectReason ?? ""}
-									placeholder="Message rejected by routing rule"
+									placeholder={t("settings.domainRouting.rejectReasonPlaceholder")}
 									onChange={(e) => setForm({ ...form, rejectReason: e.target.value })}
 								/>
 							</div>
@@ -354,10 +356,10 @@ export function DomainRouting({ domain }: DomainRoutingProps = {}) {
 
 						<div className="flex justify-end gap-2 border-t border-neutral-200 pt-4">
 							<Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-								Cancel
+								{t("settings.domainRouting.cancel")}
 							</Button>
 							<Button type="submit" disabled={save.isPending}>
-								{editing ? "Save changes" : "Create rule"}
+								{editing ? t("settings.domainRouting.saveChanges") : t("settings.domainRouting.createRule")}
 							</Button>
 						</div>
 					</form>
@@ -388,6 +390,7 @@ function RuleSection({
 	onDelete: (id: string) => void;
 	onToggle: (rule: DomainRule) => void;
 }) {
+	const { t } = useT();
 	return (
 		<Card className={`${className} border-0 bg-white px-6`}>
 			<CardHeader>
@@ -400,7 +403,7 @@ function RuleSection({
 			</CardHeader>
 			<CardContent className="space-y-2 pb-5">
 				{rules.length === 0 ? (
-					<p className="text-sm text-neutral-500">No rules yet.</p>
+					<p className="text-sm text-neutral-500">{t("settings.domainRouting.noRulesYet")}</p>
 				) : (
 					rules.map((rule) => {
 						const Icon = ACTION_ICONS[rule.action];
@@ -413,18 +416,21 @@ function RuleSection({
 								<div className="min-w-0 flex-1">
 									<div className="flex items-center gap-2">
 										<p className="truncate text-sm font-medium">
-											{rule.name || describeRule(rule, mailboxes, hostname)}
+											{rule.name || describeRule(t, rule, mailboxes, hostname)}
 										</p>
-										{!rule.enabled && <Badge variant="secondary">Disabled</Badge>}
+										{!rule.enabled && <Badge variant="secondary">{t("settings.domainRouting.disabledBadge")}</Badge>}
 									</div>
 									{rule.name && (
 										<p className="truncate text-xs text-neutral-500">
-											{describeRule(rule, mailboxes, hostname)}
+											{describeRule(t, rule, mailboxes, hostname)}
 										</p>
 									)}
 									<p className="text-xs text-neutral-400">
-										Priority {rule.priority} · matched {rule.matchCount}× · last{" "}
-										{formatLastMatched(rule.lastMatchedAt)}
+										{t("settings.domainRouting.priorityMatched", {
+											priority: rule.priority,
+											count: rule.matchCount,
+											lastMatched: formatLastMatched(t, rule.lastMatchedAt),
+										})}
 									</p>
 								</div>
 								<Switch checked={rule.enabled} onCheckedChange={() => onToggle(rule)} />

@@ -6,11 +6,15 @@ import { requireUser } from "@/lib/auth/cookies";
 import { getEnv } from "@/lib/cloudflare";
 import { getMailboxAccessLevel } from "@/lib/mailboxes/access";
 import { routingRuleSchema } from "@/lib/validators";
+import { getServerLang } from "@/lib/i18n/server";
+import { getDictionary, translate } from "@/lib/i18n";
 import type { RoutingRuleRouteParams } from "./types";
 
 export async function PATCH(request: Request, { params }: RoutingRuleRouteParams) {
 	const { id } = await params;
 	const env = getEnv();
+	const lang = await getServerLang(request);
+	const dict = getDictionary(lang);
 	const user = await requireUser(env, request);
 	const parsed = routingRuleSchema.safeParse(await request.json());
 	if (!parsed.success) {
@@ -20,18 +24,18 @@ export async function PATCH(request: Request, { params }: RoutingRuleRouteParams
 	const db = getDb(env);
 	const [rule] = await db.select().from(routingRules).where(eq(routingRules.id, id)).limit(1);
 	if (!rule?.mailboxId || rule.mailboxId !== parsed.data.mailboxId) {
-		return NextResponse.json({ error: "Rule not found" }, { status: 404 });
+		return NextResponse.json({ error: translate(dict, "server.ruleNotFound") }, { status: 404 });
 	}
 	const access = await getMailboxAccessLevel(db, user, rule.mailboxId);
 	if (!access?.canManage) {
-		return NextResponse.json({ error: "Rule not found" }, { status: 404 });
+		return NextResponse.json({ error: translate(dict, "server.ruleNotFound") }, { status: 404 });
 	}
 
 	const destination = parsed.data.destination ?? (parsed.data.folderId ? `folder:${parsed.data.folderId}` : "");
 	const systemAction = destination === "spam" || destination === "trash" ? destination : null;
 	const folderId = destination.startsWith("folder:") ? destination.slice("folder:".length) : null;
 	if (!systemAction && !folderId) {
-		return NextResponse.json({ error: "Destination is required" }, { status: 400 });
+		return NextResponse.json({ error: translate(dict, "server.destinationRequired") }, { status: 400 });
 	}
 	if (folderId) {
 		const [folder] = await db
@@ -40,7 +44,7 @@ export async function PATCH(request: Request, { params }: RoutingRuleRouteParams
 			.where(and(eq(folders.id, folderId), eq(folders.mailboxId, rule.mailboxId)))
 			.limit(1);
 		if (!folder) {
-			return NextResponse.json({ error: "Folder not found" }, { status: 404 });
+			return NextResponse.json({ error: translate(dict, "server.folderNotFound") }, { status: 404 });
 		}
 	}
 
@@ -64,15 +68,17 @@ export async function PATCH(request: Request, { params }: RoutingRuleRouteParams
 export async function DELETE(request: Request, { params }: RoutingRuleRouteParams) {
 	const { id } = await params;
 	const env = getEnv();
+	const lang = await getServerLang(request);
+	const dict = getDictionary(lang);
 	const user = await requireUser(env, request);
 	const db = getDb(env);
 	const [rule] = await db.select().from(routingRules).where(eq(routingRules.id, id)).limit(1);
 	if (!rule?.mailboxId) {
-		return NextResponse.json({ error: "Rule not found" }, { status: 404 });
+		return NextResponse.json({ error: translate(dict, "server.ruleNotFound") }, { status: 404 });
 	}
 	const access = await getMailboxAccessLevel(db, user, rule.mailboxId);
 	if (!access?.canManage) {
-		return NextResponse.json({ error: "Rule not found" }, { status: 404 });
+		return NextResponse.json({ error: translate(dict, "server.ruleNotFound") }, { status: 404 });
 	}
 
 	await db.delete(routingRules).where(eq(routingRules.id, id));

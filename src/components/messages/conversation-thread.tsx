@@ -18,6 +18,7 @@ import {
 	partitionThread,
 } from "./conversation-thread-utils";
 import clsx from "clsx";
+import { useT } from "@/lib/i18n/client";
 
 /**
  * The other messages in a conversation, ordered oldest to newest and collapsed
@@ -35,17 +36,18 @@ export function ConversationThread({
 	expandedAll,
 	onExpandedAllChange,
 }: ConversationThreadProps) {
+	const { t } = useT();
 	const slice = partitionThread(messages, currentMessageId, position, latestMessagesFirst);
 	if (slice.length === 0) return null;
 	const firstMessage = slice[0];
 	const lastMessage = slice.at(-1)!;
 	const middleMessages = slice.slice(1, -1);
 	const collapsed = !expandedAll && middleMessages.length > 0;
-	const collapsedLabel = `${middleMessages.length} ${position === "before" ? "older" : "newer"} message${middleMessages.length === 1 ? "" : "s"}`;
+	const collapsedLabel = t(position === "before" ? "mail.thread.olderCount" : "mail.thread.newerCount", { count: middleMessages.length });
 
 	return (
 		<section
-			aria-label={position === "before" ? "Earlier messages in this conversation" : "Later messages in this conversation"}
+			aria-label={position === "before" ? t("mail.thread.earlier") : t("mail.thread.later")}
 			className={cn(position === (latestMessagesFirst ? "before" : "after") ? "pb-6" : "")}
 		>
 			<ol className={cn(!collapsed && "divide-y divide-neutral-200/50", latestMessagesFirst ? "border-y" : "border-b", "border-neutral-200")}>
@@ -110,6 +112,7 @@ export function ConversationMessageCard({
 	ownAddresses,
 	defaultExpanded = false,
 }: ConversationMessageCardProps) {
+	const { t } = useT();
 	const [locallyExpanded, setLocallyExpanded] = useState(defaultExpanded);
 	const [locallyRead, setLocallyRead] = useState(message.read);
 	const expanded = locallyExpanded;
@@ -159,7 +162,7 @@ export function ConversationMessageCard({
 								{sender}
 								{expanded && <span className="text-xs ml-1 opacity-50 font-normal">&lt;{senderEmail}&gt;</span>}
 							</span>
-							{expanded && recipients && <span className="text-xs font-normal text-neutral-500">to {recipients}</span>}
+							{expanded && recipients && <span className="text-xs font-normal text-neutral-500">{t("mail.common.to")} {recipients}</span>}
 						</div>
 						{!expanded && (
 							<span className={clsx( !locallyRead ? "font-semibold" : "text-neutral-500", "block truncate text-[13px]")}>{message.snippet || "No preview"}</span>

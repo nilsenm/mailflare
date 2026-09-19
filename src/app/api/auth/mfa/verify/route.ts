@@ -11,16 +11,20 @@ import { RequestBodyTooLargeError } from "@/lib/http/errors";
 import { recordAuthActivity } from "@/lib/auth/activity";
 import { consumeLoginChallenge, getLoginChallengeUserId } from "@/lib/auth/login-challenge";
 import { verifySecondFactor } from "@/lib/auth/mfa";
+import { getServerLang } from "@/lib/i18n/server";
+import { getDictionary, translate } from "@/lib/i18n";
 
 /** Second step of a login: trade a challenge plus a TOTP or recovery code for a session. */
 export async function POST(request: Request) {
 	const env = getEnv();
+	const lang = await getServerLang(request);
+	const dict = getDictionary(lang);
 	let body: unknown;
 	try {
 		body = await readJsonBody(request, 16 * 1024);
 	} catch (error) {
 		const status = error instanceof RequestBodyTooLargeError ? 413 : 400;
-		return NextResponse.json({ error: "Invalid request" }, { status });
+		return NextResponse.json({ error: translate(dict, "server.invalidRequest") }, { status });
 	}
 	const parsed = mfaVerifySchema.safeParse(body);
 	if (!parsed.success) {
@@ -28,21 +32,21 @@ export async function POST(request: Request) {
 	}
 	// Codes are six digits; the login limiter is what stops brute force.
 	if (!(await allowLoginAttempt(env, request))) {
-		return NextResponse.json({ error: "Too many attempts. Try again shortly." }, { status: 429, headers: { "Retry-After": "60" } });
+		return NextResponse.json({ error: translate(dict, "server.tooManyAttempts") }, { status: 429, headers: { "Retry-After": "60" } });
 	}
 
 	const userId = await getLoginChallengeUserId(env, parsed.data.challengeToken);
 	if (!userId) {
-		return NextResponse.json({ error: "This sign-in attempt has expired. Start again." }, { status: 401 });
+		return NextResponse.json({ error: translate(dict, "server.signInAttemptExpired") }, { status: 401 });
 	}
 	const db = getDb(env);
 	const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
 	if (!user || user.disabled) {
-		return NextResponse.json({ error: "Account disabled" }, { status: 403 });
+		return NextResponse.json({ error: translate(dict, "server.accountDisabled") }, { status: 403 });
 	}
 	const method = await verifySecondFactor(env, user, parsed.data.code);
 	if (!method) {
-		return NextResponse.json({ error: "That code did not match" }, { status: 401 });
+		return NextResponse.json({ error: translate(dict, "server.codeDidNotMatch") }, { status: 401 });
 	}
 
 	await consumeLoginChallenge(env, parsed.data.challengeToken);

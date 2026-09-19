@@ -7,12 +7,16 @@ import { getDb } from "@/db";
 import { messages, users } from "@/db/schema";
 import { getMailboxAccessLevel, listAccessibleMailboxIds } from "@/lib/mailboxes/access";
 import { buildSearchConditions } from "@/lib/search/conditions";
+import { getServerLang } from "@/lib/i18n/server";
+import { getDictionary, translate } from "@/lib/i18n";
 
 export async function GET(request: Request) {
 	const env = getEnv();
+	const lang = await getServerLang(request);
+	const dict = getDictionary(lang);
 	const auth = await authenticateApiKey(env, request.headers.get("authorization"));
 	if (!auth || !requireScope(auth.scopes, "read")) {
-		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+		return NextResponse.json({ error: translate(dict, "server.unauthorized") }, { status: 401 });
 	}
 
 	const url = new URL(request.url);
@@ -24,13 +28,13 @@ export async function GET(request: Request) {
 	const db = getDb(env);
 	const [user] = await db.select().from(users).where(eq(users.id, auth.userId)).limit(1);
 	if (!user || user.disabled) {
-		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+		return NextResponse.json({ error: translate(dict, "server.unauthorized") }, { status: 401 });
 	}
 	const conditions: SQL[] = [];
 	if (mailboxId) {
 		const access = await getMailboxAccessLevel(db, user, mailboxId);
 		if (!access?.canRead) {
-			return NextResponse.json({ error: "Mailbox not found" }, { status: 404 });
+			return NextResponse.json({ error: translate(dict, "server.mailboxNotFound") }, { status: 404 });
 		}
 		conditions.push(eq(messages.mailboxId, mailboxId));
 	} else {

@@ -9,6 +9,8 @@ import type { DraftPayload, DraftRouteParams } from "./types";
 import { selectDraftWithBody } from "./utils";
 import { readJsonBody } from "@/lib/http/request";
 import { RequestBodyTooLargeError } from "@/lib/http/errors";
+import { getServerLang } from "@/lib/i18n/server";
+import { getDictionary, translate } from "@/lib/i18n";
 import { getDraftSender, userOwnsDraft } from "../utils";
 import { listMessageAttachments } from "@/lib/email/attachments";
 import { deleteMessageWithObjects } from "@/lib/email/message-cleanup";
@@ -16,12 +18,14 @@ import { deleteMessageWithObjects } from "@/lib/email/message-cleanup";
 export async function GET(request: Request, { params }: DraftRouteParams) {
 	const { id } = await params;
 	const env = getEnv();
+	const lang = await getServerLang(request);
+	const dict = getDictionary(lang);
 	const user = await requireUser(env, request);
 	const db = getDb(env);
 	const draft = await selectDraftWithBody(db, user.id, id);
 
 	if (!draft) {
-		return NextResponse.json({ error: "Draft not found" }, { status: 404 });
+		return NextResponse.json({ error: translate(dict, "server.draftNotFound") }, { status: 404 });
 	}
 
 	const attachments = await listMessageAttachments(env, id);
@@ -31,21 +35,23 @@ export async function GET(request: Request, { params }: DraftRouteParams) {
 export async function PATCH(request: Request, { params }: DraftRouteParams) {
 	const { id } = await params;
 	const env = getEnv();
+	const lang = await getServerLang(request);
+	const dict = getDictionary(lang);
 	const user = await requireUser(env, request);
 	let input: DraftPayload;
 	try {
 		input = await readJsonBody<DraftPayload>(request, 1024 * 1024);
 	} catch (error) {
 		const status = error instanceof RequestBodyTooLargeError ? 413 : 400;
-		return NextResponse.json({ error: "Invalid draft request" }, { status });
+		return NextResponse.json({ error: translate(dict, "server.invalidDraftRequest") }, { status });
 	}
 	const db = getDb(env);
 	const [draft] = await db.select().from(messages).where(eq(messages.id, id)).limit(1);
 
 	if (!userOwnsDraft(draft, user.id)) {
-		return NextResponse.json({ error: "Draft not found" }, { status: 404 });
+		return NextResponse.json({ error: translate(dict, "server.draftNotFound") }, { status: 404 });
 	}
-	const sender = await getDraftSender(env, user.id, input);
+	const sender = await getDraftSender(env, user.id, input, dict);
 	if ("error" in sender) {
 		return NextResponse.json({ error: sender.error }, { status: 403 });
 	}
@@ -73,12 +79,14 @@ export async function PATCH(request: Request, { params }: DraftRouteParams) {
 export async function DELETE(request: Request, { params }: DraftRouteParams) {
 	const { id } = await params;
 	const env = getEnv();
+	const lang = await getServerLang(request);
+	const dict = getDictionary(lang);
 	const user = await requireUser(env, request);
 	const db = getDb(env);
 	const [draft] = await db.select().from(messages).where(eq(messages.id, id)).limit(1);
 
 	if (!userOwnsDraft(draft, user.id)) {
-		return NextResponse.json({ error: "Draft not found" }, { status: 404 });
+		return NextResponse.json({ error: translate(dict, "server.draftNotFound") }, { status: 404 });
 	}
 
 	await deleteMessageWithObjects(env, db, id, draft.rawR2Key);

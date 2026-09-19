@@ -8,41 +8,41 @@ export const landingNavItems: LandingNavItem[] = [
 ];
 
 export const sidebarItems: SidebarItem[] = [
-	{ label: "Inbox", icon: Inbox, active: true, count: "18" },
-	{ label: "Sent", icon: Send },
-	{ label: "Drafts", icon: FileText, count: "4" },
-	{ label: "Spam", icon: ShieldAlert },
-	{ label: "Trash", icon: Trash2 },
+	{ labelKey: "nav.inbox", icon: Inbox, active: true, count: "18" },
+	{ labelKey: "nav.sent", icon: Send },
+	{ labelKey: "nav.drafts", icon: FileText, count: "4" },
+	{ labelKey: "nav.spam", icon: ShieldAlert },
+	{ labelKey: "nav.trash", icon: Trash2 },
 ];
 
 export const heroMessages: MailPreview[] = [
 	{
 		icon: MailCheck,
 		sender: "postmaster@northline.dev",
-		subject: "Route matched",
-		preview: "Inbound mail was delivered to support after DNS validation.",
-		badge: "Inbound",
+		subjectKey: "settings.ui.landing.mail1Subject",
+		previewKey: "settings.ui.landing.mail1Preview",
+		badgeKey: "settings.ui.landing.mail1Badge",
 	},
 	{
 		icon: MailCheck,
 		sender: "ops@halcyon.tools",
-		subject: "API send accepted",
-		preview: "Message queued through the production API key.",
-		badge: "Sent",
+		subjectKey: "settings.ui.landing.mail2Subject",
+		previewKey: "settings.ui.landing.mail2Preview",
+		badgeKey: "settings.ui.landing.mail2Badge",
 	},
 	{
 		icon: MailCheck,
 		sender: "alerts@marketmesh.io",
-		subject: "Webhook delivered",
-		preview: "Event payload reached your billing workspace endpoint.",
-		badge: "Hook",
+		subjectKey: "settings.ui.landing.mail3Subject",
+		previewKey: "settings.ui.landing.mail3Preview",
+		badgeKey: "settings.ui.landing.mail3Badge",
 	},
 	{
 		icon: MailCheck,
 		sender: "admin@mailflare.dev",
-		subject: "Mailbox provisioned",
-		preview: "New routing mailbox is ready for customer replies.",
-		badge: "Admin",
+		subjectKey: "settings.ui.landing.mail4Subject",
+		previewKey: "settings.ui.landing.mail4Preview",
+		badgeKey: "settings.ui.landing.mail4Badge",
 	},
 ];
 
@@ -60,11 +60,11 @@ export const deliverySignals = [
 
 export function getHomeActions(isLoggedIn: boolean): HomeAction[] {
 	if (isLoggedIn) {
-		return [{ href: "/inbox", label: "Dashboard", variant: "default" }];
+		return [{ href: "/inbox", labelKey: "settings.ui.landing.headerDashboard", variant: "default" }];
 	}
 
 	return [
-		{ href: "/login", label: "Log in", variant: "outline" },
-		{ href: "/setup", label: "Create account", variant: "default" },
+		{ href: "/login", labelKey: "settings.ui.landing.logIn", variant: "outline" },
+		{ href: "/setup", labelKey: "settings.ui.landing.createAccount", variant: "default" },
 	];
 }

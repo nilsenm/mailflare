@@ -5,6 +5,8 @@ import { auditLogs, users } from "@/db/schema";
 import { assertAdmin } from "@/lib/auth/admin";
 import { requireUser } from "@/lib/auth/cookies";
 import { getEnv } from "@/lib/cloudflare";
+import { getServerLang } from "@/lib/i18n/server";
+import { getDictionary, translate } from "@/lib/i18n";
 
 export async function GET(request: Request) {
 	const env = getEnv();
@@ -12,7 +14,9 @@ export async function GET(request: Request) {
 	try {
 		assertAdmin(admin);
 	} catch {
-		return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+		const lang = await getServerLang(request);
+		const dict = getDictionary(lang);
+		return NextResponse.json({ error: translate(dict, "server.forbidden") }, { status: 403 });
 	}
 
 	const url = new URL(request.url);

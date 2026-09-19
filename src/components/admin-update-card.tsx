@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { CheckCircle2, CircleX, Database, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useT } from "@/lib/i18n/client";
 import {
 	applyDatabaseMigrations,
 	getApplicationUpdateStatus,
@@ -13,6 +14,7 @@ import {
 import type { MigrationStatusResponse, UpdateStatusResponse, UpdateWorkflowResponse } from "./admin-update-card-types";
 
 export function AdminUpdateCard() {
+	const { t } = useT();
 	const [status, setStatus] = useState<UpdateStatusResponse>();
 	const [result, setResult] = useState<UpdateWorkflowResponse>();
 	const [error, setError] = useState("");
@@ -32,7 +34,7 @@ export function AdminUpdateCard() {
 			})
 			.catch((statusError) => {
 				if (isActive) {
-					setError(statusError instanceof Error ? statusError.message : "Could not check for updates");
+					setError(statusError instanceof Error ? statusError.message : t("admin.update.couldNotCheck"));
 				}
 			})
 			.finally(() => {
@@ -45,7 +47,7 @@ export function AdminUpdateCard() {
 			})
 			.catch((statusError) => {
 				if (isActive) {
-					setMigrationError(statusError instanceof Error ? statusError.message : "Could not check database migrations");
+					setMigrationError(statusError instanceof Error ? statusError.message : t("admin.update.couldNotCheckMigrations"));
 				}
 			})
 			.finally(() => {
@@ -55,7 +57,7 @@ export function AdminUpdateCard() {
 		return () => {
 			isActive = false;
 		};
-	}, []);
+	}, [t]);
 
 	async function handleUpdate() {
 		setError("");
@@ -65,7 +67,7 @@ export function AdminUpdateCard() {
 		try {
 			setResult(await triggerApplicationUpdate());
 		} catch (updateError) {
-			setError(updateError instanceof Error ? updateError.message : "Could not start the update");
+			setError(updateError instanceof Error ? updateError.message : t("admin.update.couldNotStart"));
 		} finally {
 			setIsPending(false);
 		}
@@ -78,7 +80,7 @@ export function AdminUpdateCard() {
 			setMigrationStatus(await applyDatabaseMigrations());
 		} catch (migrationFailure) {
 			setMigrationError(
-				migrationFailure instanceof Error ? migrationFailure.message : "Could not apply database migrations",
+				migrationFailure instanceof Error ? migrationFailure.message : t("admin.update.couldNotApplyMigrations"),
 			);
 		} finally {
 			setIsMigrating(false);
@@ -92,9 +94,9 @@ export function AdminUpdateCard() {
 					<RefreshCw className="h-5 w-5" />
 				</div>
 				<div>
-					<CardTitle className="text-base">Application update</CardTitle>
+					<CardTitle className="text-base">{t("admin.update.title")}</CardTitle>
 					<p className="mt-1 text-sm text-neutral-500">
-						Sync the latest Mailflare release and keep its database schema up to date.
+						{t("admin.update.description")}
 					</p>
 				</div>
 			</CardHeader>
@@ -103,7 +105,7 @@ export function AdminUpdateCard() {
 
 				{!isChecking && status?.configured === false && (
 					<div className="space-y-3">
-						<p className="text-sm text-neutral-600">Complete the required Cloudflare Worker configuration:</p>
+						<p className="text-sm text-neutral-600">{t("admin.update.configRequired")}</p>
 						<ul className="divide-y divide-neutral-100 overflow-hidden rounded-2xl border border-neutral-100">
 							{status.configuration?.map((item) => (
 								<li key={item.name} className="flex items-center gap-3 px-4 py-3 text-sm">
@@ -114,7 +116,7 @@ export function AdminUpdateCard() {
 									)}
 									<code className="text-xs font-medium text-neutral-800">{item.name}</code>
 									<span className={`ml-auto text-xs font-medium ${item.configured ? "text-green-700" : "text-red-600"}`}>
-										{item.configured ? "Configured" : "Missing"}
+										{item.configured ? t("admin.update.configured") : t("admin.update.missing")}
 									</span>
 								</li>
 							))}
@@ -132,8 +134,8 @@ export function AdminUpdateCard() {
 							)}
 							<p className="min-w-0 text-sm text-neutral-700">
 								{status.available
-									? `Mailflare v${status.targetVersion} is available. You are using v${status.currentVersion}.`
-									: `Mailflare v${status.currentVersion} is up to date.`}
+									? t("admin.update.available", { targetVersion: status.targetVersion ?? "", currentVersion: status.currentVersion ?? "" })
+									: t("admin.update.upToDate", { currentVersion: status.currentVersion ?? "" })}
 							</p>
 							{status.available && (
 								<button
@@ -142,7 +144,7 @@ export function AdminUpdateCard() {
 									disabled={isPending}
 									className="ml-auto shrink-0 text-sm font-medium text-blue-700 hover:underline disabled:pointer-events-none disabled:opacity-50"
 								>
-									{isPending ? "Starting update..." : "Update Mailflare"}
+									{isPending ? t("admin.update.starting") : t("admin.update.updateAction")}
 								</button>
 							)}
 						</div>
@@ -158,7 +160,7 @@ export function AdminUpdateCard() {
 							<div className="flex items-center gap-3 px-4 py-4">
 								<Database className={`h-4 w-4 shrink-0 text-amber-600 ${isMigrating ? "animate-pulse" : ""}`} />
 								<p className="text-sm text-neutral-700">
-									{migrationStatus.pending.length} database {migrationStatus.pending.length === 1 ? "migration is" : "migrations are"} pending.
+									{t("admin.update.migrationsPending", { count: migrationStatus.pending.length })}
 								</p>
 								<button
 									type="button"
@@ -166,7 +168,7 @@ export function AdminUpdateCard() {
 									disabled={isMigrating}
 									className="ml-auto shrink-0 text-sm font-medium text-blue-700 hover:underline disabled:pointer-events-none disabled:opacity-50"
 								>
-									{isMigrating ? "Updating database..." : "Update database"}
+									{isMigrating ? t("admin.update.updatingDatabase") : t("admin.update.updateDatabase")}
 								</button>
 							</div>
 						)}
@@ -174,7 +176,7 @@ export function AdminUpdateCard() {
 						{!isCheckingMigrations && !!migrationStatus?.unknown.length && (
 							<div className="flex items-center gap-3 px-4 py-4 text-sm text-red-600">
 								<CircleX className="h-4 w-4 shrink-0" />
-								Deploy the matching Mailflare release before changing this database.
+								{t("admin.update.deployMatching")}
 							</div>
 						)}
 					</div>
@@ -182,10 +184,10 @@ export function AdminUpdateCard() {
 
 				{result?.ok && (
 					<p className="text-sm text-green-700">
-						Update started for {result.repository}@{result.ref}. Refresh this page after Cloudflare deploys it. {" "}
+						{t("admin.update.started", { repository: result.repository ?? "", ref: result.ref ?? "" })} {" "}
 						{result.runUrl && (
 							<a className="font-medium underline" href={result.runUrl} target="_blank" rel="noreferrer">
-								View workflow
+								{t("admin.update.viewWorkflow")}
 							</a>
 						)}
 					</p>

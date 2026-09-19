@@ -5,6 +5,8 @@ import { addDomainSchema } from "@/lib/validators";
 import { addDomainForUser, getDomainDns, listUserDomains } from "@/lib/domains/service";
 import { summariseDns, type DnsStatusSummary } from "@/lib/dns-status";
 import { getDomainProvisioningError } from "@/lib/domains/errors";
+import { getServerLang } from "@/lib/i18n/server";
+import { getDictionary, translate } from "@/lib/i18n";
 
 export async function GET(request: NextRequest) {
 	const env = getEnv();
@@ -65,9 +67,12 @@ export async function POST(request: Request) {
 		});
 		return NextResponse.json(result);
 	} catch (err) {
-		const failure = getDomainProvisioningError(err, "Failed to add domain");
+		const lang = await getServerLang(request);
+		const dict = getDictionary(lang);
+		const failure = getDomainProvisioningError(err, translate(dict, "server.failedToAddDomain"));
+		const errorMessage = failure.code === "MX_RECORDS_CONFLICT" ? translate(dict, "server.mxRecordsConflict") : failure.message;
 		return NextResponse.json(
-			{ error: failure.message, code: failure.code },
+			{ error: errorMessage, code: failure.code },
 			{ status: failure.status },
 		);
 	}

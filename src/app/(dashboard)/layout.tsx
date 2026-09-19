@@ -13,12 +13,14 @@ import { LicenseIndicator } from "@/components/license-indicator";
 import { DashboardNav } from "@/components/dashboard-nav";
 import { SidebarProvider } from "@/components/sidebar-state";
 import { ShortcutsProvider } from "@/components/shortcuts";
+import { useT } from "@/lib/i18n/client";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { t } = useT();
   return (
     <AuthGuard>
       <SidebarProvider>
@@ -36,7 +38,7 @@ export default function DashboardLayout({
                       <Link
                         href="/settings/account"
                         className="flex h-10 w-10 items-center justify-center rounded-full text-neutral-600 hover:bg-neutral-200"
-                        title="Account Settings"
+                        title={t("mail.navigation.accountSettings")}
                       >
                         <HelpCircle className="h-5 w-5" />
                       </Link>

@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { webhooks } from "@/db/schema";
 import { parseWebhookEvents } from "@/lib/email/webhooks";
 import { webhookUpdateSchema } from "@/lib/validators";
+import { getServerLang } from "@/lib/i18n/server";
+import { getDictionary, translate } from "@/lib/i18n";
 import { loadOwnedWebhook } from "./utils";
 import type { WebhookRouteParams } from "./types";
 
@@ -43,7 +45,9 @@ export async function PATCH(request: Request, { params }: WebhookRouteParams) {
 	if (parsed.data.maxAttempts !== undefined) updates.maxAttempts = parsed.data.maxAttempts;
 
 	if (Object.keys(updates).length === 0) {
-		return NextResponse.json({ error: "No changes provided" }, { status: 400 });
+		const lang = await getServerLang(request);
+		const dict = getDictionary(lang);
+		return NextResponse.json({ error: translate(dict, "server.noChangesProvided") }, { status: 400 });
 	}
 
 	await loaded.db.update(webhooks).set(updates).where(eq(webhooks.id, id));

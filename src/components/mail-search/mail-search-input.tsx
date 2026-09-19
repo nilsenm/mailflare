@@ -4,8 +4,10 @@ import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useMailSearch } from "./mail-search-context";
 import { useShortcuts } from "@/components/shortcuts";
+import { useT } from "@/lib/i18n/client";
 
 export function MailSearchInput() {
+	const { t } = useT();
 	const { input: query, setQuery } = useMailSearch();
 	const { openCommandPalette, shortcutsEnabled, shortcutsPreferenceLoading } = useShortcuts();
 	const showShortcutHints = shortcutsEnabled && !shortcutsPreferenceLoading;
@@ -16,7 +18,7 @@ export function MailSearchInput() {
 			<Input
 				value={query}
 				onChange={(event) => setQuery(event.target.value)}
-				placeholder={showShortcutHints ? "Search mail (press / to focus)" : "Search mail"}
+				placeholder={showShortcutHints ? t("mail.search.placeholderWithShortcut") : t("mail.search.placeholder")}
 				className="h-full min-w-0 flex-1 bg-transparent text-[15px] text-neutral-800 outline-none! shadow-none! border-none! placeholder:text-neutral-500"
 			/>
 			{query ? (
@@ -24,7 +26,7 @@ export function MailSearchInput() {
 					type="button"
 					onClick={() => setQuery("")}
 					className="rounded-full p-1 text-neutral-500 hover:bg-blue-100 hover:text-neutral-800"
-					aria-label="Clear search"
+					aria-label={t("mail.search.clear")}
 				>
 					<X className="h-4 w-4" />
 				</button>
@@ -33,7 +35,7 @@ export function MailSearchInput() {
 					type="button"
 					onClick={openCommandPalette}
 					className="hidden sm:flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-neutral-500 bg-white/70 hover:bg-white border border-neutral-200/80 rounded-md shadow-2xs transition-colors"
-					title="Open Command Palette (⌘K)"
+					title={t("mail.search.openCommands")}
 				>
 					<span className="text-[11px] font-mono">⌘K</span>
 				</button>

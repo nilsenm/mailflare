@@ -18,10 +18,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CardGridSkeleton } from "@/components/page-skeletons";
 import { authFetch } from "@/lib/auth/client";
+import { useT } from "@/lib/i18n/client";
 import type { ApiKey } from "./types";
 import { parseApiKeyScopes } from "./utils";
 
 export default function ApiKeysPage() {
+	const { t } = useT();
 	const qc = useQueryClient();
 	const [name, setName] = useState("");
 	const [newKey, setNewKey] = useState<string | null>(null);
@@ -43,7 +45,7 @@ export default function ApiKeysPage() {
 				body: JSON.stringify({ name, scopes: ["send", "read"] }),
 			});
 			const json = (await res.json()) as { key?: string };
-			if (!res.ok) throw new Error("Failed");
+			if (!res.ok) throw new Error(t("admin.apiKeys.createError"));
 			setNewKey(json.key ?? null);
 			setName("");
 		},
@@ -56,29 +58,29 @@ export default function ApiKeysPage() {
 	return (
 		<div className="space-y-6">
 			<div className="flex items-center justify-between gap-4">
-				<h1 className="text-2xl font-semibold">API Keys</h1>
+				<h1 className="text-2xl font-semibold">{t("admin.apiKeys.title")}</h1>
 				<Dialog open={createOpen} onOpenChange={setCreateOpen}>
 					<DialogTrigger asChild>
 						<Button>
 							<Plus className="h-4 w-4" />
-							New API key
+							{t("admin.apiKeys.newKey")}
 						</Button>
 					</DialogTrigger>
 					<DialogContent>
 						<DialogHeader>
-							<DialogTitle>Create API key</DialogTitle>
-							<DialogDescription>Create a key with send and read permissions.</DialogDescription>
+							<DialogTitle>{t("admin.apiKeys.dialogTitle")}</DialogTitle>
+							<DialogDescription>{t("admin.apiKeys.dialogDescription")}</DialogDescription>
 						</DialogHeader>
 						<div className="space-y-4">
 							<div className="space-y-2">
-								<Label>Name</Label>
-								<Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Production app" />
+								<Label>{t("admin.apiKeys.name")}</Label>
+								<Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t("admin.apiKeys.namePlaceholder")} />
 							</div>
 							{create.isError && (
 								<p className="text-sm text-red-600">{(create.error as Error).message}</p>
 							)}
 							<Button onClick={() => create.mutate()} disabled={!name || create.isPending}>
-								{create.isPending ? "Creating..." : "Create key"}
+								{create.isPending ? t("admin.apiKeys.creating") : t("admin.apiKeys.createAction")}
 							</Button>
 						</div>
 					</DialogContent>
@@ -87,21 +89,23 @@ export default function ApiKeysPage() {
 			{newKey && (
 				<Card className="border-blue-600/10 bg-blue-400/10">
 					<CardContent className="pt-6">
-						<p className="text-sm font-medium text-blue-600">Copy your key now:</p>
+						<p className="text-sm font-medium text-blue-600">{t("admin.apiKeys.copyKey")}</p>
 						<code className="block mt-2 text-xs break-all font-bold">{newKey}</code>
 					</CardContent>
 				</Card>
 			)}
 			<section className="space-y-3">
 				<div className="flex items-center justify-between">
-					<span className="text-sm text-neutral-500">{(data?.apiKeys ?? []).length} total</span>
+					<span className="text-sm text-neutral-500">
+						{t("admin.apiKeys.total", { count: (data?.apiKeys ?? []).length })}
+					</span>
 				</div>
 				{isLoading && (
 					<CardGridSkeleton />
 				)}
 				{!isLoading && (data?.apiKeys ?? []).length === 0 && (
 					<p className="rounded-lg border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-500">
-						No API keys yet
+						{t("admin.apiKeys.empty")}
 					</p>
 				)}
 				<div className="grid gap-3">

@@ -8,6 +8,7 @@ import { getBranding } from "@/lib/branding/service";
 import { sendSystemEmail } from "@/lib/email/system-mail";
 import { createAuditLog } from "@/lib/mailboxes/audit";
 import { escapeHtml } from "@/lib/auth/password-reset-utils";
+import { getDictionary, translate } from "@/lib/i18n";
 
 const TOKEN_MINUTES = 30;
 
@@ -31,18 +32,21 @@ export async function requestPasswordReset(env: CloudflareEnv, email: string, or
 
 	const link = `${origin}/reset-password?token=${encodeURIComponent(token)}`;
 	const { appName } = await getBranding(env);
+
+	// System mail has no per-user language preference, so it always goes out in Spanish.
+	const dict = getDictionary("es");
+	const subject = translate(dict, "emails.passwordReset.subject", { appName });
+	const intro = translate(dict, "emails.passwordReset.intro", { email: user.email, appName });
+	const instruction = translate(dict, "emails.passwordReset.instruction", { minutes: TOKEN_MINUTES });
+	const ignore = translate(dict, "emails.passwordReset.ignore");
+	const introHtml = translate(dict, "emails.passwordReset.intro", { email: escapeHtml(user.email), appName: escapeHtml(appName) })
+		.replace(escapeHtml(user.email), `<b>${escapeHtml(user.email)}</b>`);
+
 	const sent = await sendSystemEmail(env, {
 		to: user.resetEmail,
-		subject: `Reset your ${appName} password`,
-		text: [
-			`Someone asked to reset the password for ${user.email} on ${appName}.`,
-			"",
-			`Open this link within ${TOKEN_MINUTES} minutes to choose a new password:`,
-			link,
-			"",
-			"If that was not you, you can ignore this message; the password stays as it is.",
-		].join("\n"),
-		html: `<p>Someone asked to reset the password for <b>${escapeHtml(user.email)}</b> on ${escapeHtml(appName)}.</p><p>Open this link within ${TOKEN_MINUTES} minutes to choose a new password:</p><p><a href="${escapeHtml(link)}">${escapeHtml(link)}</a></p><p>If that was not you, you can ignore this message; the password stays as it is.</p>`,
+		subject,
+		text: [intro, "", instruction, link, "", ignore].join("\n"),
+		html: `<p>${introHtml}</p><p>${instruction}</p><p><a href="${escapeHtml(link)}">${escapeHtml(link)}</a></p><p>${ignore}</p>`,
 	});
 	if (!sent) console.warn("Password reset requested but no domain can send mail; link not delivered");
 }

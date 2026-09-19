@@ -9,9 +9,13 @@ import { hashPassword, verifyPassword } from "@/lib/auth/password";
 import { getEnv } from "@/lib/cloudflare";
 import type { ChangePasswordInput } from "./types";
 import { parseChangePasswordRequest } from "./utils";
+import { getServerLang } from "@/lib/i18n/server";
+import { getDictionary, translate } from "@/lib/i18n";
 
 export async function PATCH(request: Request) {
 	const env = getEnv();
+	const lang = await getServerLang(request);
+	const dict = getDictionary(lang);
 	const user = await requireUser(env, request);
 	let parsed: ChangePasswordInput;
 
@@ -21,15 +25,15 @@ export async function PATCH(request: Request) {
 		if (err instanceof ZodError) {
 			return NextResponse.json({ error: err.flatten() }, { status: 400 });
 		}
-		return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+		return NextResponse.json({ error: translate(dict, "server.invalidRequest") }, { status: 400 });
 	}
 
 	if (!verifyPassword(parsed.currentPassword, user.passwordHash)) {
-		return NextResponse.json({ error: "Current password is incorrect" }, { status: 400 });
+		return NextResponse.json({ error: translate(dict, "server.currentPasswordIncorrect") }, { status: 400 });
 	}
 
 	if (verifyPassword(parsed.newPassword, user.passwordHash)) {
-		return NextResponse.json({ error: "New password must be different from the current password" }, { status: 400 });
+		return NextResponse.json({ error: translate(dict, "server.newPasswordMustBeDifferent") }, { status: 400 });
 	}
 
 	const db = getDb(env);

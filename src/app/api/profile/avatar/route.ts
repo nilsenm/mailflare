@@ -9,6 +9,8 @@ import {
 	avatarKeyFor,
 	isUploadedAvatarFile,
 } from "./utils";
+import { getServerLang } from "@/lib/i18n/server";
+import { getDictionary, translate } from "@/lib/i18n";
 
 export async function GET(request: Request) {
 	const env = getEnv();
@@ -32,24 +34,26 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
 	const env = getEnv();
+	const lang = await getServerLang(request);
+	const dict = getDictionary(lang);
 	const user = await getCurrentUser(env, request);
-	if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+	if (!user) return NextResponse.json({ error: translate(dict, "server.unauthorized") }, { status: 401 });
 
 	let form: FormData;
 	try {
 		form = await request.formData();
 	} catch {
-		return NextResponse.json({ error: "Expected multipart form data" }, { status: 400 });
+		return NextResponse.json({ error: translate(dict, "server.expectedMultipart") }, { status: 400 });
 	}
 	const file = form.get("file");
 	if (!isUploadedAvatarFile(file)) {
-		return NextResponse.json({ error: "Missing image file" }, { status: 400 });
+		return NextResponse.json({ error: translate(dict, "server.missingImageFile") }, { status: 400 });
 	}
 	if (!ALLOWED_AVATAR_TYPES.includes(file.type)) {
-		return NextResponse.json({ error: "Use a JPEG, PNG, WebP, or GIF image" }, { status: 400 });
+		return NextResponse.json({ error: translate(dict, "server.useJpegPngWebpGif") }, { status: 400 });
 	}
 	if (file.size > MAX_AVATAR_SIZE) {
-		return NextResponse.json({ error: "Image must be 2 MB or smaller" }, { status: 413 });
+		return NextResponse.json({ error: translate(dict, "server.imageTooLarge") }, { status: 413 });
 	}
 
 	const key = avatarKeyFor(user.id);
@@ -67,8 +71,10 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
 	const env = getEnv();
+	const lang = await getServerLang(request);
+	const dict = getDictionary(lang);
 	const user = await getCurrentUser(env, request);
-	if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+	if (!user) return NextResponse.json({ error: translate(dict, "server.unauthorized") }, { status: 401 });
 
 	if (user.avatarKey) {
 		await env.BUCKET.delete(user.avatarKey);

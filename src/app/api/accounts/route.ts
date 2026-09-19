@@ -7,6 +7,8 @@ import { newId } from "@/lib/ids";
 import { createUserAccountSchema } from "@/lib/validators";
 import { ensureEmailRoutingRuleToWorker } from "@/lib/cloudflare-api";
 import { ensureMailboxDomainRouting } from "@/lib/mailboxes/domain-addresses";
+import { getServerLang } from "@/lib/i18n/server";
+import { getDictionary, translate } from "@/lib/i18n";
 import type { CreateUserAccountInput } from "./types";
 import {
 	accountListItemFromUser,
@@ -35,15 +37,17 @@ export async function POST(request: Request) {
 	}
 
 	const input: CreateUserAccountInput = parsed.data;
+	const lang = await getServerLang(request);
+	const dict = getDictionary(lang);
 	const db = getDb(access.env);
 	const domain = await getDomainForAdmin(db, access.user!.id, input.domainId);
-	if (!domain) return NextResponse.json({ error: "Domain not found" }, { status: 404 });
+	if (!domain) return NextResponse.json({ error: translate(dict, "server.domainNotFound") }, { status: 404 });
 	const username = input.username.toLowerCase().trim();
 	const email = `${username}@${domain.hostname}`;
 	const [existing] = await db.select({ id: users.id }).from(users).where(eq(users.email, email)).limit(1);
-	if (existing) return NextResponse.json({ error: "Email already registered" }, { status: 409 });
+	if (existing) return NextResponse.json({ error: translate(dict, "server.emailAlreadyRegistered") }, { status: 409 });
 	const mailbox = await getExistingMailbox(db, domain.id, username);
-	if (mailbox) return NextResponse.json({ error: "Email address is already assigned" }, { status: 409 });
+	if (mailbox) return NextResponse.json({ error: translate(dict, "server.emailAlreadyAssigned") }, { status: 409 });
 
 	const userId = newId("usr");
 	try {
@@ -80,7 +84,7 @@ export async function POST(request: Request) {
 		return NextResponse.json({ account: accountListItemFromUser(account) }, { status: 201 });
 	} catch (error) {
 		await db.delete(users).where(eq(users.id, userId));
-		const message = error instanceof Error ? error.message : "Failed to create account mailbox";
+		const message = error instanceof Error ? error.message : translate(dict, "server.failedCreateAccountMailbox");
 		return NextResponse.json({ error: message }, { status: 502 });
 	}
 }

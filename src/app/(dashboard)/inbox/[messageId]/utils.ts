@@ -19,7 +19,7 @@ export async function fetchMessageMetadata(messageId: string): Promise<Pick<Mess
 	return (await authFetch(`/api/messages/${messageId}/metadata`)).json();
 }
 
-export function getMessageHeaderParties(message: Message, currentAccountName?: string) {
+export function getMessageHeaderParties(message: Message, currentAccountName?: string, me = "me") {
 	return {
 		fromName:
 			message.direction === "outbound" && currentAccountName
@@ -28,7 +28,7 @@ export function getMessageHeaderParties(message: Message, currentAccountName?: s
 		fromAddress: getEmailAddress(message.fromAddr),
 		toName:
 			message.direction === "inbound"
-				? "me"
+				? me
 				: getDisplayNameForAddress(message.toAddr, message.toContactName),
 	};
 }

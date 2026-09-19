@@ -3,6 +3,7 @@
 import React from "react";
 import { X, Keyboard } from "lucide-react";
 import type { ShortcutDefinition } from "./types";
+import { useT } from "@/lib/i18n/client";
 
 interface ShortcutsHelpDialogProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ export function ShortcutsHelpDialog({
   onClose,
   shortcuts,
 }: ShortcutsHelpDialogProps) {
+  const { t } = useT();
   if (!isOpen) return null;
 
   const grouped = shortcuts.reduce((acc, item) => {
@@ -53,10 +55,10 @@ export function ShortcutsHelpDialog({
             </div>
             <div>
               <h2 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">
-                Keyboard Shortcuts
+                {t("mail.shortcuts.title")}
               </h2>
               <p className="text-xs text-neutral-400">
-                Superhuman &amp; Gmail style quick keys
+                {t("mail.shortcuts.subtitle")}
               </p>
             </div>
           </div>
@@ -98,18 +100,18 @@ export function ShortcutsHelpDialog({
         {/* Footer */}
         <div className="px-6 py-3 bg-neutral-50 dark:bg-neutral-950/60 border-t border-neutral-100 dark:border-neutral-800 flex items-center justify-between text-xs text-neutral-400">
           <span>
-            Press{" "}
+            {t("mail.shortcuts.pressToggle", { key: "?" }).split("?")[0]}
             <kbd className="px-1.5 py-0.5 bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded font-mono">
               ?
             </kbd>{" "}
-            to toggle
+            {t("mail.shortcuts.pressToggle", { key: "?" }).split("?")[1]}
           </span>
           <span>
-            Press{" "}
+            {t("mail.shortcuts.pressClose", { key: "ESC" }).split("ESC")[0]}
             <kbd className="px-1.5 py-0.5 bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded font-mono">
               ESC
             </kbd>{" "}
-            to close
+            {t("mail.shortcuts.pressClose", { key: "ESC" }).split("ESC")[1]}
           </span>
         </div>
       </div>

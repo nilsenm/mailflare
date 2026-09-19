@@ -2,25 +2,32 @@
 
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
+import { useT } from "@/lib/i18n/client";
 import { cn } from "@/lib/utils";
 import {
-	accountSettingsNavItems,
 	getAccountSettingsHref,
 	isActiveAccountSettingsPath,
 } from "./account-settings-nav-utils";
 
 export function AccountSettingsNav() {
+	const { t } = useT();
 	const { id } = useParams<{ id: string }>();
 	const pathname = usePathname();
+
+	const items: { segment: "" | "mailboxes" | "permissions"; label: string }[] = [
+		{ segment: "", label: t("admin.accounts.navDetails") },
+		{ segment: "permissions", label: t("admin.accounts.navPermissions") },
+		{ segment: "mailboxes", label: t("admin.accounts.navMailboxes") },
+	];
 
 	return (
 		<aside className="w-full shrink-0 lg:w-48">
 			<div className="sticky top-6 space-y-3">
 				<h2 className="px-4 text-xs font-semibold uppercase tracking-wide text-neutral-500">
-					Account settings
+					{t("admin.accounts.settingsNav")}
 				</h2>
 				<nav className="space-y-1">
-					{accountSettingsNavItems.map((item) => {
+					{items.map((item) => {
 						const href = getAccountSettingsHref(id, item.segment);
 						return (
 							<Link

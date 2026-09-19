@@ -6,6 +6,7 @@ import { useBranding } from "@/components/branding-provider";
 import { PageLoadingContext } from "@/components/page-loading";
 import { RouteLoadingBar } from "@/components/route-loading-bar";
 import type { LoadingTransitionProps } from "./loading-transition-types";
+import { useT } from "@/lib/i18n/client";
 
 const MINIMUM_LOADING_TIME = 600;
 const COMPLETION_TIME = 220;
@@ -13,6 +14,7 @@ const MAXIMUM_DATA_WAIT = 10_000;
 let hasShownInitialLoadingTransition = false;
 
 export function LoadingTransition({ children, ready }: LoadingTransitionProps) {
+	const { t } = useT();
 	const branding = useBranding();
 	const showInitialLoader = useRef(!hasShownInitialLoadingTransition).current;
 	const startedAt = useRef(Date.now());
@@ -93,7 +95,7 @@ export function LoadingTransition({ children, ready }: LoadingTransitionProps) {
 					</div>
 				)}
 				<div
-					aria-label="Loading"
+					aria-label={t("mail.loading")}
 					aria-live="polite"
 					className={`fixed inset-0 z-[100] flex items-center justify-center bg-[#f6f8fc] transition-opacity duration-300 ${
 						loaderVisible ? "opacity-100" : "pointer-events-none opacity-0"

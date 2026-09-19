@@ -11,6 +11,7 @@ import {
   Route,
   Webhook,
 } from "lucide-react";
+import { useT } from "@/lib/i18n/client";
 import { cn } from "@/lib/utils";
 import { NavItem } from "./components-nav";
 import { SidebarFooter } from "./sidebar-footer";
@@ -18,44 +19,45 @@ import { useBranding } from "./branding-provider";
 import { SidebarHeader } from "./sidebar-header";
 import { useSidebar } from "./sidebar-state";
 
-const sections = [
-  {
-    // label: "Overview",
-    links: [{ href: "/admin", label: "Overview", icon: Settings }],
-  },
-  {
-    label: "Email",
-    links: [
-      { href: "/mailboxes", label: "Mailboxes", icon: Mail },
-      { href: "/domains", label: "Domains", icon: Globe2 },
-      { href: "/routing", label: "Routing", icon: Route },
-      { href: "/webhooks", label: "Webhooks", icon: Webhook },
-    ],
-  },
-  {
-    label: "Administration",
-    links: [
-      { href: "/accounts", label: "Accounts", icon: Users },
-      { href: "/activity", label: "Activity", icon: Activity },
-      { href: "/backups", label: "Backups", icon: DatabaseBackup },
-    ],
-  },
-  {
-    label: "Product",
-    links: [
-      { href: "/branding", label: "Branding", icon: Palette },
-      // { href: "/api-keys", label: "API Keys", icon: KeyRound },
-    ],
-  },
-];
-
 export function AdminNav({ className }: { className?: string }) {
+  const { t } = useT();
   const branding = useBranding();
   const { minimal } = useSidebar();
 
+  const sections = [
+    {
+      // label: t("admin.nav.overview"),
+      links: [{ href: "/admin", label: t("admin.nav.overview"), icon: Settings }],
+    },
+    {
+      label: t("admin.nav.email"),
+      links: [
+        { href: "/mailboxes", label: t("admin.nav.mailboxes"), icon: Mail },
+        { href: "/domains", label: t("admin.nav.domains"), icon: Globe2 },
+        { href: "/routing", label: t("admin.nav.routing"), icon: Route },
+        { href: "/webhooks", label: t("admin.nav.webhooks"), icon: Webhook },
+      ],
+    },
+    {
+      label: t("admin.nav.administration"),
+      links: [
+        { href: "/accounts", label: t("admin.nav.accounts"), icon: Users },
+        { href: "/activity", label: t("admin.nav.activity"), icon: Activity },
+        { href: "/backups", label: t("admin.nav.backups"), icon: DatabaseBackup },
+      ],
+    },
+    {
+      label: t("admin.nav.product"),
+      links: [
+        { href: "/branding", label: t("admin.nav.branding"), icon: Palette },
+        // { href: "/api-keys", label: t("admin.nav.apiKeys"), icon: KeyRound },
+      ],
+    },
+  ];
+
   return (
     <nav className={cn("flex min-h-full flex-col gap-1", className)}>
-      <SidebarHeader href="/inbox" label="Admin" />
+      <SidebarHeader href="/inbox" label={t("admin.nav.admin")} />
       <div className={cn("space-y-4", minimal && "space-y-2")}>
         {sections.map((section) => {
           const links = section.links.filter(

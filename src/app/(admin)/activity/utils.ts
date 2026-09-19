@@ -1,4 +1,5 @@
 import { authFetch } from "@/lib/auth/client";
+import { dateLocale, type Lang } from "@/lib/i18n";
 import type { ActivityLog, ActivityMetadata } from "./types";
 
 export async function fetchActivity(): Promise<ActivityLog[]> {
@@ -8,16 +9,16 @@ export async function fetchActivity(): Promise<ActivityLog[]> {
 	return json.activities ?? [];
 }
 
-export function formatActivityDate(value: string): string {
-	return new Intl.DateTimeFormat(undefined, {
+export function formatActivityDate(value: string, lang: Lang = "es"): string {
+	return new Intl.DateTimeFormat(dateLocale(lang), {
 		dateStyle: "medium",
 		timeStyle: "short",
 	}).format(new Date(value));
 }
 
-export function getActivityLabel(action: string): string {
-	if (action === "auth.login") return "Login";
-	if (action === "auth.logout") return "Logout";
+export function getActivityLabel(action: string, t?: (key: any) => string): string {
+	if (action === "auth.login") return t ? t("admin.activity.login") : "Login";
+	if (action === "auth.logout") return t ? t("admin.activity.logout") : "Logout";
 	return action;
 }
 

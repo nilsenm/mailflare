@@ -1,10 +1,12 @@
 import { getAuthorizedSenderAddress } from "@/lib/email/sender";
+import { translate, type Dictionary } from "@/lib/i18n";
 import type { DraftPayload } from "./types";
 
 export async function getDraftSender(
 	env: CloudflareEnv,
 	userId: string,
 	input: DraftPayload,
+	dict?: Dictionary,
 ): Promise<{ fromAddr: string; mailboxId: string } | { error: string }> {
 	try {
 		return await getAuthorizedSenderAddress(env, {
@@ -13,7 +15,13 @@ export async function getDraftSender(
 			mailboxId: input.mailboxId,
 		});
 	} catch (error) {
-		return { error: error instanceof Error ? error.message : "Mailbox is not authorized" };
+		const msg = error instanceof Error ? error.message : "Mailbox is not authorized";
+		if (dict) {
+			if (msg === "Mailbox is required") return { error: translate(dict, "server.mailboxRequired") };
+			if (msg === "Mailbox not found") return { error: translate(dict, "server.mailboxNotFound") };
+			if (msg === "Mailbox is not authorized") return { error: translate(dict, "server.mailboxNotAuthorized") };
+		}
+		return { error: msg };
 	}
 }
 

@@ -1,17 +1,21 @@
+"use client";
+
 import { AlertTriangle, Check } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useT } from "@/lib/i18n/client";
 import { getDnsRecordLabel } from "./domain-dns-details-utils";
 import type { DomainDnsDetailsProps } from "./types";
 
 export default function DomainDnsDetails({ domain, dns }: DomainDnsDetailsProps) {
+	const { t } = useT();
 	return (
 		<Card className="rounded-3xl border-0 bg-white p-6">
 			<CardHeader className="py-0">
-				<CardTitle>DNS — {domain.hostname}</CardTitle>
+				<CardTitle>{t("admin.domains.dns.title", { hostname: domain.hostname })}</CardTitle>
 			</CardHeader>
 			<CardContent className="gap-6 pt-5">
 				<section className="space-y-3">
-					<h2 className="text-sm font-medium text-neutral-900">Email Routing</h2>
+					<h2 className="text-sm font-medium text-neutral-900">{t("admin.domains.dns.emailRouting")}</h2>
 					<ul className="space-y-2">
 						{dns.routing.records.map((record, index) => (
 							<li
@@ -38,14 +42,14 @@ export default function DomainDnsDetails({ domain, dns }: DomainDnsDetailsProps)
 								) : (
 									<AlertTriangle className="h-4 w-4 shrink-0 text-red-600" />
 								)}
-								{domain.routingEnabled ? "Email routing is configured" : "No routing DNS records found"}
+								{domain.routingEnabled ? t("admin.domains.dns.routingConfigured") : t("admin.domains.dns.noRouting")}
 							</li>
 						)}
 					</ul>
 				</section>
 
 				<section className="space-y-3 mt-8">
-					<h2 className="text-sm font-medium text-neutral-900">Email Sending</h2>
+					<h2 className="text-sm font-medium text-neutral-900">{t("admin.domains.dns.emailSending")}</h2>
 					<ul className="space-y-2">
 						{dns.sending.map((record, index) => (
 							<li
@@ -63,7 +67,7 @@ export default function DomainDnsDetails({ domain, dns }: DomainDnsDetailsProps)
 								) : (
 									<AlertTriangle className="h-4 w-4 shrink-0 text-red-600" />
 								)}
-								{domain.sendingEnabled ? "Email sending is configured" : "No sending DNS records found"}
+								{domain.sendingEnabled ? t("admin.domains.dns.sendingConfigured") : t("admin.domains.dns.noSending")}
 							</li>
 						)}
 					</ul>

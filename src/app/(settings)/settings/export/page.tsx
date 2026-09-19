@@ -6,8 +6,10 @@ import { useSelectedMailbox } from "@/components/mailbox-provider";
 import { Button } from "@/components/ui/button";
 import type { ExportState } from "./types";
 import { exportMailbox } from "./utils";
+import { useT } from "@/lib/i18n/client";
 
 export default function SettingsExportPage() {
+	const { t } = useT();
 	const { selectedMailbox } = useSelectedMailbox();
 	const [exportState, setExportState] = useState<ExportState>({ error: null, loading: false });
 
@@ -17,7 +19,7 @@ export default function SettingsExportPage() {
 		try {
 			await exportMailbox(selectedMailbox.id, `${selectedMailbox.localPart}.mbox`);
 		} catch (error) {
-			setExportState({ error: error instanceof Error ? error.message : "Export failed", loading: false });
+			setExportState({ error: error instanceof Error ? error.message : t("settings.export.failed"), loading: false });
 			return;
 		}
 		setExportState({ error: null, loading: false });
@@ -26,23 +28,22 @@ export default function SettingsExportPage() {
 	return (
 		<div className="space-y-6">
 			{/* <div>
-				<h1 className="text-3xl font-medium text-neutral-900">Export</h1>
+				<h1 className="text-3xl font-medium text-neutral-900">{t("settings.export.pageTitle")}</h1>
 				<p className="mt-1 text-sm text-neutral-500">
-					Download mail from the currently selected mailbox.
+					{t("settings.export.pageDescription")}
 				</p>
 			</div> */}
 
 			<section className="space-y-4">
 				<div>
-					<h2 className="text-xl font-semibold text-neutral-900">Export mailbox</h2>
+					<h2 className="text-xl font-semibold text-neutral-900">{t("settings.export.title")}</h2>
 					<p className="mt-1 text-sm text-neutral-500">
-						Download message headers and bodies from the selected mailbox as an .mbox file.
-						Attachments are not included in this export.
+						{t("settings.export.description")}
 					</p>
 				</div>
 				<div className="space-y-3 rounded-3xl bg-white p-6">
 					<Button type="button" variant="outline" disabled={!selectedMailbox || exportState.loading} onClick={onExport}>
-						{exportState.loading ? "Preparing..." : "Download .mbox"}
+						{exportState.loading ? t("settings.export.preparing") : t("settings.export.downloadMbox")}
 					</Button>
 					{exportState.error && (
 						<p className="rounded-lg border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">

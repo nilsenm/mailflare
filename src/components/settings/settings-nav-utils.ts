@@ -2,32 +2,32 @@ import type { SettingsNavSection } from "./settings-nav-types";
 
 export const settingsNavSections: SettingsNavSection[] = [
 	{
-		label: "Settings",
+		labelKey: "settings.nav.settings",
 		items: [
 			{
 				href: "/settings/account",
-				label: "Account",
+				labelKey: "settings.nav.account",
 			},
 			{
 				href: "/settings/inbox",
-				label: "Inbox",
+				labelKey: "settings.nav.inbox",
 			},
 			{
 				href: "/settings/rules",
-				label: "Rules & Routing",
+				labelKey: "settings.nav.rulesRouting",
 			},
 		],
 	},
 	{
-		label: "Mailbox",
+		labelKey: "settings.nav.mailbox",
 		items: [
 			{
 				href: "/settings/import",
-				label: "Import",
+				labelKey: "settings.nav.import",
 			},
 			{
 				href: "/settings/export",
-				label: "Export",
+				labelKey: "settings.nav.export",
 			},
 		],
 	},

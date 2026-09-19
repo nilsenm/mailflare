@@ -6,6 +6,8 @@ import { assertAdmin } from "@/lib/auth/admin";
 import { requireUser } from "@/lib/auth/cookies";
 import { getLicenseEntitlements } from "@/lib/licenses/service";
 import { getEnv } from "@/lib/cloudflare";
+import { getServerLang } from "@/lib/i18n/server";
+import { getDictionary, translate } from "@/lib/i18n";
 
 type Db = ReturnType<typeof getDb>;
 
@@ -70,6 +72,8 @@ export function accountListItemFromUser(user: {
 
 export async function requireTeamAdmin(request: Request) {
 	const env = getEnv();
+	const lang = await getServerLang(request);
+	const dict = getDictionary(lang);
 	try {
 		const user = await requireUser(env, request);
 		assertAdmin(user);
@@ -77,11 +81,11 @@ export async function requireTeamAdmin(request: Request) {
 			return {
 				env,
 				user,
-				error: NextResponse.json({ error: "A Team license is required to manage accounts" }, { status: 403 }),
+				error: NextResponse.json({ error: translate(dict, "server.licenseRequiredManageAccounts") }, { status: 403 }),
 			};
 		}
 		return { env, user, error: null };
 	} catch {
-		return { env, user: null, error: NextResponse.json({ error: "Forbidden" }, { status: 403 }) };
+		return { env, user: null, error: NextResponse.json({ error: translate(dict, "server.forbidden") }, { status: 403 }) };
 	}
 }

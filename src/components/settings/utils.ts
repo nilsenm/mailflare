@@ -1,6 +1,7 @@
 import type { MailboxOption } from "@/components/mailbox-provider";
 import { clearMailboxesCache } from "@/components/mailbox-provider-utils";
 import { authFetch } from "@/lib/auth/client";
+import { getDictionary, LANG_COOKIE, resolveLang, translate, type TranslationKey } from "@/lib/i18n";
 import type {
 	CurrentMailboxFormResponse,
 	ForwardingEmailResponse,
@@ -16,6 +17,16 @@ import type {
 	MfaStatusResponse,
 } from "./types";
 
+/** Client-side fallback error text, translated from the language cookie (no React context available here). */
+function fallbackText(key: TranslationKey): string {
+	if (typeof document === "undefined") return translate(getDictionary("es"), key);
+	const cookieLang = document.cookie
+		.split(";")
+		.map((part) => part.trim().split("="))
+		.find(([name]) => name === LANG_COOKIE)?.[1];
+	return translate(getDictionary(resolveLang(cookieLang)), key);
+}
+
 export function getMailboxAddress(mailbox: Pick<MailboxOption, "localPart" | "hostname">): string {
 	return `${mailbox.localPart}@${mailbox.hostname}`;
 }
@@ -29,7 +40,7 @@ export async function updateCurrentMailboxName(id: string, displayName: string):
 	const data = (await res.json()) as CurrentMailboxFormResponse;
 
 	if (!res.ok || !data.mailbox) {
-		throw new Error(typeof data.error === "string" ? data.error : "Failed to update mailbox");
+		throw new Error(typeof data.error === "string" ? data.error : fallbackText("settings.currentMailbox.updateFailed"));
 	}
 	clearMailboxesCache();
 
@@ -48,7 +59,7 @@ export async function loadAccountSettings(): Promise<Required<AccountSettingsRes
 	const data = (await res.json()) as AccountSettingsResponse;
 
 	if (!res.ok || !data.user) {
-		throw new Error(typeof data.error === "string" ? data.error : "Failed to load account");
+		throw new Error(typeof data.error === "string" ? data.error : fallbackText("errors.loadAccount"));
 	}
 
 	return data.user;
@@ -62,7 +73,7 @@ export async function updateForwardingEmail(forwardingEmail: string): Promise<st
 	});
 	const data = (await res.json()) as ForwardingEmailResponse;
 	if (!res.ok) {
-		throw new Error(typeof data.error === "string" ? data.error : "Failed to update forwarding email");
+		throw new Error(typeof data.error === "string" ? data.error : fallbackText("settings.forwarding.updateFailed"));
 	}
 	return data.forwardingEmail ?? "";
 }
@@ -75,7 +86,7 @@ export async function updateMailboxSignature(mailboxId: string, signature: strin
 	});
 	const data = (await res.json()) as MailboxSignatureResponse;
 	if (!res.ok || !data.mailbox) {
-		throw new Error(typeof data.error === "string" ? data.error : "Failed to update signature");
+		throw new Error(typeof data.error === "string" ? data.error : fallbackText("settings.signature.updateFailed"));
 	}
 	clearMailboxesCache();
 	return data.mailbox.signature ?? "";
@@ -96,7 +107,7 @@ export async function updateMailboxAutoReply(
 	});
 	const data = (await res.json()) as MailboxAutoReplyResponse;
 	if (!res.ok || !data.mailbox) {
-		throw new Error(typeof data.error === "string" ? data.error : "Failed to update auto-reply");
+		throw new Error(typeof data.error === "string" ? data.error : fallbackText("settings.autoReply.updateFailed"));
 	}
 	clearMailboxesCache();
 	return {
@@ -115,7 +126,7 @@ export async function updatePassword(currentPassword: string, newPassword: strin
 	const data = (await res.json()) as ChangePasswordResponse;
 
 	if (!res.ok) {
-		throw new Error(typeof data.error === "string" ? data.error : "Failed to change password");
+		throw new Error(typeof data.error === "string" ? data.error : fallbackText("settings.password.changeFailed"));
 	}
 }
 
@@ -127,7 +138,7 @@ export async function createJmapApiKey(name: string): Promise<string> {
 		body: JSON.stringify({ name, scopes: ["jmap"] }),
 	});
 	const data = (await res.json()) as { key?: string; error?: unknown };
-	if (!res.ok || !data.key) throw new Error(typeof data.error === "string" ? data.error : "Could not create a key");
+	if (!res.ok || !data.key) throw new Error(typeof data.error === "string" ? data.error : fallbackText("settings.emailClients.createKeyFailed"));
 	return data.key;
 }
 
@@ -138,7 +149,7 @@ function errorMessage(data: { error?: unknown }, fallback: string): string {
 export async function loadMfaStatus(): Promise<MfaStatusResponse> {
 	const res = await authFetch("/api/settings/mfa");
 	const data = (await res.json()) as MfaStatusResponse;
-	if (!res.ok) throw new Error(errorMessage(data, "Failed to load two-factor settings"));
+	if (!res.ok) throw new Error(errorMessage(data, fallbackText("settings.mfa.loadStatusFailed")));
 	return data;
 }
 
@@ -149,7 +160,7 @@ export async function beginMfaEnrollment(password: string): Promise<Required<Pic
 		body: JSON.stringify({ password }),
 	});
 	const data = (await res.json()) as MfaEnrollmentResponse;
-	if (!res.ok || !data.secret || !data.otpauthUrl || !data.qrSvg) throw new Error(errorMessage(data, "Could not start enrolment"));
+	if (!res.ok || !data.secret || !data.otpauthUrl || !data.qrSvg) throw new Error(errorMessage(data, fallbackText("settings.mfa.couldNotStart")));
 	return { secret: data.secret, otpauthUrl: data.otpauthUrl, qrSvg: data.qrSvg };
 }
 
@@ -160,7 +171,7 @@ export async function confirmMfaEnrollment(code: string): Promise<string[]> {
 		body: JSON.stringify({ code }),
 	});
 	const data = (await res.json()) as MfaRecoveryCodesResponse;
-	if (!res.ok || !data.recoveryCodes) throw new Error(errorMessage(data, "Could not confirm the code"));
+	if (!res.ok || !data.recoveryCodes) throw new Error(errorMessage(data, fallbackText("settings.mfa.couldNotConfirm")));
 	return data.recoveryCodes;
 }
 
@@ -171,7 +182,7 @@ export async function disableMfa(password: string, code: string): Promise<void> 
 		body: JSON.stringify({ password, code }),
 	});
 	const data = (await res.json()) as { error?: unknown };
-	if (!res.ok) throw new Error(errorMessage(data, "Could not turn off two-factor authentication"));
+	if (!res.ok) throw new Error(errorMessage(data, fallbackText("settings.mfa.couldNotTurnOff")));
 }
 
 export async function regenerateRecoveryCodes(password: string): Promise<string[]> {
@@ -181,6 +192,6 @@ export async function regenerateRecoveryCodes(password: string): Promise<string[
 		body: JSON.stringify({ password }),
 	});
 	const data = (await res.json()) as MfaRecoveryCodesResponse;
-	if (!res.ok || !data.recoveryCodes) throw new Error(errorMessage(data, "Could not generate new codes"));
+	if (!res.ok || !data.recoveryCodes) throw new Error(errorMessage(data, fallbackText("settings.mfa.couldNotGenerateCodes")));
 	return data.recoveryCodes;
 }

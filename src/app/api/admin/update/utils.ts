@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { assertAdmin } from "@/lib/auth/admin";
 import { requireUser } from "@/lib/auth/cookies";
 import { getEnv } from "@/lib/cloudflare";
+import { getServerLang } from "@/lib/i18n/server";
+import { getDictionary, translate } from "@/lib/i18n";
 import type {
   GitHubContentResponse,
   GitHubRepositoryResponse,
@@ -25,16 +27,20 @@ export async function authorizeAdminRequest(request: Request) {
   try {
     user = await requireUser(env, request);
   } catch {
+    const lang = await getServerLang(request);
+    const dict = getDictionary(lang);
     return {
-      error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
+      error: NextResponse.json({ error: translate(dict, "server.unauthorized") }, { status: 401 }),
     };
   }
 
   try {
     assertAdmin(user);
   } catch {
+    const lang = await getServerLang(request);
+    const dict = getDictionary(lang);
     return {
-      error: NextResponse.json({ error: "Forbidden" }, { status: 403 }),
+      error: NextResponse.json({ error: translate(dict, "server.forbidden") }, { status: 403 }),
     };
   }
 

@@ -10,14 +10,15 @@ import { Textarea } from "@/components/ui/textarea";
 import type { MailboxAutoReplySettings } from "./types";
 import { updateMailboxAutoReply } from "./utils";
 import { Switch } from "../ui/switch";
-
-const defaultSettings: MailboxAutoReplySettings = {
-  enabled: false,
-  subject: "Out of office",
-  body: "",
-};
+import { useT } from "@/lib/i18n/client";
 
 export function MailboxAutoReplyForm() {
+  const { t } = useT();
+  const defaultSettings: MailboxAutoReplySettings = {
+    enabled: false,
+    subject: t("settings.autoReply.defaultSubject"),
+    body: "",
+  };
   const { selectedMailbox, setSelectedMailbox, isLoading } =
     useSelectedMailbox();
   const [settings, setSettings] = useState(defaultSettings);
@@ -28,7 +29,7 @@ export function MailboxAutoReplyForm() {
   useEffect(() => {
     const nextSettings = {
       enabled: selectedMailbox?.autoReplyEnabled ?? false,
-      subject: selectedMailbox?.autoReplySubject ?? "Out of office",
+      subject: selectedMailbox?.autoReplySubject ?? t("settings.autoReply.defaultSubject"),
       body: selectedMailbox?.autoReplyBody ?? "",
     };
     setSettings(nextSettings);
@@ -39,13 +40,14 @@ export function MailboxAutoReplyForm() {
     selectedMailbox?.autoReplyEnabled,
     selectedMailbox?.autoReplySubject,
     selectedMailbox?.autoReplyBody,
+    t,
   ]);
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!selectedMailbox) return;
     if (settings.enabled && !settings.body.trim()) {
-      setStatus("Enter an auto-reply message before enabling it.");
+      setStatus(t("settings.autoReply.enableFailedNoBody"));
       return;
     }
     setSaving(true);
@@ -60,10 +62,10 @@ export function MailboxAutoReplyForm() {
         autoReplySubject: saved.subject,
         autoReplyBody: saved.body,
       });
-      setStatus("Saved");
+      setStatus(t("settings.saved"));
     } catch (error) {
       setStatus(
-        error instanceof Error ? error.message : "Failed to update auto-reply",
+        error instanceof Error ? error.message : t("settings.autoReply.updateFailed"),
       );
     } finally {
       setSaving(false);
@@ -71,11 +73,11 @@ export function MailboxAutoReplyForm() {
   }
 
   if (isLoading)
-    return <p className="text-sm text-neutral-500">Loading inbox…</p>;
+    return <p className="text-sm text-neutral-500">{t("settings.autoReply.loadingInbox")}</p>;
   if (!selectedMailbox)
     return (
       <p className="text-sm text-neutral-500">
-        Select an inbox to configure auto-reply.
+        {t("settings.autoReply.selectInbox")}
       </p>
     );
 
@@ -88,10 +90,10 @@ export function MailboxAutoReplyForm() {
       <label className="flex items-start gap-3 rounded-xl bg-neutral-50 p-4">
         <span className="flex-1">
           <span className="block text-sm font-medium text-neutral-900">
-            Enable auto-reply for {address}
+            {t("settings.autoReply.enableFor", { address })}
           </span>
           <span className="mt-1 block text-sm text-neutral-500">
-            Each sender receives at most one automatic response every 24 hours.
+            {t("settings.autoReply.oncePerDay")}
           </span>
         </span>
 
@@ -104,37 +106,37 @@ export function MailboxAutoReplyForm() {
       {settings.enabled && (
         <>
           <div className="space-y-2">
-            <Label htmlFor="autoReplySubject">Subject</Label>
+            <Label htmlFor="autoReplySubject">{t("settings.autoReply.subjectLabel")}</Label>
             <Input
               id="autoReplySubject"
               value={settings.subject}
               onChange={(event) =>
                 setSettings({ ...settings, subject: event.target.value })
               }
-              placeholder="Out of office"
+              placeholder={t("settings.autoReply.defaultSubject")}
               disabled={!canManage || saving}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="autoReplyBody">Message</Label>
+            <Label htmlFor="autoReplyBody">{t("settings.autoReply.messageLabel")}</Label>
             <Textarea
               id="autoReplyBody"
               value={settings.body}
               onChange={(event) =>
                 setSettings({ ...settings, body: event.target.value })
               }
-              placeholder="Thanks for your message. I am currently away and will reply when I return."
+              placeholder={t("settings.autoReply.bodyPlaceholder")}
               rows={7}
               disabled={!canManage || saving}
             />
           </div>
           <div className="flex items-center gap-3">
             <Button type="submit" disabled={!canManage || saving || !changed}>
-              {saving ? "Saving..." : "Save"}
+              {saving ? t("settings.saving") : t("common.save")}
             </Button>
             {!canManage && (
               <p className="text-sm text-neutral-500">
-                Full access is required to edit auto-reply.
+                {t("settings.autoReply.fullAccessRequired")}
               </p>
             )}
             {status && <p className="text-sm text-neutral-500">{status}</p>}

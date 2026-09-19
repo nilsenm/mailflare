@@ -5,6 +5,8 @@ import { routingRules } from "@/db/schema";
 import { requireSessionUser } from "@/lib/api/auth";
 import { getEnv } from "@/lib/cloudflare";
 import { domainRoutingRuleSchema } from "@/lib/validators";
+import { getServerLang } from "@/lib/i18n/server";
+import { getDictionary, translate } from "@/lib/i18n";
 import {
 	assertRuleMailbox,
 	assertAdminRuleMailbox,
@@ -27,13 +29,17 @@ async function loadRule(request: Request, id: string) {
 		.where(and(eq(routingRules.id, id), eq(routingRules.scope, "domain")))
 		.limit(1);
 	if (!rule) {
-		return { error: NextResponse.json({ error: "Rule not found" }, { status: 404 }) } as const;
+		const lang = await getServerLang(request);
+		const dict = getDictionary(lang);
+		return { error: NextResponse.json({ error: translate(dict, "server.ruleNotFound") }, { status: 404 }) } as const;
 	}
 
 	const mailboxId = new URL(request.url).searchParams.get("mailboxId");
 	const adminDomain = !mailboxId ? await getAdminDomain(db, user, rule.domainId) : null;
 	if (!adminDomain && (!mailboxId || !(await getManagedDomainMailbox(db, user, mailboxId, rule.domainId)))) {
-		return { error: NextResponse.json({ error: "Domain or mailbox access is required" }, { status: 403 }) } as const;
+		const lang = await getServerLang(request);
+		const dict = getDictionary(lang);
+		return { error: NextResponse.json({ error: translate(dict, "server.domainOrMailboxAccessRequired") }, { status: 403 }) } as const;
 	}
 
 	return { env, db, user, rule, adminDomain, error: null } as const;
@@ -57,7 +63,9 @@ export async function PATCH(request: Request, { params }: DomainRoutingRuleRoute
 			: await assertRuleMailbox(loaded.db, loaded.user, parsed.data.mailboxId, loaded.rule.domainId)
 		: true;
 	if (!destinationAllowed) {
-		return NextResponse.json({ error: "Mailbox access is required for the destination" }, { status: 403 });
+		const lang = await getServerLang(request);
+		const dict = getDictionary(lang);
+		return NextResponse.json({ error: translate(dict, "server.mailboxAccessRequiredForDestination") }, { status: 403 });
 	}
 
 	await loaded.db.update(routingRules).set(toRuleColumns(parsed.data)).where(eq(routingRules.id, id));

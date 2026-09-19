@@ -1,14 +1,15 @@
 import { authFetch } from "@/lib/auth/client";
+import { dateLocale, type Lang } from "@/lib/i18n";
 import type { BackupItem, BackupsResponse, BackupSettings } from "./types";
 
 export const WEEKDAYS = [
-	{ value: 0, label: "Sunday" },
-	{ value: 1, label: "Monday" },
-	{ value: 2, label: "Tuesday" },
-	{ value: 3, label: "Wednesday" },
-	{ value: 4, label: "Thursday" },
-	{ value: 5, label: "Friday" },
-	{ value: 6, label: "Saturday" },
+	{ value: 0, label: "Sunday", key: "admin.backups.weekdays.sunday" as const },
+	{ value: 1, label: "Monday", key: "admin.backups.weekdays.monday" as const },
+	{ value: 2, label: "Tuesday", key: "admin.backups.weekdays.tuesday" as const },
+	{ value: 3, label: "Wednesday", key: "admin.backups.weekdays.wednesday" as const },
+	{ value: 4, label: "Thursday", key: "admin.backups.weekdays.thursday" as const },
+	{ value: 5, label: "Friday", key: "admin.backups.weekdays.friday" as const },
+	{ value: 6, label: "Saturday", key: "admin.backups.weekdays.saturday" as const },
 ];
 
 export async function fetchBackups(): Promise<BackupsResponse> {
@@ -65,9 +66,9 @@ export async function downloadBackup(backup: BackupItem): Promise<void> {
 	URL.revokeObjectURL(url);
 }
 
-export function formatBackupDate(value: string | null): string {
+export function formatBackupDate(value: string | null, lang: Lang = "es"): string {
 	if (!value) return "-";
-	return new Intl.DateTimeFormat(undefined, {
+	return new Intl.DateTimeFormat(dateLocale(lang), {
 		dateStyle: "medium",
 		timeStyle: "short",
 	}).format(new Date(value));

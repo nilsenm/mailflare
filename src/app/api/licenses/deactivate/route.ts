@@ -12,6 +12,6 @@ export async function POST(request: Request) {
 		const license = await deactivateLicense(env);
 		return NextResponse.json({ license });
 	} catch (error) {
-		return getLicenseErrorResponse(error);
+		return await getLicenseErrorResponse(error, request);
 	}
 }

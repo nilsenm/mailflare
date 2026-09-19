@@ -2,14 +2,18 @@ import { InboxThreadingSettings } from "@/components/settings/inbox-threading-se
 import { InboxShortcutsSettings } from "@/components/settings/inbox-shortcuts-settings";
 import { MailboxAutoReplyForm } from "@/components/settings/mailbox-auto-reply-form";
 import { SpamFilterSettings } from "@/components/settings/spam-filter-settings";
+import { getDictionary, translate } from "@/lib/i18n";
+import { getServerLang } from "@/lib/i18n/server";
 
-export default function SettingsInboxPage() {
+export default async function SettingsInboxPage() {
+	const dict = getDictionary(await getServerLang());
+	const t = (key: Parameters<typeof translate>[1]) => translate(dict, key);
 	return (
 		<div className="space-y-8 py-4">
 			<section className="space-y-4">
 				<div>
-					<h2 className="text-xl font-semibold text-neutral-900">Spam protection</h2>
-					<p className="mt-1 text-sm text-neutral-500">Control local spam analysis for incoming messages.</p>
+					<h2 className="text-xl font-semibold text-neutral-900">{t("settings.inbox.spamProtection")}</h2>
+					<p className="mt-1 text-sm text-neutral-500">{t("settings.inbox.spamProtectionDescription")}</p>
 				</div>
 				<div className="rounded-3xl bg-white p-6">
 					<SpamFilterSettings />
@@ -17,8 +21,8 @@ export default function SettingsInboxPage() {
 			</section>
 			<section className="space-y-4">
 				<div>
-					<h2 className="text-xl font-semibold text-neutral-900">Threading</h2>
-					<p className="mt-1 text-sm text-neutral-500">Choose how emails are organized in your inbox.</p>
+					<h2 className="text-xl font-semibold text-neutral-900">{t("settings.inbox.threading")}</h2>
+					<p className="mt-1 text-sm text-neutral-500">{t("settings.inbox.threadingDescription")}</p>
 				</div>
 				<div className="rounded-3xl bg-white p-6">
 					<InboxThreadingSettings />
@@ -27,8 +31,8 @@ export default function SettingsInboxPage() {
 
 			<section className="space-y-4">
 				<div>
-					<h2 className="text-xl font-semibold text-neutral-900">Shortcuts</h2>
-					<p className="mt-1 text-sm text-neutral-500">Choose whether keyboard shortcuts are active.</p>
+					<h2 className="text-xl font-semibold text-neutral-900">{t("settings.inbox.shortcuts")}</h2>
+					<p className="mt-1 text-sm text-neutral-500">{t("settings.inbox.shortcutsDescription")}</p>
 				</div>
 				<div className="rounded-3xl bg-white p-6">
 					<InboxShortcutsSettings />
@@ -37,9 +41,9 @@ export default function SettingsInboxPage() {
 
 			<section className="space-y-4">
 				<div>
-					<h2 className="text-xl font-semibold text-neutral-900">Automatic response</h2>
+					<h2 className="text-xl font-semibold text-neutral-900">{t("settings.inbox.autoReply")}</h2>
 					<p className="mt-1 text-sm text-neutral-500">
-						Configure the subject and message for the inbox currently selected above.
+						{t("settings.inbox.autoReplyDescription")}
 					</p>
 				</div>
 				<div className="rounded-3xl bg-white p-6">

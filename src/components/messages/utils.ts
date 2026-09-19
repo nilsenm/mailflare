@@ -11,17 +11,18 @@ export function getMessageParty(
 	message: Message,
 	folder: MessageFolderConfig["folder"],
 	currentAccountName?: string,
+	labels?: { draft: string; unknownSender: string; noRecipient: string },
 ) {
-	if (folder === "drafts") return "Draft";
-	if (folder === "sent") return formatRecipientSummary(message.toAddr, message.toContactName);
+	if (folder === "drafts") return labels?.draft ?? "Draft";
+	if (folder === "sent") return formatRecipientSummary(message.toAddr, message.toContactName, labels?.noRecipient);
 	if (message.direction === "outbound" && currentAccountName) return currentAccountName;
-	return message.fromContactName ?? (message.fromAddr ? getEmailDisplayName(message.fromAddr) : "Unknown sender");
+	return message.fromContactName ?? (message.fromAddr ? getEmailDisplayName(message.fromAddr) : labels?.unknownSender ?? "Unknown sender");
 }
 
 /** "Maya Chen, +2" for a multi-recipient message, or just the one name. */
-export function formatRecipientSummary(toAddr: string, firstContactName?: string | null): string {
+export function formatRecipientSummary(toAddr: string, firstContactName?: string | null, noRecipient = "No recipient"): string {
 	const entries = splitEmailAddressList(toAddr);
-	if (entries.length === 0) return "No recipient";
+	if (entries.length === 0) return noRecipient;
 	const first = firstContactName ?? getEmailDisplayName(entries[0]);
 	return entries.length > 1 ? `${first}, +${entries.length - 1}` : first;
 }
@@ -39,9 +40,9 @@ export function isMessageListRowUnread(message: Message): boolean {
 	return message.direction === "inbound" && !message.read;
 }
 
-export function getMessagePreview(message: Message, folder: MessageFolderConfig["folder"]) {
-	if (folder === "drafts") return message.snippet || message.toAddr || "No content";
-	return message.snippet || "No preview";
+export function getMessagePreview(message: Message, folder: MessageFolderConfig["folder"], labels?: { noContent: string; noPreview: string }) {
+	if (folder === "drafts") return message.snippet || message.toAddr || labels?.noContent || "No content";
+	return message.snippet || labels?.noPreview || "No preview";
 }
 
 export function formatMessageListTimestamp(createdAt: string): string {

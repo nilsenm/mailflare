@@ -7,21 +7,25 @@ import { getMailboxAccessLevel } from "@/lib/mailboxes/access";
 import { getPersonalIdentityForAddress, syncPersonalIdentity } from "@/lib/profile/sync";
 import type { ContactRequestInput } from "./types";
 import { getContactByEmail, saveManualContactName, toContactDetails } from "./utils";
+import { getServerLang } from "@/lib/i18n/server";
+import { getDictionary, translate } from "@/lib/i18n";
 
 export async function GET(request: Request) {
 	const env = getEnv();
+	const lang = await getServerLang(request);
+	const dict = getDictionary(lang);
 	const user = await requireUser(env, request);
 	const url = new URL(request.url);
 	const mailboxId = url.searchParams.get("mailboxId");
 	const email = normalizeEmailAddress(url.searchParams.get("address") ?? "");
 	if (!mailboxId || !email) {
-		return NextResponse.json({ error: "Mailbox and contact are required" }, { status: 400 });
+		return NextResponse.json({ error: translate(dict, "server.mailboxAndContactRequired") }, { status: 400 });
 	}
 
 	const db = getDb(env);
 	const access = await getMailboxAccessLevel(db, user, mailboxId);
 	if (!access?.canRead) {
-		return NextResponse.json({ error: "Mailbox not found" }, { status: 404 });
+		return NextResponse.json({ error: translate(dict, "server.mailboxNotFound") }, { status: 404 });
 	}
 	const storedContact = toContactDetails(await getContactByEmail(db, access.mailbox.userId, email));
 	const account = await getPersonalIdentityForAddress(db, access.mailbox.userId, email);
@@ -50,23 +54,25 @@ export async function GET(request: Request) {
 
 export async function PATCH(request: Request) {
 	const env = getEnv();
+	const lang = await getServerLang(request);
+	const dict = getDictionary(lang);
 	const user = await requireUser(env, request);
 	const body = (await request.json()) as ContactRequestInput;
 	const email = normalizeEmailAddress(body.address ?? "");
 	const displayName = body.displayName?.trim() ?? "";
 	if (!body.mailboxId || !email || !displayName || displayName.length > 100) {
-		return NextResponse.json({ error: "A valid contact name is required" }, { status: 400 });
+		return NextResponse.json({ error: translate(dict, "server.validContactNameRequired") }, { status: 400 });
 	}
 
 	const db = getDb(env);
 	const access = await getMailboxAccessLevel(db, user, body.mailboxId);
 	if (!access?.canManage) {
-		return NextResponse.json({ error: "Mailbox not found" }, { status: 404 });
+		return NextResponse.json({ error: translate(dict, "server.mailboxNotFound") }, { status: 404 });
 	}
 	const account = await getPersonalIdentityForAddress(db, access.mailbox.userId, email);
 	if (account) {
 		if (account.userId !== user.id) {
-			return NextResponse.json({ error: "Only the account owner can change this contact" }, { status: 403 });
+			return NextResponse.json({ error: translate(dict, "server.onlyOwnerCanChangeContact") }, { status: 403 });
 		}
 		await syncPersonalIdentity(db, {
 			userId: account.userId,

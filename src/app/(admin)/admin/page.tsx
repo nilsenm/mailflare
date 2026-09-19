@@ -1,60 +1,49 @@
 import Link from "next/link";
-import { Globe2, KeyRound, Mail, Palette, Settings, Users, Webhook } from "lucide-react";
+import { Globe2, Mail, Palette, Users } from "lucide-react";
 import { AdminUpdateCard } from "@/components/admin-update-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getDictionary, translate } from "@/lib/i18n";
+import { getServerLang } from "@/lib/i18n/server";
 
-const sections = [
-	{
-		href: "/mailboxes",
-		title: "Mailboxes",
-		description: "Create and manage mailbox addresses.",
-		icon: Mail,
-	},
-	{
-		href: "/domains",
-		title: "Domains",
-		description: "Add Cloudflare domains and inspect DNS state.",
-		icon: Globe2,
-	},
-	{
-		href: "/branding",
-		title: "Branding",
-		description: "Customize the app name, icon, and favicon.",
-		icon: Palette,
-	},
-	{
-		href: "/accounts",
-		title: "Accounts",
-		description: "Add and manage user accounts with a Team license.",
-		icon: Users,
-	},
-	// {
-	// 	href: "/api-keys",
-	// 	title: "API Keys",
-	// 	description: "Manage API credentials for programmatic access.",
-	// 	icon: KeyRound,
-	// },
-	// {
-	// 	href: "/webhooks",
-	// 	title: "Webhooks",
-	// 	description: "Send mail events to external systems.",
-	// 	icon: Webhook,
-	// },
-	// {
-	// 	href: "/settings/account",
-	// 	title: "Account",
-	// 	description: "View personal account and platform configuration.",
-	// 	icon: Settings,
-	// },
-];
+export default async function AdminSettingsPage() {
+	const lang = await getServerLang();
+	const dict = getDictionary(lang);
 
-export default function AdminSettingsPage() {
+	const sections = [
+		{
+			href: "/mailboxes",
+			title: translate(dict, "admin.overview.mailboxesTitle"),
+			description: translate(dict, "admin.overview.mailboxesDescription"),
+			icon: Mail,
+		},
+		{
+			href: "/domains",
+			title: translate(dict, "admin.overview.domainsTitle"),
+			description: translate(dict, "admin.overview.domainsDescription"),
+			icon: Globe2,
+		},
+		{
+			href: "/branding",
+			title: translate(dict, "admin.overview.brandingTitle"),
+			description: translate(dict, "admin.overview.brandingDescription"),
+			icon: Palette,
+		},
+		{
+			href: "/accounts",
+			title: translate(dict, "admin.overview.accountsTitle"),
+			description: translate(dict, "admin.overview.accountsDescription"),
+			icon: Users,
+		},
+	];
+
 	return (
 		<div>
 			<div className="mb-8">
-				<h1 className="text-3xl font-medium text-neutral-900">Admin settings</h1>
+				<h1 className="text-3xl font-medium text-neutral-900">
+					{translate(dict, "admin.overview.title")}
+				</h1>
 				<p className="mt-2 text-sm text-neutral-500">
-					Manage workspace-level mail infrastructure and integrations.
+					{translate(dict, "admin.overview.description")}
 				</p>
 			</div>
 			<div className="grid lg:grid-cols-2 gap-4">

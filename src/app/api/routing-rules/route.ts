@@ -7,6 +7,8 @@ import { requireUser } from "@/lib/auth/cookies";
 import { newId } from "@/lib/ids";
 import { getMailboxAccessLevel } from "@/lib/mailboxes/access";
 import { routingRuleSchema } from "@/lib/validators";
+import { getServerLang } from "@/lib/i18n/server";
+import { getDictionary, translate } from "@/lib/i18n";
 
 export async function GET(request: Request) {
 	const env = getEnv();
@@ -20,7 +22,9 @@ export async function GET(request: Request) {
 	const db = getDb(env);
 	const access = await getMailboxAccessLevel(db, user, mailboxId);
 	if (!access?.canManage) {
-		return NextResponse.json({ error: "Mailbox not found" }, { status: 404 });
+		const lang = await getServerLang(request);
+		const dict = getDictionary(lang);
+		return NextResponse.json({ error: translate(dict, "server.mailboxNotFound") }, { status: 404 });
 	}
 
 	const rows = await db
@@ -32,6 +36,8 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
 	const env = getEnv();
+	const lang = await getServerLang(request);
+	const dict = getDictionary(lang);
 	const user = await requireUser(env, request);
 	const parsed = routingRuleSchema.safeParse(await request.json());
 	if (!parsed.success) {
@@ -41,7 +47,7 @@ export async function POST(request: Request) {
 	const db = getDb(env);
 	const access = await getMailboxAccessLevel(db, user, parsed.data.mailboxId);
 	if (!access?.canManage) {
-		return NextResponse.json({ error: "Mailbox not found" }, { status: 404 });
+		return NextResponse.json({ error: translate(dict, "server.mailboxNotFound") }, { status: 404 });
 	}
 	const mailbox = access.mailbox;
 
@@ -50,7 +56,7 @@ export async function POST(request: Request) {
 	const folderId = destination.startsWith("folder:") ? destination.slice("folder:".length) : null;
 
 	if (!systemAction && !folderId) {
-		return NextResponse.json({ error: "Destination is required" }, { status: 400 });
+		return NextResponse.json({ error: translate(dict, "server.destinationRequired") }, { status: 400 });
 	}
 
 	if (folderId) {
@@ -60,7 +66,7 @@ export async function POST(request: Request) {
 			.where(and(eq(folders.id, folderId), eq(folders.mailboxId, mailbox.id)))
 			.limit(1);
 		if (!folder) {
-			return NextResponse.json({ error: "Folder not found" }, { status: 404 });
+			return NextResponse.json({ error: translate(dict, "server.folderNotFound") }, { status: 404 });
 		}
 	}
 

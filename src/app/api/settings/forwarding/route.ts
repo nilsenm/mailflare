@@ -8,9 +8,13 @@ import { getEnv } from "@/lib/cloudflare";
 import { getLicenseEntitlements } from "@/lib/licenses/service";
 import type { UpdateForwardingEmailInput } from "./types";
 import { parseUpdateForwardingEmailRequest } from "./utils";
+import { getServerLang } from "@/lib/i18n/server";
+import { getDictionary, translate } from "@/lib/i18n";
 
 export async function PATCH(request: Request) {
 	const env = getEnv();
+	const lang = await getServerLang(request);
+	const dict = getDictionary(lang);
 	const user = await requireUser(env, request);
 	let input: UpdateForwardingEmailInput;
 	try {
@@ -19,11 +23,11 @@ export async function PATCH(request: Request) {
 		if (error instanceof ZodError) {
 			return NextResponse.json({ error: error.flatten() }, { status: 400 });
 		}
-		return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+		return NextResponse.json({ error: translate(dict, "server.invalidRequest") }, { status: 400 });
 	}
 
 	if (!(await getLicenseEntitlements(env)).canForwardEmail) {
-		return NextResponse.json({ error: "A Pro or Team license is required for email forwarding" }, { status: 403 });
+		return NextResponse.json({ error: translate(dict, "server.licenseRequiredForwarding") }, { status: 403 });
 	}
 
 	await getDb(env)

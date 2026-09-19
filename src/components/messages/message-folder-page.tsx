@@ -34,6 +34,7 @@ import {
 	runBulkMessageAction,
 } from "./utils";
 import clsx from "clsx";
+import { useT } from "@/lib/i18n/client";
 
 const pageSize = 25;
 
@@ -48,6 +49,7 @@ function MessageListRow({
 	onMessageAction,
 	dragMessageIds,
 }: MessageListRowProps) {
+	const { t } = useT();
 	const Icon = config.icon;
 	const { openDraftComposer } = useCompose();
 	const [read, setRead] = useState(message.read);
@@ -59,8 +61,12 @@ function MessageListRow({
 	const rowMessage = { ...message, read, starred, threadUnread };
 	const unread = isMessageListRowUnread(rowMessage);
 	const draggable = config.folder === "inbox" && message.direction === "inbound";
-	const party = getMessageParty(rowMessage, config.folder, currentAccountName);
-	const preview = getMessagePreview(rowMessage, config.folder);
+	const party = getMessageParty(rowMessage, config.folder, currentAccountName, {
+		draft: t("mail.common.draft"), unknownSender: t("mail.common.unknownSender"), noRecipient: t("mail.common.noRecipient"),
+	});
+	const preview = getMessagePreview(rowMessage, config.folder, {
+		noContent: t("mail.common.noContent"), noPreview: t("mail.common.noPreview"),
+	});
 	const href = `${config.hrefPrefix}/${message.id}`;
 	const navigation = useMessageNavigation(href, rowMessage);
 
@@ -99,7 +105,7 @@ function MessageListRow({
 					checked={selected}
 					onChange={(event) => onSelectedChange(message.id, event.target.checked)}
 					className="mt-1 h-4 w-4 rounded border-neutral-300"
-					aria-label={`Select message from ${party}`}
+					aria-label={t("mail.list.selectMessageFrom", { sender: party })}
 				/>
 				<Link href={href} onClick={onMessageNavigate} className="min-w-0">
 					<span className="flex items-baseline justify-between gap-3">
@@ -118,7 +124,7 @@ function MessageListRow({
 						className={`mt-1 block truncate text-sm ${unread ? "font-semibold text-neutral-900" : "text-neutral-700"
 							}`}
 					>
-						{message.subject ?? "(no subject)"}
+						{message.subject ?? t("mail.common.noSubject")}
 					</span>
 					<span className="mt-0.5 block truncate text-xs leading-5 text-neutral-500">
 						{preview}
@@ -134,7 +140,7 @@ function MessageListRow({
 	const content = (
 		<>
 			{config.folder === "inbox" && message.direction === "inbound" && (
-				<Tooltip label={starred ? "Starred" : "Not starred"}>
+				<Tooltip label={starred ? t("mail.list.starred") : t("mail.list.notStarred")}>
 					<Button
 						type="button"
 						variant="ghost"
@@ -144,7 +150,7 @@ function MessageListRow({
 							event.stopPropagation();
 							void toggleMessageStar(message.id).then((result) => setStarred(result.starred));
 						}}
-						aria-label={starred ? "Starred" : "Not starred"}
+						aria-label={starred ? t("mail.list.starred") : t("mail.list.notStarred")}
 					>
 						<Icon className={`h-4 w-4 ${starred ? "fill-amber-400 text-amber-400" : "text-neutral-300"}`} />
 					</Button>
@@ -162,7 +168,7 @@ function MessageListRow({
 			</span>
 			<span className="truncate text-neutral-700">
 				<span className={unread ? "font-semibold text-neutral-900" : ""}>
-					{rowMessage.subject ?? "(no subject)"}
+					{rowMessage.subject ?? t("mail.common.noSubject")}
 				</span>
 				<span className="text-neutral-500"> - {getMessagePreview(rowMessage, config.folder)}</span>
 			</span>
@@ -183,7 +189,7 @@ function MessageListRow({
 					checked={selected}
 					onChange={(event) => onSelectedChange(message.id, event.target.checked)}
 					className="h-4 w-4 rounded border-neutral-300"
-					aria-label="Select message"
+					aria-label={t("mail.list.selectMessage")}
 				/>
 				<button type="button" className="contents text-left" onClick={() => openDraftComposer(message.id)}>
 					{content}
@@ -206,7 +212,7 @@ function MessageListRow({
 				checked={selected}
 				onChange={(event) => onSelectedChange(message.id, event.target.checked)}
 				className="h-4 w-4 rounded border-neutral-300"
-				aria-label="Select message"
+				aria-label={t("mail.list.selectMessage")}
 			/>
 			<Link href={href} onClick={onMessageNavigate} className="contents">
 				{content}
@@ -242,6 +248,17 @@ export function MessageFolderPage({
 	selectedMessageId,
 	selection,
 }: MessageFolderPageProps) {
+	const { t } = useT();
+	const folderTitle = config.folderId ? config.title : ({
+		inbox: t("mail.folders.inbox"), starred: t("mail.folders.starred"), snoozed: t("mail.folders.snoozed"),
+		sent: t("mail.folders.sent"), archived: t("mail.folders.archived"), spam: t("mail.folders.spam"),
+		trash: t("mail.folders.trash"), drafts: t("nav.drafts"),
+	} as Record<string, string>)[config.folder] ?? config.title;
+	const folderEmpty = ({
+		inbox: t("mail.folders.noEmails"), starred: t("mail.folders.noStarred"), snoozed: t("mail.folders.noSnoozed"),
+		sent: t("mail.folders.noEmails"), archived: t("mail.folders.noArchived"), spam: t("mail.folders.noSpam"),
+		trash: t("mail.folders.noTrash"), drafts: t("mail.folders.noEmails"),
+	} as Record<string, string>)[config.folder] ?? config.emptyText;
 	const { selectedMailbox, isLoading: mailboxesLoading } = useSelectedMailbox();
 	const { query } = useMailSearch();
 	const [offset, setOffset] = useState(0);
@@ -298,12 +315,12 @@ export function MessageFolderPage({
 	useEffect(() => {
 		if (mailboxesLoading) return;
 		document.title = formatEmailPageTitle({
-			location: config.title,
+			location: folderTitle,
 			total: titleTotal,
 			unread: titleUnread,
 			emailAddress: mailboxAddress,
 		});
-	}, [config.title, mailboxAddress, mailboxesLoading, titleTotal, titleUnread]);
+	}, [folderTitle, mailboxAddress, mailboxesLoading, titleTotal, titleUnread]);
 
 	function updateSelectedMessage(messageId: string, selected: boolean) {
 		const message = messages.find((item) => item.id === messageId);
@@ -371,13 +388,13 @@ export function MessageFolderPage({
 		<div className="flex h-full min-h-0 flex-col">
 			<div className={`flex h-14 shrink-0 items-center justify-between border-b border-neutral-200 ${compact ? "px-4" : "px-6"}`}>
 				<div className="flex items-center gap-3 w-full">
-					<Tooltip label="Select all visible messages">
+					<Tooltip label={t("mail.list.selectAll")}>
 						<Checkbox
 							checked={allVisibleSelected}
 							disabled={messages.length === 0}
 							onChange={(event) => toggleAllVisible(event.target.checked)}
 							className="h-4 w-4 rounded border-neutral-300"
-							aria-label="Select all visible messages"
+							aria-label={t("mail.list.selectAll")}
 						/>
 					</Tooltip>
 					{selectedIds.length > 0 && !compact ? (
@@ -402,37 +419,37 @@ export function MessageFolderPage({
 				{(selectedIds.length === 0 || compact) && (
 					<div className="flex items-center gap-2 text-neutral-500">
 						<span className="text-xs text-neutral-500 whitespace-nowrap">
-							{pageRange.start} - {pageRange.end} of {pageRange.total}
+							{pageRange.start} - {pageRange.end} {t("mail.list.of")} {pageRange.total}
 						</span>
-						<Tooltip label="Previous page">
+						<Tooltip label={t("mail.list.previousPage")}>
 							<Button
 								variant="ghost"
 								size="sm"
 								disabled={offset === 0 || isLoading}
 								onClick={() => setOffset(Math.max(offset - limit, 0))}
-								aria-label="Previous page"
+								aria-label={t("mail.list.previousPage")}
 							>
 								<ChevronLeft className="h-4 w-4" />
 							</Button>
 						</Tooltip>
-						<Tooltip label="Next page">
+						<Tooltip label={t("mail.list.nextPage")}>
 							<Button
 								variant="ghost"
 								size="sm"
 								disabled={offset + messages.length >= total || isLoading}
 								onClick={() => setOffset(offset + limit)}
-								aria-label="Next page"
+								aria-label={t("mail.list.nextPage")}
 							>
 								<ChevronRight className="h-4 w-4" />
 							</Button>
 						</Tooltip>
 						{config.folder === "inbox" && (
-							<Tooltip label={unreadOnly ? "Showing unread emails" : "Show unread emails only"}>
+							<Tooltip label={unreadOnly ? t("mail.list.showingUnread") : t("mail.list.showUnreadOnly")}>
 								<Button
 									type="button"
 									variant="ghost"
 									size="sm"
-									aria-label="Show unread emails only"
+									aria-label={t("mail.list.showUnreadOnly")}
 									aria-pressed={unreadOnly}
 									onClick={() => setUnreadOnly((current) => !current)}
 									className={unreadOnly ? "bg-blue-100 text-blue-700 hover:bg-blue-100" : undefined}
@@ -467,7 +484,7 @@ export function MessageFolderPage({
 				))}
 				{!isLoading && messages.length === 0 && (
 					<p className="px-6 py-4 text-sm text-neutral-500">
-						{hasActiveFilters ? "No messages match these filters" : config.emptyText}
+						{hasActiveFilters ? t("mail.list.noFilterMatches") : folderEmpty}
 					</p>
 				)}
 			</div>

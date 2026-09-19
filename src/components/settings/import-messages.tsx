@@ -10,8 +10,10 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import type { ImportMessagesProps, ImportMessagesResult } from "./import-messages-types";
 import { getImportSummary, importMessageFiles } from "./import-messages-utils";
+import { useT } from "@/lib/i18n/client";
 
 export function ImportMessages({ destination, sourceLabel }: ImportMessagesProps) {
+	const { t } = useT();
 	const { selectedMailbox } = useSelectedMailbox();
 	const [files, setFiles] = useState<File[]>([]);
 	const [loading, setLoading] = useState(false);
@@ -30,7 +32,7 @@ export function ImportMessages({ destination, sourceLabel }: ImportMessagesProps
 			setResult(nextResult);
 			window.dispatchEvent(new Event("mailflare:messages-changed"));
 		} catch (err) {
-			setError(err instanceof Error ? err.message : "Import failed");
+			setError(err instanceof Error ? err.message : t("settings.importMessages.failed"));
 		} finally {
 			setLoading(false);
 		}
@@ -41,17 +43,16 @@ export function ImportMessages({ destination, sourceLabel }: ImportMessagesProps
 			<CardHeader>
 				<CardTitle className="flex items-center gap-2">
 					<Upload className="h-4 w-4" />
-					Import mail
+					{t("settings.importMessages.title")}
 				</CardTitle>
 				<CardDescription>
-					Upload exported .eml or .mbox files from source {sourceLabel}. They will be saved to the
-					matching section in the selected mailbox.
+					{t("settings.importMessages.description", { sourceLabel })}
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<form onSubmit={onSubmit} className="space-y-4">
 					<div className="space-y-2">
-						<Label htmlFor="mail-import">Mail export files</Label>
+						<Label htmlFor="mail-import">{t("settings.importMessages.filesLabel")}</Label>
 						<Input
 							id="mail-import"
 							type="file"
@@ -61,12 +62,12 @@ export function ImportMessages({ destination, sourceLabel }: ImportMessagesProps
 							className="block w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm shadow-sm shadow-neutral-200/50 file:mr-3 file:rounded-md file:border-0 file:bg-neutral-100 file:px-3 file:py-1.5 file:text-sm file:font-medium"
 						/>
 						<p className="text-xs leading-5 text-neutral-500">
-							Imports up to 100 messages and 25 MB per upload. Duplicate Message-ID values are skipped.
+							{t("settings.importMessages.hint")}
 						</p>
 					</div>
 
 					<Button type="submit" disabled={!selectedMailbox || files.length === 0 || loading}>
-						{loading ? "Importing..." : "Import messages"}
+						{loading ? t("settings.import.importing") : t("settings.importMessages.importMessages")}
 					</Button>
 
 					{result && (

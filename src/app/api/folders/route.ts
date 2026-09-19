@@ -6,6 +6,8 @@ import { requireUser } from "@/lib/auth/cookies";
 import { getEnv } from "@/lib/cloudflare";
 import { newId } from "@/lib/ids";
 import { folderSchema } from "@/lib/validators";
+import { getServerLang } from "@/lib/i18n/server";
+import { getDictionary, translate } from "@/lib/i18n";
 import { getMailboxFolderAccess, listFoldersForMailbox } from "./utils";
 
 export async function GET(request: Request) {
@@ -20,7 +22,9 @@ export async function GET(request: Request) {
 	const db = getDb(env);
 	const access = await getMailboxFolderAccess(db, user, mailboxId);
 	if (!access) {
-		return NextResponse.json({ error: "Mailbox not found" }, { status: 404 });
+		const lang = await getServerLang(request);
+		const dict = getDictionary(lang);
+		return NextResponse.json({ error: translate(dict, "server.mailboxNotFound") }, { status: 404 });
 	}
 
 	const rows = await listFoldersForMailbox(db, mailboxId);
@@ -29,6 +33,8 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
 	const env = getEnv();
+	const lang = await getServerLang(request);
+	const dict = getDictionary(lang);
 	const user = await requireUser(env, request);
 	const parsed = folderSchema.safeParse(await request.json());
 	if (!parsed.success) {
@@ -38,7 +44,7 @@ export async function POST(request: Request) {
 	const db = getDb(env);
 	const access = await getMailboxFolderAccess(db, user, parsed.data.mailboxId);
 	if (!access?.canManage) {
-		return NextResponse.json({ error: "Mailbox not found" }, { status: 404 });
+		return NextResponse.json({ error: translate(dict, "server.mailboxNotFound") }, { status: 404 });
 	}
 
 	const name = parsed.data.name.trim();
@@ -48,7 +54,7 @@ export async function POST(request: Request) {
 		.where(and(eq(folders.mailboxId, parsed.data.mailboxId), eq(folders.name, name)))
 		.limit(1);
 	if (existing) {
-		return NextResponse.json({ error: "Folder already exists" }, { status: 409 });
+		return NextResponse.json({ error: translate(dict, "server.folderAlreadyExists") }, { status: 409 });
 	}
 
 	const id = newId("fld");

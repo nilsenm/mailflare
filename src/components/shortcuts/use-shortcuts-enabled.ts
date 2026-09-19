@@ -2,9 +2,11 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { loadShortcutsEnabled, updateShortcutsEnabled } from "./use-shortcuts-enabled-utils";
+import { useT } from "@/lib/i18n/client";
 
 /** Loads and updates the signed-in account's keyboard shortcut preference. */
 export function useShortcutsEnabled() {
+	const { t } = useT();
 	const [enabled, setEnabledState] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -18,7 +20,7 @@ export function useShortcutsEnabled() {
 			.catch((loadError) => {
 				if (cancelled) return;
 				setEnabledState(true);
-				setError(loadError instanceof Error ? loadError.message : "Failed to load shortcut settings");
+				setError(t("mail.shortcuts.loadError"));
 			})
 			.finally(() => {
 				if (!cancelled) setIsLoading(false);
@@ -26,7 +28,7 @@ export function useShortcutsEnabled() {
 		return () => {
 			cancelled = true;
 		};
-	}, []);
+	}, [t]);
 
 	const setEnabled = useCallback(async (next: boolean) => {
 		const previous = enabled;
@@ -36,11 +38,11 @@ export function useShortcutsEnabled() {
 			setEnabledState(await updateShortcutsEnabled(next));
 		} catch (updateError) {
 			setEnabledState(previous);
-			const message = updateError instanceof Error ? updateError.message : "Failed to update shortcut settings";
+			const message = t("mail.shortcuts.updateError");
 			setError(message);
 			throw new Error(message);
 		}
-	}, [enabled]);
+	}, [enabled, t]);
 
 	return { enabled, error, isLoading, setEnabled };
 }

@@ -1,4 +1,5 @@
 import { authFetch } from "@/lib/auth/client";
+import type { TranslationKey } from "@/lib/i18n";
 import type {
 	DomainRule,
 	DomainRuleField,
@@ -7,31 +8,31 @@ import type {
 	DomainRuleOperator,
 } from "./types";
 
-export const MATCH_FIELD_LABELS: Record<DomainRuleField, string> = {
-	recipient: "Recipient address",
-	sender: "Sender address",
-	title: "Subject",
-	content: "Body",
+export const MATCH_FIELD_KEYS: Record<DomainRuleField, TranslationKey> = {
+	recipient: "settings.domainRouting.matchFieldRecipient",
+	sender: "settings.domainRouting.matchFieldSender",
+	title: "settings.domainRouting.matchFieldSubject",
+	content: "settings.domainRouting.matchFieldBody",
 };
 
-export const MATCH_OPERATOR_LABELS: Record<DomainRuleOperator, string> = {
-	contains: "contains",
-	exact: "is exactly",
-	starts_with: "starts with",
-	ends_with: "ends with",
-	regex: "matches regex",
+export const MATCH_OPERATOR_KEYS: Record<DomainRuleOperator, TranslationKey> = {
+	contains: "settings.domainRouting.operatorContains",
+	exact: "settings.domainRouting.operatorExact",
+	starts_with: "settings.domainRouting.operatorStartsWith",
+	ends_with: "settings.domainRouting.operatorEndsWith",
+	regex: "settings.domainRouting.operatorRegex",
 };
 
-export const ACTION_LABELS = {
-	store: "Deliver to mailbox",
-	forward: "Forward to address",
-	reject: "Reject / block",
-} as const;
+export const ACTION_KEYS: Record<DomainRule["action"], TranslationKey> = {
+	store: "settings.domainRouting.actionStore",
+	forward: "settings.domainRouting.actionForward",
+	reject: "settings.domainRouting.actionReject",
+};
 
-async function readJson<T>(res: Response): Promise<T> {
+async function readJson<T>(res: Response, t: (key: TranslationKey) => string): Promise<T> {
 	const json = (await res.json()) as T & { error?: unknown };
 	if (!res.ok) {
-		throw new Error(typeof json.error === "string" ? json.error : "Request failed");
+		throw new Error(typeof json.error === "string" ? json.error : t("settings.domainRouting.requestFailed"));
 	}
 	return json;
 }
@@ -43,7 +44,7 @@ export async function fetchDomainRules(
 	const params = new URLSearchParams({ domainId });
 	if (mailboxId) params.set("mailboxId", mailboxId);
 	const res = await authFetch(`/api/routing-rules/domain?${params}`);
-	const json = await readJson<{ rules: DomainRule[]; mailboxes: DomainRuleMailbox[] }>(res);
+	const json = (await res.json()) as { rules: DomainRule[]; mailboxes: DomainRuleMailbox[] };
 	return { rules: json.rules ?? [], mailboxes: json.mailboxes ?? [] };
 }
 
@@ -56,50 +57,57 @@ function domainRuleUrl(id: string | null, mailboxId?: string): string {
 	return `/api/routing-rules/domain${id ? `/${id}` : ""}${query}`;
 }
 
-export async function createDomainRule(input: DomainRuleInput, mailboxId?: string) {
+export async function createDomainRule(input: DomainRuleInput, t: (key: TranslationKey) => string, mailboxId?: string) {
 	return readJson(
 		await authFetch(domainRuleUrl(null, mailboxId), {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify(input),
 		}),
+		t,
 	);
 }
 
-export async function updateDomainRule(id: string, input: DomainRuleInput, mailboxId?: string) {
+export async function updateDomainRule(id: string, input: DomainRuleInput, t: (key: TranslationKey) => string, mailboxId?: string) {
 	return readJson(
 		await authFetch(domainRuleUrl(id, mailboxId), {
 			method: "PATCH",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify(input),
 		}),
+		t,
 	);
 }
 
-export async function deleteDomainRule(id: string, mailboxId?: string) {
-	return readJson(await authFetch(domainRuleUrl(id, mailboxId), { method: "DELETE" }));
+export async function deleteDomainRule(id: string, t: (key: TranslationKey) => string, mailboxId?: string) {
+	return readJson(await authFetch(domainRuleUrl(id, mailboxId), { method: "DELETE" }), t);
 }
 
-export function describeRule(rule: DomainRule, mailboxes: DomainRuleMailbox[], hostname: string): string {
+export function describeRule(
+	t: (key: TranslationKey, vars?: Record<string, string | number>) => string,
+	rule: DomainRule,
+	mailboxes: DomainRuleMailbox[],
+	hostname: string,
+): string {
 	const condition =
 		rule.matchValue === "*"
-			? "Any message"
-			: `${MATCH_FIELD_LABELS[rule.matchField]} ${MATCH_OPERATOR_LABELS[rule.matchOperator]} "${rule.matchValue}"`;
+			? t("settings.domainRouting.anyMessage")
+			: `${t(MATCH_FIELD_KEYS[rule.matchField])} ${t(MATCH_OPERATOR_KEYS[rule.matchOperator])} "${rule.matchValue}"`;
 
-	if (rule.action === "reject") return `${condition} → reject`;
+	if (rule.action === "reject") return t("settings.domainRouting.describeReject", { condition });
 	if (rule.action === "forward") {
-		const copy = rule.keepCopy ? " and keep a copy" : "";
-		return `${condition} → forward to ${rule.forwardTo ?? "—"}${copy}`;
+		const copy = rule.keepCopy ? t("settings.domainRouting.describeForwardKeepCopy") : "";
+		return t("settings.domainRouting.describeForward", { condition, target: rule.forwardTo ?? "—", copy });
 	}
 	const mailbox = mailboxes.find((m) => m.id === rule.mailboxId);
 	const address = mailbox ? `${mailbox.localPart}@${hostname}` : "—";
-	return `${condition} → deliver to ${address}`;
+	return t("settings.domainRouting.describeStore", { condition, address });
 }
 
-export function formatLastMatched(value: DomainRule["lastMatchedAt"]): string {
-	if (value === null || value === undefined) return "Never";
+export function formatLastMatched(t: (key: TranslationKey) => string, value: DomainRule["lastMatchedAt"]): string {
+	if (value === null || value === undefined) return t("settings.domainRouting.never");
 	const numeric = typeof value === "number" ? value : Date.parse(String(value));
-	if (!Number.isFinite(numeric)) return "Never";
+	if (!Number.isFinite(numeric)) return t("settings.domainRouting.never");
 	// Drizzle timestamps serialise as seconds when they bypass the mapper.
 	const ms = numeric < 1e12 ? numeric * 1000 : numeric;
 	return new Date(ms).toLocaleString();

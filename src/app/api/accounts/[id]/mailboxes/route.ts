@@ -4,6 +4,8 @@ import { getDb } from "@/db";
 import { domains, mailboxes } from "@/db/schema";
 import { requireTeamAdmin } from "../../utils";
 import { selectAccountById } from "../utils";
+import { getServerLang } from "@/lib/i18n/server";
+import { getDictionary, translate } from "@/lib/i18n";
 import type { AccountRouteParams } from "../types";
 
 export async function GET(request: Request, { params }: AccountRouteParams) {
@@ -13,7 +15,9 @@ export async function GET(request: Request, { params }: AccountRouteParams) {
 	const db = getDb(access.env);
 	const account = await selectAccountById(db, id);
 	if (!account || (account.id !== access.user!.id && account.createdByUserId !== access.user!.id)) {
-		return NextResponse.json({ error: "Account not found" }, { status: 404 });
+		const lang = await getServerLang(request);
+		const dict = getDictionary(lang);
+		return NextResponse.json({ error: translate(dict, "server.accountNotFound") }, { status: 404 });
 	}
 	const rows = await db.select({
 		id: mailboxes.id,
