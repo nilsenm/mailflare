@@ -11,6 +11,7 @@ import {
   Users,
   Route,
   Webhook,
+  Send,
 } from "lucide-react";
 import { useT } from "@/lib/i18n/client";
 import { cn } from "@/lib/utils";
@@ -36,6 +37,7 @@ export function AdminNav({ className }: { className?: string }) {
         { href: "/mailboxes", label: t("admin.nav.mailboxes"), icon: Mail },
         { href: "/domains", label: t("admin.nav.domains"), icon: Globe2 },
         { href: "/routing", label: t("admin.nav.routing"), icon: Route },
+        { href: "/outbound-mail", label: t("admin.nav.outboundMail"), icon: Send },
         { href: "/webhooks", label: t("admin.nav.webhooks"), icon: Webhook },
       ],
     },

@@ -13,13 +13,11 @@ function optional(name: string): string | undefined {
 	return value || undefined;
 }
 
-function mailerConfig(): MailerConfig {
-	const smtp = optional("SMTP_URL");
-	if (smtp) return { kind: "smtp", url: smtp };
-	const accountId = optional("CF_ACCOUNT_ID");
-	const token = optional("CF_TOKEN");
-	if (accountId && token) return { kind: "cloudflare", accountId, token };
-	return { kind: "none" };
+function mailerConfig(): Pick<MailerConfig, "directUrl" | "relayUrl"> {
+	return {
+		directUrl: optional("SMTP_URL"),
+		relayUrl: optional("SMTP_URL_RELAY") ?? optional("SMTP_URL_BREVO"),
+	};
 }
 
 /**
@@ -33,7 +31,18 @@ export function createNodeRuntime(): NodeRuntime {
 
 	const database = openSqliteDatabase(join(dataDir, "mailflare.sqlite"));
 	const bucket = openFileBucket(join(dataDir, "blobs"));
-	const mailer = openMailer(mailerConfig());
+	const mailer = openMailer({
+		...mailerConfig(),
+		loadSettings: async () => {
+			const row = await database.prepare(
+				"SELECT outbound_provider, outbound_fallback FROM app_settings WHERE id = ?",
+			).bind("default").first<{ outbound_provider: "direct" | "relay"; outbound_fallback: number }>();
+			return {
+				provider: row?.outbound_provider === "relay" ? "relay" : "direct",
+				fallback: row ? row.outbound_fallback !== 0 : true,
+			};
+		},
+	});
 	const inboundQueue = openQueue("mailflare-inbound");
 	const outboundQueue = openQueue("mailflare-outbound");
 	const realtime = new RealtimeHubRegistry();

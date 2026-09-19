@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Globe2, Mail, Palette, Users } from "lucide-react";
+import { Globe2, Mail, Palette, Send, Users } from "lucide-react";
 import { AdminUpdateCard } from "@/components/admin-update-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getDictionary, translate } from "@/lib/i18n";
@@ -21,6 +21,12 @@ export default async function AdminSettingsPage() {
 			title: translate(dict, "admin.overview.domainsTitle"),
 			description: translate(dict, "admin.overview.domainsDescription"),
 			icon: Globe2,
+		},
+		{
+			href: "/outbound-mail",
+			title: translate(dict, "admin.overview.outboundTitle"),
+			description: translate(dict, "admin.overview.outboundDescription"),
+			icon: Send,
 		},
 		{
 			href: "/branding",

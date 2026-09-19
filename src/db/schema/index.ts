@@ -567,6 +567,8 @@ export const appSettings = sqliteTable("app_settings", {
 	id: text("id").primaryKey(),
 	appName: text("app_name").notNull().default("Mailflare"),
 	iconKey: text("icon_key"),
+	outboundProvider: text("outbound_provider", { enum: ["direct", "relay"] }).notNull().default("direct"),
+	outboundFallback: integer("outbound_fallback", { mode: "boolean" }).notNull().default(true),
 	updatedAt: integer("updated_at", { mode: "timestamp" })
 		.notNull()
 		.$defaultFn(() => new Date()),

@@ -1,6 +1,7 @@
 import nodemailer from "nodemailer";
 import type { Transporter } from "nodemailer";
 import { getEmailAddress } from "@/lib/email/address";
+import { selectOutboundProviders, sendWithOutboundProviders } from "./outbound-selection.js";
 
 type Builder = {
 	from: string | { name?: string; email: string };
@@ -15,10 +16,13 @@ type Builder = {
 	attachments?: Array<{ filename: string; type: string; content: ArrayBuffer | ArrayBufferView | string; disposition?: string; contentId?: string }>;
 };
 
-export type MailerConfig =
-	| { kind: "smtp"; url: string }
-	| { kind: "cloudflare"; accountId: string; token: string }
-	| { kind: "none" };
+export type OutboundProvider = "direct" | "relay";
+export type OutboundSettings = { provider: OutboundProvider; fallback: boolean };
+export type MailerConfig = {
+	directUrl?: string;
+	relayUrl?: string;
+	loadSettings: () => Promise<OutboundSettings>;
+};
 
 function addressString(value: string | { name?: string; email: string }): string {
 	if (typeof value === "string") return value;
@@ -30,97 +34,103 @@ function messageIdFor(from: Builder["from"]): string {
 	return `<${crypto.randomUUID()}@${domain}>`;
 }
 
-/**
- * The `send_email` binding's builder API over SMTP (any provider, or your
- * own MTA) or Cloudflare's Email Sending REST endpoint. A Message-ID is
- * generated here and passed as a header so threading behaves the same as on
- * Workers, where Cloudflare returns the id it assigned.
- */
 export class Mailer {
-	private transporter: Transporter | null = null;
+	private readonly transporters = new Map<string, Transporter>();
+	private settingsCache: { value: OutboundSettings; expiresAt: number } | null = null;
 
-	constructor(private readonly config: MailerConfig) {
-		if (config.kind === "smtp") {
-			// Self-signed relays are common on private networks; opt in explicitly.
-			const rejectUnauthorized = process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== "false";
-			this.transporter = nodemailer.createTransport({ url: config.url, tls: { rejectUnauthorized } });
-		}
-	}
+	constructor(private readonly config: MailerConfig) {}
 
 	get configured() {
-		return this.config.kind !== "none";
+		return !!this.config.directUrl || !!this.config.relayUrl;
+	}
+
+	getAvailability() {
+		return { direct: !!this.config.directUrl, relay: !!this.config.relayUrl };
+	}
+
+	getHosts() {
+		return { directHost: hostFor(this.config.directUrl), relayHost: hostFor(this.config.relayUrl) };
+	}
+
+	invalidateSettingsCache() {
+		this.settingsCache = null;
+	}
+
+	async getSettings(): Promise<OutboundSettings> {
+		if (this.settingsCache && this.settingsCache.expiresAt > Date.now()) return this.settingsCache.value;
+		const value = await this.config.loadSettings();
+		this.settingsCache = { value, expiresAt: Date.now() + 10_000 };
+		return value;
 	}
 
 	async send(message: Builder): Promise<{ messageId: string }> {
-		const messageId = message.headers?.["Message-ID"] ?? messageIdFor(message.from);
-		const headers = { ...(message.headers ?? {}), "Message-ID": messageId };
-
-		if (this.config.kind === "smtp" && this.transporter) {
-			await this.transporter.sendMail({
-				from: addressString(message.from),
-				to: message.to,
-				cc: message.cc,
-				bcc: message.bcc,
-				replyTo: message.replyTo ? addressString(message.replyTo) : undefined,
-				subject: message.subject,
-				text: message.text,
-				html: message.html,
-				headers: Object.fromEntries(Object.entries(headers).filter(([key]) => key !== "Message-ID")),
-				messageId,
-				attachments: (message.attachments ?? []).map((attachment) => ({
-					filename: attachment.filename,
-					contentType: attachment.type,
-					content: toBuffer(attachment.content),
-					contentDisposition: attachment.disposition === "inline" ? "inline" : "attachment",
-					cid: attachment.contentId ?? undefined,
-				})),
-			});
-			return { messageId };
-		}
-
-		if (this.config.kind === "cloudflare") {
-			const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${this.config.accountId}/email/sending/send`, {
-				method: "POST",
-				headers: { Authorization: `Bearer ${this.config.token}`, "Content-Type": "application/json" },
-				body: JSON.stringify({
-					from: addressString(message.from),
-					to: message.to,
-					cc: message.cc,
-					bcc: message.bcc,
-					reply_to: message.replyTo ? addressString(message.replyTo) : undefined,
-					subject: message.subject,
-					text: message.text,
-					html: message.html,
-					headers,
-					attachments: (message.attachments ?? []).map((attachment) => ({
-						filename: attachment.filename,
-						type: attachment.type,
-						content: base64(toBuffer(attachment.content)),
-						disposition: attachment.disposition === "inline" ? "inline" : "attachment",
-						...(attachment.contentId ? { content_id: attachment.contentId } : {}),
-					})),
-				}),
-			});
-			if (!response.ok) {
-				const detail = await response.text().catch(() => "");
-				throw new Error(`Cloudflare Email Sending failed (${response.status}): ${detail.slice(0, 300)}`);
-			}
-			return { messageId };
-		}
-
-		throw new Error("Outbound mail is not configured. Set SMTP_URL, or CF_ACCOUNT_ID and CF_TOKEN.");
+		const settings = await this.getSettings();
+		return this.sendUsing(message, settings.provider, settings.fallback);
 	}
 
-	/** Relay a raw RFC 5322 message unchanged, for forwarding rules. SMTP only. */
+	async sendUsing(message: Builder, provider: OutboundProvider, fallback = false): Promise<{ messageId: string }> {
+		const available = this.getAvailability();
+		const providers = selectOutboundProviders(provider, fallback, available) as OutboundProvider[];
+		if (!available[provider] && providers.length > 0) console.warn(`[outbound-mail] ${provider} is not configured; using ${providers[0]}`);
+		const messageId = message.headers?.["Message-ID"] ?? messageIdFor(message.from);
+		const headers = { ...(message.headers ?? {}), "Message-ID": messageId };
+		const sent = await sendWithOutboundProviders(providers, async (selected: OutboundProvider) => {
+			console.info(`[outbound-mail] sending via ${selected}`);
+			try {
+				await this.transporter(selected).sendMail({
+					from: addressString(message.from), to: message.to, cc: message.cc, bcc: message.bcc,
+					replyTo: message.replyTo ? addressString(message.replyTo) : undefined,
+					subject: message.subject, text: message.text, html: message.html,
+					headers: Object.fromEntries(Object.entries(headers).filter(([key]) => key !== "Message-ID")),
+					messageId,
+					attachments: (message.attachments ?? []).map((attachment) => ({
+						filename: attachment.filename, contentType: attachment.type, content: toBuffer(attachment.content),
+						contentDisposition: attachment.disposition === "inline" ? "inline" : "attachment",
+						cid: attachment.contentId ?? undefined,
+					})),
+				});
+				return { messageId };
+			} catch (error) {
+				console.error(`[outbound-mail] ${selected} failed${providers.length > 1 ? "; fallback available" : ""}`, error);
+				throw error;
+			}
+		});
+		console.info(`[outbound-mail] sent via ${sent.provider}${sent.fallbackUsed ? " (fallback)" : ""}`);
+		return sent.result;
+	}
+
 	async sendRaw(envelopeFrom: string, to: string, raw: Buffer): Promise<boolean> {
-		if (!this.transporter) return false;
-		await this.transporter.sendMail({ envelope: { from: envelopeFrom, to }, raw });
+		const settings = await this.getSettings();
+		const providers = selectOutboundProviders(settings.provider, settings.fallback, this.getAvailability()) as OutboundProvider[];
+		if (!this.getAvailability()[settings.provider] && providers.length > 0) console.warn(`[outbound-mail] ${settings.provider} is not configured; using ${providers[0]} for raw message`);
+		const sent = await sendWithOutboundProviders(providers, async (provider: OutboundProvider) => {
+			console.info(`[outbound-mail] sending raw message via ${provider}`);
+			try {
+				await this.transporter(provider).sendMail({ envelope: { from: envelopeFrom, to }, raw });
+				return true;
+			} catch (error) {
+				console.error(`[outbound-mail] raw message failed via ${provider}`, error);
+				throw error;
+			}
+		});
+		console.info(`[outbound-mail] raw message sent via ${sent.provider}${sent.fallbackUsed ? " (fallback)" : ""}`);
 		return true;
+	}
+
+	private transporter(provider: OutboundProvider): Transporter {
+		const url = provider === "direct" ? this.config.directUrl : this.config.relayUrl;
+		if (!url) throw new Error(`${provider} outbound mail transport is not configured`);
+		const cached = this.transporters.get(url);
+		if (cached) return cached;
+		const created = nodemailer.createTransport({ url, tls: { rejectUnauthorized: process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== "false" } });
+		this.transporters.set(url, created);
+		return created;
 	}
 }
 
-function base64(buffer: Buffer): string {
-	return (buffer as unknown as { toString(encoding: string): string }).toString("base64");
+function hostFor(url?: string): string | null {
+	if (!url) return null;
+	try { return new URL(url).hostname; } catch { return null; }
 }
 
 function toBuffer(content: ArrayBuffer | ArrayBufferView | string): Buffer {
