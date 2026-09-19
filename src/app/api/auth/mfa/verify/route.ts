@@ -37,7 +37,7 @@ export async function POST(request: Request) {
 
 	const userId = await getLoginChallengeUserId(env, parsed.data.challengeToken);
 	if (!userId) {
-		return NextResponse.json({ error: translate(dict, "server.signInAttemptExpired") }, { status: 401 });
+		return NextResponse.json({ error: translate(dict, "server.signInAttemptExpired"), code: "challenge_expired" }, { status: 401 });
 	}
 	const db = getDb(env);
 	const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
