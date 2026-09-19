@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BadgeDollarSign, Globe2, KeyRound, Mail, Palette, Settings, Users, Webhook } from "lucide-react";
+import { Globe2, KeyRound, Mail, Palette, Settings, Users, Webhook } from "lucide-react";
 import { AdminUpdateCard } from "@/components/admin-update-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -21,12 +21,6 @@ const sections = [
 		title: "Branding",
 		description: "Customize the app name, icon, and favicon.",
 		icon: Palette,
-	},
-	{
-		href: "/licenses",
-		title: "Licenses",
-		description: "Compare Pro and Team one-time licenses.",
-		icon: BadgeDollarSign,
 	},
 	{
 		href: "/accounts",

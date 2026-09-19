@@ -24,11 +24,13 @@ async function getOrCreateLicenseSettings(env: CloudflareEnv) {
 	return settings;
 }
 
+// Instalación LESOTUR (fork AGPL-3.0): todas las funciones Team quedan habilitadas
+// sin licencia comercial. El resto del flujo de licencias se conserva intacto.
 function toLicenseStatus(settings: typeof licenseSettings.$inferSelect): LicenseStatus {
-	const active = settings.state === "active" && (settings.plan === "pro" || settings.plan === "team");
+	const active = true;
 	return {
-		plan: active ? settings.plan : "community",
-		state: settings.state,
+		plan: "team",
+		state: "active",
 		features: parseFeatures(settings.features),
 		instanceId: settings.instanceId,
 		instanceUrl: settings.instanceUrl,
