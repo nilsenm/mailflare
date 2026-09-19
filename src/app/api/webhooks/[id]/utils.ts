@@ -19,7 +19,7 @@ export async function loadOwnedWebhook(request: Request, id: string) {
 		.limit(1);
 
 	if (!hook) {
-		return { error: NextResponse.json({ error: "Webhook not found" }, { status: 404 }) } as const;
+		return { error: NextResponse.json({ error: "Webhook no encontrado" }, { status: 404 }) } as const;
 	}
 	return { env, db, user, hook, error: null } as const;
 }

@@ -65,7 +65,7 @@ export function RegisterClient() {
         if (!active) return;
         setMxChecking(false);
         if (!ok || data.hasExistingMx === undefined) {
-          setError(typeof data.error === "string" ? data.error : "Could not check existing MX records");
+          setError(typeof data.error === "string" ? data.error : "No se pudieron comprobar los registros MX existentes");
           return;
         }
         setMxRecordsExist(data.hasExistingMx);
@@ -73,7 +73,7 @@ export function RegisterClient() {
       .catch((error: unknown) => {
         if (!active) return;
         setMxChecking(false);
-        setError(error instanceof Error ? error.message : "Could not check existing MX records");
+        setError(error instanceof Error ? error.message : "No se pudieron comprobar los registros MX existentes");
       });
 
     return () => {
@@ -91,7 +91,7 @@ export function RegisterClient() {
       setChecks(preparation.data.checks ?? []);
       setDatabaseMigrated(!!preparation.data.migrated);
       if (!preparation.ok) {
-        setError(preparation.data.error ?? "Complete the missing configuration before continuing.");
+        setError(preparation.data.error ?? "Completa la configuración pendiente antes de continuar.");
         return;
       }
 
@@ -102,7 +102,7 @@ export function RegisterClient() {
       setPrimaryDomainSendingRequested(data.primaryDomain?.sendingRequested ?? null);
       setPreparationComplete(true);
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Installation preparation failed");
+      setError(error instanceof Error ? error.message : "No se pudo preparar la instalación");
     } finally {
       setLoading(false);
     }
@@ -122,7 +122,7 @@ export function RegisterClient() {
     setLoading(false);
     if (!ok || !data.domain) {
       setError(
-        typeof data.error === "string" ? data.error : "Domain setup failed",
+        typeof data.error === "string" ? data.error : "No se pudo configurar el dominio",
       );
       return;
     }
@@ -142,7 +142,7 @@ export function RegisterClient() {
     if (!ok || !data.domain) {
       setDomainCheck(null);
       setEnableSending(false);
-      setError(typeof data.error === "string" ? data.error : "Domain check failed");
+      setError(typeof data.error === "string" ? data.error : "No se pudo comprobar el dominio");
       return;
     }
 
@@ -159,7 +159,7 @@ export function RegisterClient() {
     const domain = setupDomain ?? primaryDomain;
     if (!domain) {
       setLoading(false);
-      setError("Domain setup is not complete");
+      setError("La configuración del dominio no está completa");
       return;
     }
 
@@ -181,7 +181,7 @@ export function RegisterClient() {
         return;
       }
       setError(
-        typeof data.error === "string" ? data.error : "Registration failed",
+        typeof data.error === "string" ? data.error : "No se pudo completar el registro",
       );
       setTurnstileReset((value) => value + 1);
       return;
@@ -195,27 +195,27 @@ export function RegisterClient() {
     return (
       <AuthShell
         icon={MailPlus}
-        title="Account registration is closed"
+        title="El registro de cuentas está cerrado"
         footer={
           <Link
             href="/login"
             className="inline-flex items-center gap-2 hover:underline"
           >
-            Sign in instead
+            Iniciar sesión en su lugar
             <ArrowRight className="h-4 w-4" />
           </Link>
         }
       >
         <div className="space-y-5">
           <p className="text-sm leading-6 text-neutral-600">
-            This installation already has an account for {primaryDomain ?? "this workspace"}.
+            Esta instalación ya tiene una cuenta para {primaryDomain ?? "este espacio de trabajo"}.
           </p>
           <Button
             type="button"
             className="h-11 w-full rounded-full px-6 active:scale-[0.98]"
             onClick={() => router.push("/login")}
           >
-            Go to login
+            Ir al inicio de sesión
           </Button>
         </div>
       </AuthShell>
@@ -225,7 +225,7 @@ export function RegisterClient() {
   return (
     <AuthShell
       icon={MailPlus}
-      title={step === 1 ? "Prepare installation" : showDomainStep ? "Add your domain" : "Create your mailbox"}
+      title={step === 1 ? "Preparar instalación" : showDomainStep ? "Agrega tu dominio" : "Crea tu buzón"}
       // description={
       // 	showDomainStep
       // 		? "Connect the primary Cloudflare zone first so routing records can be created before the first mailbox."
@@ -233,22 +233,22 @@ export function RegisterClient() {
       // }
       steps={
         [
-          { label: "System", active: step === 1 },
-          { label: "Domain", active: step === 2 },
-          { label: "Account", active: step === 3 },
+          { label: "Sistema", active: step === 1 },
+          { label: "Dominio", active: step === 2 },
+          { label: "Cuenta", active: step === 3 },
         ]
       }
     >
       {step === 1 ? (
         <div className="space-y-5">
           <p className="text-sm leading-6 text-neutral-600">
-            Mailflare checks its required Cloudflare configuration and initializes a clean D1 database before setup continues.
+            Mailflare comprueba la configuración necesaria de Cloudflare e inicializa una base de datos D1 limpia antes de continuar.
           </p>
           <div className="space-y-2">
             {loading && checks.length === 0 && (
               <div className="flex items-center gap-3 rounded-2xl bg-neutral-50 px-4 py-3 text-sm text-neutral-600">
                 <LoaderCircle className="h-4 w-4 animate-spin" />
-                Checking installation
+                Comprobando la instalación
               </div>
             )}
             {checks.map((check) => (
@@ -267,7 +267,7 @@ export function RegisterClient() {
             {preparationComplete && (
               <div className="flex items-center gap-3 rounded-2xl bg-green-50 px-4 py-3 text-sm text-green-700">
                 <CheckCircle2 className="h-4 w-4" />
-                {databaseMigrated ? "Clean database migrated successfully" : "Database schema is ready"}
+                {databaseMigrated ? "La base de datos limpia se migró correctamente" : "El esquema de la base de datos está listo"}
               </div>
             )}
           </div>
@@ -282,7 +282,7 @@ export function RegisterClient() {
               className="h-11 w-full rounded-full px-6 active:scale-[0.98]"
               onClick={() => setStep(hasPrimaryDomain ? 3 : 2)}
             >
-              Continue
+              Continuar
             </Button>
           ) : (
             <Button
@@ -292,14 +292,14 @@ export function RegisterClient() {
               disabled={loading}
               onClick={() => void runPreparation()}
             >
-              {loading ? "Checking..." : "Check again"}
+              {loading ? "Comprobando..." : "Comprobar de nuevo"}
             </Button>
           )}
         </div>
       ) : showDomainStep ? (
         <form method="post" onSubmit={onDomainSubmit} className="space-y-5">
           <div className="space-y-2">
-            <Label htmlFor="domain">Primary domain</Label>
+            <Label htmlFor="domain">Dominio principal</Label>
             <Input
               id="domain"
               name="domain"
@@ -315,20 +315,20 @@ export function RegisterClient() {
               }}
             />
             <p className="text-xs leading-5 text-neutral-500">
-              The domain must already be a Cloudflare zone on this account.
+              El dominio ya debe ser una zona de Cloudflare en esta cuenta.
             </p>
           </div>
           <div className="flex items-center justify-between gap-4 rounded-2xl bg-neutral-50 px-4 py-3">
             <div>
-              <Label htmlFor="setup-enable-sending">Enable sending</Label>
+              <Label htmlFor="setup-enable-sending">Activar envío</Label>
               <p className="mt-1 text-xs leading-5 text-neutral-500">
                 {domainChecking
-                  ? "Checking Cloudflare access..."
+                  ? "Comprobando el acceso a Cloudflare..."
                   : domainCheck
                     ? enableSending
-                      ? "Required to send email."
-                      : "Receive-only mode."
-                    : "Enter the domain and leave the field to verify it."}
+                      ? "Necesario para enviar correos."
+                      : "Modo de solo recepción."
+                    : "Ingresa el dominio y sal del campo para verificarlo."}
               </p>
             </div>
             <Switch
@@ -341,7 +341,7 @@ export function RegisterClient() {
           {domainCheck && (
             <div className="flex items-center gap-3 rounded-2xl bg-green-50 px-4 py-3 text-sm text-green-700">
               <CheckCircle2 className="h-4 w-4" />
-              Domain found in Cloudflare as {domainCheck.zone.name}
+              Dominio encontrado en Cloudflare como {domainCheck.zone.name}
             </div>
           )}
           {error && (
@@ -354,7 +354,7 @@ export function RegisterClient() {
             className="h-11 w-full rounded-full px-6 active:scale-[0.98]"
             disabled={loading || domainChecking}
           >
-            {loading ? "Adding domain..." : "Continue"}
+            {loading ? "Agregando dominio..." : "Continuar"}
           </Button>
         </form>
       ) : (
@@ -362,13 +362,13 @@ export function RegisterClient() {
 					{mxChecking && (
 						<div className="flex items-center gap-3 rounded-2xl bg-neutral-50 px-4 py-3 text-sm text-neutral-600">
 							<LoaderCircle className="h-4 w-4 animate-spin" />
-							Checking existing MX records
+							Comprobando los registros MX existentes
 						</div>
 					)}
 					{mxRecordsExist === false && (
 						<div className="flex items-center gap-3 rounded-2xl bg-green-50 px-4 py-3 text-sm text-green-700">
 							<CheckCircle2 className="h-4 w-4" />
-							No existing MX records found
+							No se encontraron registros MX existentes
 						</div>
 					)}
 					{mxRecordsExist === true && (
@@ -381,16 +381,16 @@ export function RegisterClient() {
 							<span>
 								<span className="flex items-center gap-2 text-sm font-medium">
 									<AlertTriangle className="h-4 w-4" />
-									Replace existing MX records
+									Reemplazar los registros MX existentes
 								</span>
 								<span className="mt-1 block text-xs leading-5">
-									This deletes the current mail provider's MX records and replaces them with Cloudflare Email Routing. The previous provider will stop receiving mail.
+									Esto elimina los registros MX del proveedor de correo actual y los reemplaza con Cloudflare Email Routing. El proveedor anterior dejará de recibir correo.
 								</span>
 							</span>
 						</label>
 					)}
           <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
+            <Label htmlFor="username">Nombre de usuario</Label>
             <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 relative">
               <Input
                 id="username"
@@ -406,7 +406,7 @@ export function RegisterClient() {
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">Contraseña</Label>
             <Input
               id="password"
               name="password"
@@ -418,7 +418,7 @@ export function RegisterClient() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="resetEmail">Recovery email</Label>
+            <Label htmlFor="resetEmail">Correo de recuperación</Label>
             <Input
               id="resetEmail"
               name="resetEmail"
@@ -441,7 +441,7 @@ export function RegisterClient() {
 							className="h-11 w-full rounded-full px-6 active:scale-[0.98]"
 							onClick={() => setMxCheckRevision((value) => value + 1)}
 						>
-							Check MX records again
+							Comprobar de nuevo los registros MX
 						</Button>
 					)}
           <TurnstileField resetSignal={turnstileReset} />
@@ -450,7 +450,7 @@ export function RegisterClient() {
 						className="h-11 w-full rounded-full px-6 active:scale-[0.98] mt-8"
 						disabled={loading || mxChecking || mxRecordsExist === null || (mxRecordsExist && !replaceMxRecords) || hasAdminAccount === null || hasPrimaryDomain === null}
 					>
-						{loading ? "Creating..." : "Create account"}
+						{loading ? "Creando..." : "Crear cuenta"}
 					</Button>
         </form>
       )}

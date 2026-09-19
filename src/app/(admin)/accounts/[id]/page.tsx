@@ -78,7 +78,7 @@ export default function AccountDetailsPage() {
 					</Label>
 				</div>
 				<div className="space-y-2">
-					<Label htmlFor="account-email">Email</Label>
+					<Label htmlFor="account-email">Correo electrónico</Label>
 					<Input id="account-email" value={account.email} readOnly className="bg-neutral-50 text-neutral-500" />
 				</div>
 				<div className="space-y-2">
@@ -118,7 +118,7 @@ export default function AccountDetailsPage() {
 					Account enabled
 				</label>
 				<Button onClick={() => void saveDetails()} disabled={saving || !account.name.trim()}>
-					{saving ? "Saving..." : "Save details"}
+					{saving ? "Guardando..." : "Save details"}
 				</Button>
 			</section>
 			{message && <p className="text-sm text-neutral-500">{message}</p>}

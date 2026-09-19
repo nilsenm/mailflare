@@ -26,7 +26,7 @@ export async function authorizeAdminRequest(request: Request) {
     user = await requireUser(env, request);
   } catch {
     return {
-      error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
+      error: NextResponse.json({ error: "No autorizado" }, { status: 401 }),
     };
   }
 
@@ -34,7 +34,7 @@ export async function authorizeAdminRequest(request: Request) {
     assertAdmin(user);
   } catch {
     return {
-      error: NextResponse.json({ error: "Forbidden" }, { status: 403 }),
+      error: NextResponse.json({ error: "Prohibido" }, { status: 403 }),
     };
   }
 
@@ -93,7 +93,7 @@ async function githubRequest<T>(
 
   console.log(`[gg]`, `${GITHUB_API_URL}${path}`);
 
-  if (response.statusText === "Forbidden") {
+  if (response.statusText === "Prohibido") {
     return {
       response,
       data: { error: response.statusText } as any,

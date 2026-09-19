@@ -17,12 +17,12 @@ export async function POST(request: Request) {
 	if (!secret) return NextResponse.json({ error: "INBOUND_WEBHOOK_SECRET is not configured" }, { status: 503 });
 
 	const raw = await request.arrayBuffer();
-	if (raw.byteLength > 25 * 1024 * 1024) return NextResponse.json({ error: "Message too large" }, { status: 413 });
+	if (raw.byteLength > 25 * 1024 * 1024) return NextResponse.json({ error: "El mensaje es demasiado grande" }, { status: 413 });
 	const from = request.headers.get("x-mailflare-from") ?? "";
 	const to = request.headers.get("x-mailflare-to") ?? "";
 	const signature = request.headers.get("x-mailflare-signature") ?? "";
 	if (!from || !to || !(await verifyInboundSignature(secret, signature, raw, from, to))) {
-		return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+		return NextResponse.json({ error: "Firma no válida" }, { status: 401 });
 	}
 
 	let headers: Record<string, string> = {};

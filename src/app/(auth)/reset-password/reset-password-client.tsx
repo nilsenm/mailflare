@@ -21,7 +21,7 @@ export function ResetPasswordClient() {
 	async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		if (password !== confirm) {
-			setError("Passwords do not match");
+			setError("Las contraseñas no coinciden");
 			return;
 		}
 		setLoading(true);
@@ -29,12 +29,12 @@ export function ResetPasswordClient() {
 		try {
 			const result = await confirmPasswordReset(token, password);
 			if (!result.ok) {
-				setError(result.error ?? "Could not reset the password");
+				setError(result.error ?? "No se pudo restablecer la contraseña");
 				return;
 			}
 			setDone(true);
 		} catch {
-			setError("Unable to reach the server. Please try again.");
+			setError("No se pudo conectar con el servidor. Inténtalo de nuevo.");
 		} finally {
 			setLoading(false);
 		}
@@ -42,9 +42,9 @@ export function ResetPasswordClient() {
 
 	if (!token) {
 		return (
-			<AuthShell icon={LockKeyhole} title="Reset link missing" description="Open the link from the reset email to choose a new password.">
+			<AuthShell icon={LockKeyhole} title="Falta el enlace de restablecimiento" description="Abre el enlace del correo de restablecimiento para elegir una contraseña nueva.">
 				<Link href="/forgot-password" className="text-sm text-blue-600 hover:underline">
-					Request a new link
+					Solicitar un enlace nuevo
 				</Link>
 			</AuthShell>
 		);
@@ -53,16 +53,16 @@ export function ResetPasswordClient() {
 	return (
 		<AuthShell
 			icon={LockKeyhole}
-			title={done ? "Password updated" : "Choose a new password"}
+			title={done ? "Contraseña actualizada" : "Elige una contraseña nueva"}
 			description={
 				done
-					? "You have been signed out everywhere. Sign in with your new password to continue."
-					: "Use at least 8 characters. Every other session for this account will be signed out."
+					? "Se cerró tu sesión en todos los dispositivos. Inicia sesión con tu contraseña nueva para continuar."
+					: "Usa al menos 8 caracteres. Se cerrarán las demás sesiones de esta cuenta."
 			}
 			footer={
 				done ? (
 					<Link href="/login" className="text-sm font-medium text-blue-600 hover:underline">
-						Go to sign in
+						Ir a iniciar sesión
 					</Link>
 				) : undefined
 			}
@@ -70,7 +70,7 @@ export function ResetPasswordClient() {
 			{!done && (
 				<form onSubmit={onSubmit} className="space-y-5">
 					<div className="space-y-2">
-						<Label htmlFor="password">New password</Label>
+						<Label htmlFor="password">Contraseña nueva</Label>
 						<Input
 							id="password"
 							type="password"
@@ -83,7 +83,7 @@ export function ResetPasswordClient() {
 						/>
 					</div>
 					<div className="space-y-2">
-						<Label htmlFor="confirm">Confirm new password</Label>
+						<Label htmlFor="confirm">Confirma la contraseña nueva</Label>
 						<Input
 							id="confirm"
 							type="password"
@@ -98,7 +98,7 @@ export function ResetPasswordClient() {
 						<p className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{error}</p>
 					)}
 					<Button type="submit" className="h-11 w-full rounded-full px-6 active:scale-[0.98]" disabled={loading}>
-						{loading ? "Saving..." : "Set new password"}
+						{loading ? "Guardando..." : "Establecer contraseña nueva"}
 					</Button>
 				</form>
 			)}

@@ -140,13 +140,13 @@ export function ThreadMessageActions({
 					<Star className={starred ? "h-4 w-4 fill-amber-400 text-amber-400" : "h-4 w-4"} />
 				</Button>
 			</Tooltip>
-			<Tooltip label="Reply">
+			<Tooltip label="Responder">
 				<Button
 					type="button"
 					variant="ghost"
 					size="sm"
 					className="h-8 w-8 px-0"
-					aria-label="Reply"
+					aria-label="Responder"
 					disabled={pending}
 					onClick={() => void onReply("reply")}
 				>
@@ -171,20 +171,20 @@ export function ThreadMessageActions({
 				{moreOpen && (
 					<div className="absolute right-0 z-30 mt-1 w-56 rounded-xl border border-neutral-200 bg-white p-2 text-neutral-700 shadow-lg">
 						<button type="button" className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-neutral-100" onClick={() => void onReply("reply")}>
-							<Reply className="h-4 w-4" /> Reply
+							<Reply className="h-4 w-4" /> Responder
 						</button>
 						{canReplyAll && (
 							<button type="button" className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-neutral-100" onClick={() => void onReply("replyAll")}>
-								<ReplyAll className="h-4 w-4" /> Reply all
+								<ReplyAll className="h-4 w-4" /> Responder a todos
 							</button>
 						)}
 						<button type="button" className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-neutral-100" onClick={() => void onForward()}>
-							<Forward className="h-4 w-4" /> Forward
+							<Forward className="h-4 w-4" /> Reenviar
 						</button>
 						<hr className="my-1 border-neutral-100" />
 						<button type="button" className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-neutral-100" onClick={() => void onMessageAction(message.read ? "unread" : "read")}>
 							{message.read ? <Mail className="h-4 w-4" /> : <MailOpen className="h-4 w-4" />}
-							{message.read ? "Mark as unread" : "Mark as read"}
+							{message.read ? "Marcar como no leído" : "Marcar como leído"}
 						</button>
 						{moveActions.map((item) => (
 							<button key={item.action} type="button" className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-neutral-100" onClick={() => void onMessageAction(item.action)}>

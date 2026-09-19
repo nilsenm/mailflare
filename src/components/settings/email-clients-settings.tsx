@@ -45,7 +45,7 @@ export function EmailClientsSettings() {
 			{key ? (
 				<div className="space-y-3 rounded-2xl bg-neutral-50 p-4">
 					<Field label="Server" value={server} onCopy={copy} copied={copied} />
-					<Field label="Username" value="any value" onCopy={copy} copied={copied} />
+					<Field label="Nombre de usuario" value="any value" onCopy={copy} copied={copied} />
 					<Field label="Password (API key)" value={key} onCopy={copy} copied={copied} mono />
 					<p className="text-xs text-neutral-500">
 						This key is shown once. It can be revoked from the API keys page. Session discovery is at <code>{server}/.well-known/jmap</code>.
@@ -59,7 +59,7 @@ export function EmailClientsSettings() {
 					</div>
 					<Button type="submit" disabled={busy}>
 						<KeyRound className="h-4 w-4" />
-						{busy ? "Creating..." : "Create app password"}
+						{busy ? "Creando..." : "Create app password"}
 					</Button>
 					{error && <p className="w-full text-sm text-red-600">{error}</p>}
 				</form>

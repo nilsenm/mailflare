@@ -79,7 +79,7 @@ export default function HomePage() {
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Button size="lg" asChild className="rounded-full px-6">
                 <Link href={actions.at(-1)?.href ?? "/setup"}>
-                  {hasUser ? "Open dashboard" : "Create account"}
+                  {hasUser ? "Abrir panel" : "Crear cuenta"}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
@@ -90,7 +90,7 @@ export default function HomePage() {
                 className="rounded-full border-neutral-200 bg-white px-6"
               >
                 <Link href={hasUser ? "/inbox" : "/login"}>
-                  {hasUser ? "View inbox" : "Log in"}
+                  {hasUser ? "Ver bandeja de entrada" : "Log in"}
                 </Link>
               </Button>
             </div>
@@ -105,7 +105,7 @@ export default function HomePage() {
                 </div>
                 <div className="mb-3 flex h-12 w-fit items-center gap-2 rounded-2xl bg-blue-100 px-5 text-sm font-semibold text-blue-950 shadow-sm">
                   <Mail className="h-4 w-4" />
-                  Compose
+                  Redactar
                 </div>
                 {sidebarItems.map((item) => {
                   const Icon = item.icon;

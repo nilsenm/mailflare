@@ -58,7 +58,7 @@ export async function POST(request: Request) {
 		body = await readJsonBody(request, 16 * 1024);
 	} catch (error) {
 		const status = error instanceof RequestBodyTooLargeError ? 413 : 400;
-		return NextResponse.json({ error: "Invalid webhook request" }, { status });
+		return NextResponse.json({ error: "Solicitud de webhook no válida" }, { status });
 	}
 	const parsed = webhookSchema.safeParse(body);
 	if (!parsed.success) {

@@ -15,7 +15,7 @@ export async function POST(request: Request) {
 
 	try {
 		const { licenseKey, plan } = await parseLicenseKeyRequest(request);
-		if (!plan) return NextResponse.json({ error: "Choose Pro or Team" }, { status: 400 });
+		if (!plan) return NextResponse.json({ error: "Elige Pro o Team" }, { status: 400 });
 		const license = await activateLicense(env, licenseKey, getLicenseInstanceUrl(request), plan);
 		return NextResponse.json({ license });
 	} catch (error) {

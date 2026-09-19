@@ -131,7 +131,7 @@ export function ShortcutsProvider({
         category: "Navigation",
         action: () => {
           const searchInput = document.querySelector<HTMLInputElement>(
-            'input[placeholder*="Search"]'
+            'input[placeholder*="Buscar"]'
           );
           if (searchInput) {
             searchInput.focus();
@@ -282,7 +282,7 @@ export function ShortcutsProvider({
         id: "settings-account",
         title: "Account Settings",
         subtitle: "Profile, password & preferences",
-        category: "Settings",
+        category: "Ajustes",
         icon: Settings,
         perform: () => router.push("/settings/account"),
       },

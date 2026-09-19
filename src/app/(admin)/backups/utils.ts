@@ -67,7 +67,7 @@ export async function downloadBackup(backup: BackupItem): Promise<void> {
 
 export function formatBackupDate(value: string | null): string {
 	if (!value) return "-";
-	return new Intl.DateTimeFormat(undefined, {
+	return new Intl.DateTimeFormat("es-PE", {
 		dateStyle: "medium",
 		timeStyle: "short",
 	}).format(new Date(value));

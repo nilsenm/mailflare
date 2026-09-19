@@ -116,7 +116,7 @@ export function ContactDetailsTrigger({
 							/>
 						</div>
 						<div className="space-y-2">
-							<Label htmlFor="contact-email">Email</Label>
+							<Label htmlFor="contact-email">Correo electrónico</Label>
 							<Input
 								id="contact-email"
 								value={contact?.email ?? address}
@@ -126,7 +126,7 @@ export function ContactDetailsTrigger({
 						<div className="grid gap-3 rounded-lg bg-neutral-50 p-3 text-sm sm:grid-cols-2">
 							<div>
 								<p className="text-xs font-medium uppercase text-neutral-400">Source</p>
-								<p className="mt-1 capitalize text-neutral-700">{contact?.source ?? "Email"}</p>
+								<p className="mt-1 capitalize text-neutral-700">{contact?.source ?? "Correo electrónico"}</p>
 							</div>
 							<div>
 								<p className="text-xs font-medium uppercase text-neutral-400">Last seen</p>
@@ -144,7 +144,7 @@ export function ContactDetailsTrigger({
 							onClick={saveContact}
 							disabled={loading || saving || !displayName.trim()}
 						>
-							{saving ? "Saving..." : "Save contact"}
+							{saving ? "Guardando..." : "Save contact"}
 						</Button>
 					</div>
 				</DialogContent>

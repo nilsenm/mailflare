@@ -85,7 +85,7 @@ export function formatTimestamp(value: string | number | null | undefined): stri
 	const numeric = typeof value === "number" ? value : Date.parse(String(value));
 	if (!Number.isFinite(numeric)) return "—";
 	const ms = numeric < 1e12 ? numeric * 1000 : numeric;
-	return new Date(ms).toLocaleString();
+	return new Date(ms).toLocaleString("es-PE");
 }
 
 export function formatDuration(ms: number | null): string {

@@ -44,7 +44,7 @@ export async function POST(request: Request) {
 		input = await readJsonBody<DraftPayload>(request, 1024 * 1024);
 	} catch (error) {
 		const status = error instanceof RequestBodyTooLargeError ? 413 : 400;
-		return NextResponse.json({ error: "Invalid draft request" }, { status });
+		return NextResponse.json({ error: "Solicitud de borrador no válida" }, { status });
 	}
 	const db = getDb(env);
 	const sender = await getDraftSender(env, user.id, input);
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
 			.limit(1);
 		const sourceAccess = source?.mailboxId ? await getMailboxAccessLevel(db, user, source.mailboxId) : null;
 		if (!source || !sourceAccess?.canRead) {
-			return NextResponse.json({ error: "Message not found" }, { status: 404 });
+			return NextResponse.json({ error: "Mensaje no encontrado" }, { status: 404 });
 		}
 		forwardSourceId = source.id;
 	}

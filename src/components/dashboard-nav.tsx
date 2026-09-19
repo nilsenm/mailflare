@@ -48,12 +48,12 @@ import { SidebarHeader } from "./sidebar-header";
 import { useSidebar } from "./sidebar-state";
 
 const links = [
-  { href: "/compose", label: "Compose", icon: MailPlus, primary: true },
-  { href: "/inbox", label: "Inbox", icon: Inbox, preloadMessages: true },
-  { href: "/starred", label: "Starred", icon: Star, preloadMessages: true },
-  { href: "/snoozed", label: "Snoozed", icon: Clock, preloadMessages: true },
-  { href: "/sent", label: "Sent", icon: Send, preloadMessages: true },
-  { href: "/drafts", label: "Drafts", icon: FileText, preloadMessages: true },
+  { href: "/compose", label: "Redactar", icon: MailPlus, primary: true },
+  { href: "/inbox", label: "Bandeja de entrada", icon: Inbox, preloadMessages: true },
+  { href: "/starred", label: "Destacados", icon: Star, preloadMessages: true },
+  { href: "/snoozed", label: "Pospuestos", icon: Clock, preloadMessages: true },
+  { href: "/sent", label: "Enviados", icon: Send, preloadMessages: true },
+  { href: "/drafts", label: "Borradores", icon: FileText, preloadMessages: true },
   {
     href: "/archived",
     label: "Archived",
@@ -61,7 +61,7 @@ const links = [
     preloadMessages: true,
   },
   { href: "/spam", label: "Spam", icon: ShieldAlert, preloadMessages: true },
-  { href: "/trash", label: "Trash", icon: Trash2, preloadMessages: true },
+  { href: "/trash", label: "Papelera", icon: Trash2, preloadMessages: true },
 ];
 
 export function DashboardNav({ className }: { className?: string }) {
@@ -186,14 +186,14 @@ export function DashboardNav({ className }: { className?: string }) {
                 <button
                   type="button"
                   className="flex h-7 w-7 items-center justify-center rounded-lg text-neutral-500 hover:bg-blue-50 hover:text-blue-700"
-                  aria-label="Create folder"
+                  aria-label="Crear carpeta"
                 >
                   <Plus className="h-4 w-4" />
                 </button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Create folder</DialogTitle>
+                  <DialogTitle>Crear carpeta</DialogTitle>
                   <DialogDescription>
                     Add a folder to the selected mailbox.
                   </DialogDescription>
@@ -214,7 +214,7 @@ export function DashboardNav({ className }: { className?: string }) {
                     <div
                       className="flex flex-wrap gap-2"
                       role="radiogroup"
-                      aria-label="Folder color"
+                      aria-label="Color de la carpeta"
                     >
                       {FOLDER_COLOR_OPTIONS.map((option) => (
                         <button
@@ -239,7 +239,7 @@ export function DashboardNav({ className }: { className?: string }) {
                     type="submit"
                     disabled={addingFolder || !newFolderName.trim()}
                   >
-                    {addingFolder ? "Creating..." : "Create folder"}
+                    {addingFolder ? "Creando..." : "Crear carpeta"}
                   </Button>
                 </form>
               </DialogContent>

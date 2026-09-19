@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 const accountsRemovedResponse = () =>
-	NextResponse.json({ error: "Multiple accounts are not available in this build" }, { status: 410 });
+	NextResponse.json({ error: "Esta versión no permite varias cuentas" }, { status: 410 });
 
 export async function GET() {
 	return accountsRemovedResponse();

@@ -13,17 +13,17 @@ export async function POST(
 	const env = getEnv();
 	const user = await getCurrentUser(env, request);
 	if (!user) {
-		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+		return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 	}
 
 	const payload = (await request.json()) as MessageStatusPayload;
 	if (!isAllowedMessageStatus(payload.status)) {
-		return NextResponse.json({ error: "Invalid message status" }, { status: 400 });
+		return NextResponse.json({ error: "Estado de mensaje no válido" }, { status: 400 });
 	}
 
 	const success = await updateMessageStatusForUser(env, user, messageId, payload.status);
 	if (!success) {
-		return NextResponse.json({ error: "Message not found" }, { status: 404 });
+		return NextResponse.json({ error: "Mensaje no encontrado" }, { status: 404 });
 	}
 
 	return NextResponse.json({ success: true });

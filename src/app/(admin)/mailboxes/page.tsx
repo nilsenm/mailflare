@@ -143,13 +143,13 @@ export default function MailboxesPage() {
 										className="flex h-10 w-full rounded-md border border-neutral-200 bg-white px-3 text-sm shadow-sm shadow-neutral-200/50 focus-visible:border-blue-600 focus-visible:outline-none"
 									>
 										<option value="personal">Personal inbox</option>
-										<option value="shared">Shared inbox</option>
+										<option value="shared">Buzón compartido</option>
 									</Select>
 								</div>
 							)}
 							{mailboxType === "personal" ? (
 							<div className="space-y-2">
-								<Label htmlFor="mailbox-owner">Account</Label>
+								<Label htmlFor="mailbox-owner">Cuenta</Label>
 								<Select
 									id="mailbox-owner"
 									value={ownerUserId}
@@ -193,7 +193,7 @@ export default function MailboxesPage() {
 									/>
 									<span className="flex items-center text-sm text-neutral-400">@</span>
 									<Select
-										aria-label="Domain"
+										aria-label="Dominio"
 										className="min-w-0 max-w-[55%] bg-transparent px-3 text-sm text-neutral-700 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
 										value={domainId}
 										onChange={(event) => setDomainId(event.target.value)}
@@ -214,7 +214,7 @@ export default function MailboxesPage() {
 								onClick={() => create.mutate()}
 								disabled={(mailboxType === "personal" && !ownerUserId) || !displayName.trim() || !domainId || !localPart || create.isPending}
 							>
-								{create.isPending ? "Creating..." : "Create mailbox"}
+								{create.isPending ? "Creando..." : "Create mailbox"}
 							</Button>
 						</div>
 					</DialogContent>

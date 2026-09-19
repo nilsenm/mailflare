@@ -24,7 +24,7 @@ export function NewMessagePopup({
 						New email
 					</p>
 					<p className="mt-0.5 truncate text-sm text-neutral-800">
-						{notification.subject || "(no subject)"}
+						{notification.subject || "(sin asunto)"}
 					</p>
 					<p className="mt-1 truncate text-xs text-neutral-500">
 						From {notification.fromName ?? getEmailDisplayName(notification.from)}

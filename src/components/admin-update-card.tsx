@@ -142,7 +142,7 @@ export function AdminUpdateCard() {
 									disabled={isPending}
 									className="ml-auto shrink-0 text-sm font-medium text-blue-700 hover:underline disabled:pointer-events-none disabled:opacity-50"
 								>
-									{isPending ? "Starting update..." : "Update Mailflare"}
+									{isPending ? "Iniciando actualización..." : "Actualizar Mailflare"}
 								</button>
 							)}
 						</div>
@@ -166,7 +166,7 @@ export function AdminUpdateCard() {
 									disabled={isMigrating}
 									className="ml-auto shrink-0 text-sm font-medium text-blue-700 hover:underline disabled:pointer-events-none disabled:opacity-50"
 								>
-									{isMigrating ? "Updating database..." : "Update database"}
+									{isMigrating ? "Actualizando la base de datos..." : "Actualizar base de datos"}
 								</button>
 							</div>
 						)}

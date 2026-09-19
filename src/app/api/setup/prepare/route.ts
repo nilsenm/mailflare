@@ -7,7 +7,7 @@ import { migrateCleanDatabase } from "@/lib/setup/migration";
 export async function POST() {
 	const env = getEnv();
 	if (await hasAdminAccount(env)) {
-		return NextResponse.json({ error: "Initial setup is already complete" }, { status: 403 });
+		return NextResponse.json({ error: "La configuración inicial ya está completa" }, { status: 403 });
 	}
 
 	const checks = getSetupRequirementChecks(env);

@@ -354,7 +354,7 @@ export function DomainRouting({ domain }: DomainRoutingProps = {}) {
 
 						<div className="flex justify-end gap-2 border-t border-neutral-200 pt-4">
 							<Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-								Cancel
+								Cancelar
 							</Button>
 							<Button type="submit" disabled={save.isPending}>
 								{editing ? "Save changes" : "Create rule"}

@@ -18,17 +18,17 @@ export async function POST(request: Request) {
 		input = await parseImportForm(request);
 	} catch (error) {
 		const status = error instanceof RequestBodyTooLargeError ? 413 : 400;
-		return NextResponse.json({ error: "Invalid import upload" }, { status });
+		return NextResponse.json({ error: "Carga de importación no válida" }, { status });
 	}
 
 	if (!input.mailboxId || input.messages.length === 0) {
-		return NextResponse.json({ error: "Select a mailbox and at least one .eml or .mbox file" }, { status: 400 });
+		return NextResponse.json({ error: "Selecciona un buzón y al menos un archivo .eml o .mbox" }, { status: 400 });
 	}
 
 	const db = getDb(env);
 	const access = await getMailboxAccessLevel(db, user, input.mailboxId);
 	if (!access?.canManage) {
-		return NextResponse.json({ error: "Mailbox not found" }, { status: 404 });
+		return NextResponse.json({ error: "Buzón no encontrado" }, { status: 404 });
 	}
 	if (input.destination.type === "folder") {
 		const [folder] = await db
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
 			.where(and(eq(folders.id, input.destination.folderId), eq(folders.mailboxId, access.mailbox.id)))
 			.limit(1);
 		if (!folder) {
-			return NextResponse.json({ error: "Folder not found" }, { status: 404 });
+			return NextResponse.json({ error: "Carpeta no encontrada" }, { status: 404 });
 		}
 	}
 

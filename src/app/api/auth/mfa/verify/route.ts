@@ -20,7 +20,7 @@ export async function POST(request: Request) {
 		body = await readJsonBody(request, 16 * 1024);
 	} catch (error) {
 		const status = error instanceof RequestBodyTooLargeError ? 413 : 400;
-		return NextResponse.json({ error: "Invalid request" }, { status });
+		return NextResponse.json({ error: "Solicitud no válida" }, { status });
 	}
 	const parsed = mfaVerifySchema.safeParse(body);
 	if (!parsed.success) {
@@ -28,21 +28,21 @@ export async function POST(request: Request) {
 	}
 	// Codes are six digits; the login limiter is what stops brute force.
 	if (!(await allowLoginAttempt(env, request))) {
-		return NextResponse.json({ error: "Too many attempts. Try again shortly." }, { status: 429, headers: { "Retry-After": "60" } });
+		return NextResponse.json({ error: "Demasiados intentos. Inténtalo de nuevo en unos minutos." }, { status: 429, headers: { "Retry-After": "60" } });
 	}
 
 	const userId = await getLoginChallengeUserId(env, parsed.data.challengeToken);
 	if (!userId) {
-		return NextResponse.json({ error: "This sign-in attempt has expired. Start again." }, { status: 401 });
+		return NextResponse.json({ error: "Este intento de inicio de sesión venció. Empieza de nuevo." }, { status: 401 });
 	}
 	const db = getDb(env);
 	const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
 	if (!user || user.disabled) {
-		return NextResponse.json({ error: "Account disabled" }, { status: 403 });
+		return NextResponse.json({ error: "Cuenta desactivada" }, { status: 403 });
 	}
 	const method = await verifySecondFactor(env, user, parsed.data.code);
 	if (!method) {
-		return NextResponse.json({ error: "That code did not match" }, { status: 401 });
+		return NextResponse.json({ error: "Ese código no coincide" }, { status: 401 });
 	}
 
 	await consumeLoginChallenge(env, parsed.data.challengeToken);

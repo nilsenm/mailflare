@@ -39,7 +39,7 @@ function loadTurnstileScript(): Promise<void> {
 			script.dataset.loaded = "true";
 			resolve();
 		});
-		script.addEventListener("error", () => reject(new Error("Turnstile failed to load")));
+		script.addEventListener("error", () => reject(new Error("No se pudo cargar Turnstile")));
 		document.head.appendChild(script);
 	});
 }

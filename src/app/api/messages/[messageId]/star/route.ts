@@ -13,7 +13,7 @@ export async function POST(
 	const { messageId } = await params;
 	const env = getEnv();
 	const user = await getCurrentUser(env, _request);
-	if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+	if (!user) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
 	const db = getDb(env);
 	const [message] = await db
@@ -21,10 +21,10 @@ export async function POST(
 		.from(messages)
 		.where(eq(messages.id, messageId))
 		.limit(1);
-	if (!message?.mailboxId) return NextResponse.json({ error: "Message not found" }, { status: 404 });
+	if (!message?.mailboxId) return NextResponse.json({ error: "Mensaje no encontrado" }, { status: 404 });
 
 	const access = await getMailboxAccessLevel(db, user, message.mailboxId);
-	if (!access?.canRead) return NextResponse.json({ error: "Message not found" }, { status: 404 });
+	if (!access?.canRead) return NextResponse.json({ error: "Mensaje no encontrado" }, { status: 404 });
 
 	const starred = !message.starred;
 	await db.update(messages).set({ starred }).where(eq(messages.id, message.id));

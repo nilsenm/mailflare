@@ -13,7 +13,7 @@ export async function GET(request: Request) {
 	try {
 		assertAdmin(admin);
 	} catch {
-		return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+		return NextResponse.json({ error: "Prohibido" }, { status: 403 });
 	}
 
 	const url = new URL(request.url);

@@ -18,17 +18,17 @@ export async function POST(request: Request) {
 		body = await readJsonBody(request, 16 * 1024);
 	} catch (error) {
 		const status = error instanceof RequestBodyTooLargeError ? 413 : 400;
-		return NextResponse.json({ error: "Invalid request" }, { status });
+		return NextResponse.json({ error: "Solicitud no válida" }, { status });
 	}
 	const parsed = passwordResetRequestSchema.safeParse(body);
 	if (!parsed.success) {
-		return NextResponse.json({ error: "Enter the email address you sign in with" }, { status: 400 });
+		return NextResponse.json({ error: "Ingresa la dirección de correo con la que inicias sesión" }, { status: 400 });
 	}
 	if (!(await allowLoginAttempt(env, request))) {
-		return NextResponse.json({ error: "Too many attempts. Try again shortly." }, { status: 429, headers: { "Retry-After": "60" } });
+		return NextResponse.json({ error: "Demasiados intentos. Inténtalo de nuevo en unos minutos." }, { status: 429, headers: { "Retry-After": "60" } });
 	}
 	if (!(await verifyTurnstileToken(env, request, (body as Record<string, unknown>).turnstileToken))) {
-		return NextResponse.json({ error: "Verification failed. Please try again." }, { status: 400 });
+		return NextResponse.json({ error: "La verificación falló. Inténtalo de nuevo." }, { status: 400 });
 	}
 
 	const origin = env.APP_URL?.trim() || new URL(request.url).origin;

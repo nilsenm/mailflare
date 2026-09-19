@@ -118,7 +118,7 @@ export default function MailboxSettingsPage() {
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <h1 className="truncate text-3xl font-medium text-neutral-900">
-            Settings
+            Ajustes
           </h1>
           {address ? (
             <p className="mt-1 truncate no-font-mono text-sm text-neutral-500">
@@ -148,7 +148,7 @@ export default function MailboxSettingsPage() {
 
       <Card className="rounded-3xl border-0 bg-white p-6">
         <CardHeader className="py-0">
-          <CardTitle>Account</CardTitle>
+          <CardTitle>Cuenta</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 pt-5">
           {mailbox.data ? (
@@ -199,7 +199,7 @@ export default function MailboxSettingsPage() {
             disabled={mailbox.isLoading || updateName.isPending}
           >
             <Save className="h-4 w-4" />
-            {updateName.isPending ? "Saving..." : "Save changes"}
+            {updateName.isPending ? "Guardando..." : "Save changes"}
           </Button>
         </CardContent>
       </Card>
@@ -275,7 +275,7 @@ export default function MailboxSettingsPage() {
               onClick={() => addAlias.mutate()}
             >
               <AtSign className="h-4 w-4" />
-              {addAlias.isPending ? "Adding..." : "Add alias"}
+              {addAlias.isPending ? "Agregando..." : "Add alias"}
             </Button>
           </div>
           {addAlias.isError && (
@@ -362,7 +362,7 @@ export default function MailboxSettingsPage() {
                 onClick={() => addMember.mutate()}
               >
                 <UserPlus className="h-4 w-4" />
-                {addMember.isPending ? "Adding..." : "Add user"}
+                {addMember.isPending ? "Agregando..." : "Add user"}
               </Button>
             </div>
             {addMember.isError && (
@@ -423,7 +423,7 @@ export default function MailboxSettingsPage() {
         <CardContent className="grid gap-4 pt-5">
           <div className="space-y-1">
             <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
-              Email
+              Correo electrónico
             </p>
             <p className="truncate no-font-mono text-sm text-neutral-900">
               {address || "-"}
@@ -431,7 +431,7 @@ export default function MailboxSettingsPage() {
           </div>
           <div className="space-y-1">
             <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
-              Username
+              Nombre de usuario
             </p>
             <p className="truncate no-font-mono text-sm text-neutral-900">
               {mailbox.data?.localPart ?? "-"}
@@ -439,7 +439,7 @@ export default function MailboxSettingsPage() {
           </div>
           <div className="space-y-1">
             <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
-              Domain
+              Dominio
             </p>
             <p className="truncate no-font-mono text-sm text-neutral-900">
               {mailbox.data?.hostname ?? "-"}

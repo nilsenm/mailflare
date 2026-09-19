@@ -122,7 +122,7 @@ export default function BackupsPage() {
           </Button>
           <Button onClick={() => runBackup.mutate()} disabled={runBackup.isPending || !backupConfigured}>
             <Play className="h-4 w-4" />
-            {runBackup.isPending ? "Starting..." : "Back up now"}
+            {runBackup.isPending ? "Starting..." : "Crear copia ahora"}
           </Button>
         </div>
       </div>
@@ -172,7 +172,7 @@ export default function BackupsPage() {
                 <RefreshCw
                   className={`h-4 w-4 ${backups.isFetching ? "animate-spin" : ""}`}
                 />
-                Check again
+                Comprobar de nuevo
               </Button>
             </div>
           </CardContent>
@@ -196,9 +196,9 @@ export default function BackupsPage() {
                   onCheckedChange={(enabled) =>
                     setSettings({ ...settings, enabled })
                   }
-                  aria-label="Enable automatic backups"
+                  aria-label="Activar copias de seguridad automáticas"
                 />
-                <span>Enable automatic backups</span>
+                <span>Activar copias de seguridad automáticas</span>
               </div>
 
               {settings.enabled && (
@@ -284,9 +284,9 @@ export default function BackupsPage() {
                             retentionEnabled,
                           })
                         }
-                        aria-label="Delete old backups automatically"
+                        aria-label="Eliminar automáticamente las copias antiguas"
                       />
-                      <span>Delete old backups automatically</span>
+                      <span>Eliminar automáticamente las copias antiguas</span>
                     </div>
 
                     <div className="space-y-2">
@@ -320,7 +320,7 @@ export default function BackupsPage() {
                 disabled={saveSettings.isPending}
               >
                 <Save className="h-4 w-4" />
-                {saveSettings.isPending ? "Saving..." : "Save settings"}
+                {saveSettings.isPending ? "Guardando..." : "Guardar ajustes"}
               </Button>
             </>
           )}
@@ -370,7 +370,7 @@ export default function BackupsPage() {
               <Button
                 size="sm"
                 variant="ghost"
-                title="Download backup"
+                title="Descargar copia de seguridad"
                 disabled={backup.status !== "completed" || download.isPending}
                 onClick={() => download.mutate(backup)}
               >
@@ -379,7 +379,7 @@ export default function BackupsPage() {
               <Button
                 size="sm"
                 variant="ghost"
-                title="Delete backup"
+                title="Eliminar copia de seguridad"
                 disabled={
                   deleteBackup.isPending ||
                   backup.status === "queued" ||

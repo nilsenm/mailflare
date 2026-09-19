@@ -10,12 +10,12 @@ import { RequestBodyTooLargeError } from "@/lib/http/errors";
 export async function POST(request: Request) {
 	const env = getEnv();
 	if (await hasAdminAccount(env)) {
-		return NextResponse.json({ error: "Initial setup is already complete" }, { status: 403 });
+		return NextResponse.json({ error: "La configuración inicial ya está completa" }, { status: 403 });
 	}
 
 	const existing = await getPrimaryDomain(env);
 	if (existing) {
-		return NextResponse.json({ error: "Primary domain already exists" }, { status: 409 });
+		return NextResponse.json({ error: "El dominio principal ya existe" }, { status: 409 });
 	}
 
 	let body: unknown;
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
 		body = await readJsonBody(request, 16 * 1024);
 	} catch (error) {
 		const status = error instanceof RequestBodyTooLargeError ? 413 : 400;
-		return NextResponse.json({ error: "Invalid setup request" }, { status });
+		return NextResponse.json({ error: "Solicitud de configuración no válida" }, { status });
 	}
 	const parsed = setupDomainSchema.safeParse(body);
 	if (!parsed.success) {
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
 	try {
 		return NextResponse.json({ domain: await preflightDomain(env, parsed.data.hostname) });
 	} catch (err) {
-		const message = err instanceof Error ? err.message : "Domain check failed";
+		const message = err instanceof Error ? err.message : "No se pudo comprobar el dominio";
 		return NextResponse.json({ error: message }, { status: 502 });
 	}
 }

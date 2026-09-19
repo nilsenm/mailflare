@@ -10,7 +10,7 @@ export async function POST(request: Request, { params }: WebhookDeliveryRoutePar
 
 	const result = await runDelivery(loaded.env, deliveryId, { userId: loaded.user.id });
 	if (!result) {
-		return NextResponse.json({ error: "Delivery not found" }, { status: 404 });
+		return NextResponse.json({ error: "Entrega no encontrada" }, { status: 404 });
 	}
 
 	return NextResponse.json({ status: result.status });

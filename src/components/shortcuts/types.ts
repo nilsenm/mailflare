@@ -16,7 +16,7 @@ export interface CommandItem {
   id: string;
   title: string;
   subtitle?: string;
-  category: 'Actions' | 'Navigation' | 'Settings' | 'Mailboxes' | 'General';
+  category: 'Actions' | 'Navigation' | 'Ajustes' | 'Mailboxes' | 'General';
   icon?: React.ComponentType<{ className?: string }>;
   shortcut?: string;
   keywords?: string[];

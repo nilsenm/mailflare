@@ -63,7 +63,7 @@ export function MailboxSignatureForm() {
 			</div>
 			<div className="flex items-center gap-3">
 				<Button type="submit" disabled={!canManage || saving || signature.trim() === savedSignature}>
-					{saving ? "Saving..." : "Save signature"}
+					{saving ? "Guardando..." : "Save signature"}
 				</Button>
 				{!canManage && <p className="text-sm text-neutral-500">Full access is required to edit this signature.</p>}
 				{status && <p className="text-sm text-neutral-500">{status}</p>}

@@ -103,7 +103,7 @@ export function MessageActions({
 		() => [
 			{
 				key: "e",
-				label: "Archive Message",
+				label: "Archivar mensaje",
 				category: "Actions" as const,
 				action: () => {
 					if (status !== "archived") void runAction("archive");
@@ -111,7 +111,7 @@ export function MessageActions({
 			},
 			{
 				key: "y",
-				label: "Archive Message",
+				label: "Archivar mensaje",
 				category: "Actions" as const,
 				action: () => {
 					if (status !== "archived") void runAction("archive");
@@ -119,7 +119,7 @@ export function MessageActions({
 			},
 			{
 				key: "#",
-				label: "Move to Trash",
+				label: "Mover a Papelera",
 				category: "Actions" as const,
 				action: () => {
 					if (status !== "trash") void runAction("trash");
@@ -127,13 +127,13 @@ export function MessageActions({
 			},
 			{
 				key: "r",
-				label: "Reply to Message",
+				label: "Responder al mensaje",
 				category: "Composing" as const,
 				action: () => void handleReply("reply"),
 			},
 			{
 				key: "!",
-				label: "Report Spam",
+				label: "Marcar como spam",
 				category: "Actions" as const,
 				action: () => {
 					if (status !== "spam" && direction === "inbound") void runAction("spam");
@@ -141,7 +141,7 @@ export function MessageActions({
 			},
 			{
 				key: "u",
-				label: "Back to List",
+				label: "Volver a la lista",
 				category: "Navigation" as const,
 				action: () => router.back(),
 			},
@@ -224,12 +224,12 @@ export function MessageActions({
 		<div className="flex items-center gap-3 text-neutral-600">
 			{error && <span className="text-xs text-red-600">{error}</span>}
 			<div className="flex items-center gap-2">
-				<Tooltip label={shortcutsEnabled ? "Reply (r)" : "Reply"}>
+				<Tooltip label={shortcutsEnabled ? "Reply (r)" : "Responder"}>
 					<Button
 						type="button"
 						variant="ghost"
 						size="sm"
-						aria-label={shortcutsEnabled ? "Reply (r)" : "Reply"}
+						aria-label={shortcutsEnabled ? "Reply (r)" : "Responder"}
 						disabled={disabled}
 						onClick={() => handleReply("reply")}
 					>
@@ -237,12 +237,12 @@ export function MessageActions({
 					</Button>
 				</Tooltip>
 				{canReplyAll && (
-					<Tooltip label="Reply all">
+					<Tooltip label="Responder a todos">
 						<Button
 							type="button"
 							variant="ghost"
 							size="sm"
-							aria-label="Reply all"
+							aria-label="Responder a todos"
 							disabled={disabled}
 							onClick={() => handleReply("replyAll")}
 						>
@@ -251,12 +251,12 @@ export function MessageActions({
 					</Tooltip>
 				)}
 				{message && messageMeta && (
-					<Tooltip label="Forward">
+					<Tooltip label="Reenviar">
 						<Button
 							type="button"
 							variant="ghost"
 							size="sm"
-							aria-label="Forward"
+							aria-label="Reenviar"
 							disabled={disabled}
 							onClick={() => void handleForward()}
 						>
@@ -264,11 +264,11 @@ export function MessageActions({
 						</Button>
 					</Tooltip>
 				)}
-				<Tooltip label={shortcutsEnabled ? "Archive (e)" : "Archive"}>
+				<Tooltip label={shortcutsEnabled ? "Archive (e)" : "Archivar"}>
 					<Button
 						variant="ghost"
 						size="sm"
-						aria-label={shortcutsEnabled ? "Archive (e)" : "Archive"}
+						aria-label={shortcutsEnabled ? "Archive (e)" : "Archivar"}
 						disabled={disabled || status === "archived"}
 						onClick={() => runAction("archive")}
 					>
@@ -286,7 +286,7 @@ export function MessageActions({
 						<ShieldAlert className="h-5 w-5" />
 					</Button>
 				</Tooltip>
-				<Tooltip label={shortcutsEnabled ? "Delete (#)" : "Delete"}>
+				<Tooltip label={shortcutsEnabled ? "Delete (#)" : "Eliminar"}>
 					<Button
 						variant="ghost"
 						size="sm"
@@ -297,11 +297,11 @@ export function MessageActions({
 						<Trash2 className="h-5 w-5" />
 					</Button>
 				</Tooltip>
-				<Tooltip label={read ? "Mark as unread" : "Mark as read"}>
+				<Tooltip label={read ? "Marcar como no leído" : "Marcar como leído"}>
 					<Button
 						variant="ghost"
 						size="sm"
-						aria-label={read ? "Mark as unread" : "Mark as read"}
+						aria-label={read ? "Marcar como no leído" : "Marcar como leído"}
 						disabled={disabled}
 						onClick={() => runAction(markAction)}
 					>

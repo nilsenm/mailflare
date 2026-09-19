@@ -25,13 +25,13 @@ export async function GET(request: Request) {
 	const domainId = searchParams.get("domainId");
 	const mailboxId = searchParams.get("mailboxId");
 	if (!domainId) {
-		return NextResponse.json({ error: "domainId is required" }, { status: 400 });
+		return NextResponse.json({ error: "domainId es obligatorio" }, { status: 400 });
 	}
 
 	const db = getDb(env);
 	const adminDomain = !mailboxId ? await getAdminDomain(db, user, domainId) : null;
 	if (!adminDomain && (!mailboxId || !(await getManagedDomainMailbox(db, user, mailboxId, domainId)))) {
-		return NextResponse.json({ error: "Domain or mailbox access is required" }, { status: 403 });
+		return NextResponse.json({ error: "Se requiere acceso al dominio o al buzón" }, { status: 403 });
 	}
 
 	return NextResponse.json({
@@ -56,7 +56,7 @@ export async function POST(request: Request) {
 	const mailboxId = new URL(request.url).searchParams.get("mailboxId");
 	const adminDomain = !mailboxId ? await getAdminDomain(db, user, parsed.data.domainId) : null;
 	if (!adminDomain && (!mailboxId || !(await getManagedDomainMailbox(db, user, mailboxId, parsed.data.domainId)))) {
-		return NextResponse.json({ error: "Domain or mailbox access is required" }, { status: 403 });
+		return NextResponse.json({ error: "Se requiere acceso al dominio o al buzón" }, { status: 403 });
 	}
 
 	const destinationAllowed = parsed.data.mailboxId
@@ -65,7 +65,7 @@ export async function POST(request: Request) {
 			: await assertRuleMailbox(db, user, parsed.data.mailboxId, parsed.data.domainId)
 		: true;
 	if (!destinationAllowed) {
-		return NextResponse.json({ error: "Mailbox access is required for the destination" }, { status: 403 });
+		return NextResponse.json({ error: "Se requiere acceso al buzón de destino" }, { status: 403 });
 	}
 
 	const id = newId("rule");

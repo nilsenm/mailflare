@@ -22,11 +22,11 @@ export async function GET(request: Request) {
 	const url = new URL(request.url);
 	const mailboxId = url.searchParams.get("mailboxId");
 	const email = normalizeEmailAddress(url.searchParams.get("address") ?? "");
-	if (!mailboxId || !email) return new Response("Not found", { status: 404 });
+	if (!mailboxId || !email) return new Response("No encontrado", { status: 404 });
 
 	const db = getDb(env);
 	const access = await getMailboxAccessLevel(db, user, mailboxId);
-	if (!access?.canRead) return new Response("Not found", { status: 404 });
+	if (!access?.canRead) return new Response("No encontrado", { status: 404 });
 	const account = await getPersonalIdentityForAddress(db, access.mailbox.userId, email);
 	const [contact] = await db
 		.select({ avatarKey: contacts.avatarKey })
@@ -34,10 +34,10 @@ export async function GET(request: Request) {
 		.where(and(eq(contacts.userId, access.mailbox.userId), eq(contacts.email, email)))
 		.limit(1);
 	const avatarKey = account ? account.avatarKey : contact?.avatarKey;
-	if (!avatarKey) return new Response("Not found", { status: 404 });
+	if (!avatarKey) return new Response("No encontrado", { status: 404 });
 
 	const object = await env.BUCKET.get(avatarKey);
-	if (!object) return new Response("Not found", { status: 404 });
+	if (!object) return new Response("No encontrado", { status: 404 });
 	const headers = new Headers();
 	headers.set("Content-Type", object.httpMetadata?.contentType ?? "application/octet-stream");
 	headers.set("X-Content-Type-Options", "nosniff");
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
 	try {
 		form = await request.formData();
 	} catch {
-		return NextResponse.json({ error: "Expected multipart form data" }, { status: 400 });
+		return NextResponse.json({ error: "Se esperaban datos de formulario multipart" }, { status: 400 });
 	}
 	const mailboxEntry = form.get("mailboxId");
 	const addressEntry = form.get("address");
@@ -61,22 +61,22 @@ export async function POST(request: Request) {
 	const email = normalizeEmailAddress(typeof addressEntry === "string" ? addressEntry : "");
 	const file = form.get("file");
 	if (!mailboxId || !email || !isUploadedAvatarFile(file)) {
-		return NextResponse.json({ error: "Mailbox, contact, and image file are required" }, { status: 400 });
+		return NextResponse.json({ error: "El buzón, el contacto y el archivo de imagen son obligatorios" }, { status: 400 });
 	}
 	if (!ALLOWED_AVATAR_TYPES.includes(file.type)) {
-		return NextResponse.json({ error: "Use a JPEG, PNG, WebP, or GIF image" }, { status: 400 });
+		return NextResponse.json({ error: "Usa una imagen JPEG, PNG, WebP o GIF" }, { status: 400 });
 	}
 	if (file.size > MAX_AVATAR_SIZE) {
-		return NextResponse.json({ error: "Image must be 2 MB or smaller" }, { status: 413 });
+		return NextResponse.json({ error: "La imagen debe pesar 2 MB o menos" }, { status: 413 });
 	}
 
 	const db = getDb(env);
 	const access = await getMailboxAccessLevel(db, user, mailboxId);
-	if (!access?.canManage) return NextResponse.json({ error: "Mailbox not found" }, { status: 404 });
+	if (!access?.canManage) return NextResponse.json({ error: "Buzón no encontrado" }, { status: 404 });
 	const account = await getPersonalIdentityForAddress(db, access.mailbox.userId, email);
 	if (account) {
 		if (account.userId !== user.id) {
-			return NextResponse.json({ error: "Only the account owner can change this contact" }, { status: 403 });
+			return NextResponse.json({ error: "Solo el propietario de la cuenta puede modificar este contacto" }, { status: 403 });
 		}
 		const key = avatarKeyFor(account.userId);
 		await env.BUCKET.put(key, await file.arrayBuffer(), {
@@ -116,15 +116,15 @@ export async function DELETE(request: Request) {
 	const url = new URL(request.url);
 	const mailboxId = url.searchParams.get("mailboxId");
 	const email = normalizeEmailAddress(url.searchParams.get("address") ?? "");
-	if (!mailboxId || !email) return NextResponse.json({ error: "Mailbox and contact are required" }, { status: 400 });
+	if (!mailboxId || !email) return NextResponse.json({ error: "El buzón y el contacto son obligatorios" }, { status: 400 });
 
 	const db = getDb(env);
 	const access = await getMailboxAccessLevel(db, user, mailboxId);
-	if (!access?.canManage) return NextResponse.json({ error: "Mailbox not found" }, { status: 404 });
+	if (!access?.canManage) return NextResponse.json({ error: "Buzón no encontrado" }, { status: 404 });
 	const account = await getPersonalIdentityForAddress(db, access.mailbox.userId, email);
 	if (account) {
 		if (account.userId !== user.id) {
-			return NextResponse.json({ error: "Only the account owner can change this contact" }, { status: 403 });
+			return NextResponse.json({ error: "Solo el propietario de la cuenta puede modificar este contacto" }, { status: 403 });
 		}
 		if (account.avatarKey) await env.BUCKET.delete(account.avatarKey);
 		await syncPersonalIdentity(db, { ...account, avatarKey: null });

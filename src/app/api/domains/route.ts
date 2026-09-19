@@ -65,7 +65,7 @@ export async function POST(request: Request) {
 		});
 		return NextResponse.json(result);
 	} catch (err) {
-		const failure = getDomainProvisioningError(err, "Failed to add domain");
+		const failure = getDomainProvisioningError(err, "No se pudo agregar el dominio");
 		return NextResponse.json(
 			{ error: failure.message, code: failure.code },
 			{ status: failure.status },

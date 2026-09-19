@@ -10,11 +10,11 @@ export async function GET(request: Request) {
 	const user = await requireUser(env, request);
 	const url = new URL(request.url);
 	const mailboxId = url.searchParams.get("mailboxId");
-	if (!mailboxId) return NextResponse.json({ error: "Mailbox is required" }, { status: 400 });
+	if (!mailboxId) return NextResponse.json({ error: "El buzón es obligatorio" }, { status: 400 });
 
 	const access = await getMailboxAccessLevel(getDb(env), user, mailboxId);
 	if (!access?.canRead) {
-		return NextResponse.json({ error: "Mailbox not found" }, { status: 404 });
+		return NextResponse.json({ error: "Buzón no encontrado" }, { status: 404 });
 	}
 
 	const mbox = await exportMailboxToMbox(env, mailboxId);

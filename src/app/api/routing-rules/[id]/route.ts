@@ -20,18 +20,18 @@ export async function PATCH(request: Request, { params }: RoutingRuleRouteParams
 	const db = getDb(env);
 	const [rule] = await db.select().from(routingRules).where(eq(routingRules.id, id)).limit(1);
 	if (!rule?.mailboxId || rule.mailboxId !== parsed.data.mailboxId) {
-		return NextResponse.json({ error: "Rule not found" }, { status: 404 });
+		return NextResponse.json({ error: "Regla no encontrada" }, { status: 404 });
 	}
 	const access = await getMailboxAccessLevel(db, user, rule.mailboxId);
 	if (!access?.canManage) {
-		return NextResponse.json({ error: "Rule not found" }, { status: 404 });
+		return NextResponse.json({ error: "Regla no encontrada" }, { status: 404 });
 	}
 
 	const destination = parsed.data.destination ?? (parsed.data.folderId ? `folder:${parsed.data.folderId}` : "");
 	const systemAction = destination === "spam" || destination === "trash" ? destination : null;
 	const folderId = destination.startsWith("folder:") ? destination.slice("folder:".length) : null;
 	if (!systemAction && !folderId) {
-		return NextResponse.json({ error: "Destination is required" }, { status: 400 });
+		return NextResponse.json({ error: "El destino es obligatorio" }, { status: 400 });
 	}
 	if (folderId) {
 		const [folder] = await db
@@ -40,7 +40,7 @@ export async function PATCH(request: Request, { params }: RoutingRuleRouteParams
 			.where(and(eq(folders.id, folderId), eq(folders.mailboxId, rule.mailboxId)))
 			.limit(1);
 		if (!folder) {
-			return NextResponse.json({ error: "Folder not found" }, { status: 404 });
+			return NextResponse.json({ error: "Carpeta no encontrada" }, { status: 404 });
 		}
 	}
 
@@ -68,11 +68,11 @@ export async function DELETE(request: Request, { params }: RoutingRuleRouteParam
 	const db = getDb(env);
 	const [rule] = await db.select().from(routingRules).where(eq(routingRules.id, id)).limit(1);
 	if (!rule?.mailboxId) {
-		return NextResponse.json({ error: "Rule not found" }, { status: 404 });
+		return NextResponse.json({ error: "Regla no encontrada" }, { status: 404 });
 	}
 	const access = await getMailboxAccessLevel(db, user, rule.mailboxId);
 	if (!access?.canManage) {
-		return NextResponse.json({ error: "Rule not found" }, { status: 404 });
+		return NextResponse.json({ error: "Regla no encontrada" }, { status: 404 });
 	}
 
 	await db.delete(routingRules).where(eq(routingRules.id, id));

@@ -22,7 +22,7 @@ export function getScheduleSendOptions(now = new Date()): ScheduleSendOption[] {
 }
 
 export function formatScheduledSend(value: Date): string {
-	return new Intl.DateTimeFormat(undefined, {
+	return new Intl.DateTimeFormat("es-PE", {
 		weekday: "short",
 		month: "short",
 		day: "numeric",

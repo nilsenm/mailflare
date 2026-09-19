@@ -12,7 +12,7 @@ export async function GET(request: Request) {
 	try {
 		assertAdmin(auth.user);
 	} catch {
-		return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+		return NextResponse.json({ error: "Prohibido" }, { status: 403 });
 	}
 	return NextResponse.json(await getSearchIndexStatus(env));
 }
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
 	try {
 		assertAdmin(auth.user);
 	} catch {
-		return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+		return NextResponse.json({ error: "Prohibido" }, { status: 403 });
 	}
 	await rebuildSearchIndex(env);
 	return NextResponse.json(await getSearchIndexStatus(env));

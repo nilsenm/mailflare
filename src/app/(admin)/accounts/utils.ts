@@ -11,7 +11,7 @@ export function getAccountMailbox(account: Pick<Account, "localPart" | "hostname
 }
 
 export function formatAccountDate(value: string): string {
-	return new Intl.DateTimeFormat(undefined, {
+	return new Intl.DateTimeFormat("es-PE", {
 		month: "short",
 		day: "numeric",
 		year: "numeric",

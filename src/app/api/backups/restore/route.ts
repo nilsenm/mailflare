@@ -11,7 +11,7 @@ export async function POST(request: Request) {
 		assertAdmin(user);
 		const form = await request.formData();
 		const file = form.get("backup");
-		if (!(file instanceof File)) return NextResponse.json({ error: "Choose a backup file" }, { status: 400 });
+		if (!(file instanceof File)) return NextResponse.json({ error: "Elige un archivo de copia de seguridad" }, { status: 400 });
 		await restoreDatabaseRecords(env.DB, await file.arrayBuffer());
 		return NextResponse.json({ ok: true });
 	} catch (error) {

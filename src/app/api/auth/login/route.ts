@@ -20,7 +20,7 @@ export async function POST(request: Request) {
 		body = await readJsonBody(request, 16 * 1024);
 	} catch (error) {
 		const status = error instanceof RequestBodyTooLargeError ? 413 : 400;
-		return NextResponse.json({ error: "Invalid login request" }, { status });
+		return NextResponse.json({ error: "Solicitud de inicio de sesión no válida" }, { status });
 	}
 	const parsed = loginSchema.safeParse(body);
 	if (!parsed.success) {
@@ -28,21 +28,21 @@ export async function POST(request: Request) {
 	}
 	if (!(await allowLoginAttempt(env, request))) {
 		return NextResponse.json(
-			{ error: "Too many login attempts. Try again shortly." },
+			{ error: "Demasiados intentos de inicio de sesión. Inténtalo de nuevo en unos minutos." },
 			{ status: 429, headers: { "Retry-After": "60" } },
 		);
 	}
 	if (!(await verifyTurnstileToken(env, request, (body as Record<string, unknown>).turnstileToken))) {
-		return NextResponse.json({ error: "Verification failed. Please try again." }, { status: 400 });
+		return NextResponse.json({ error: "La verificación falló. Inténtalo de nuevo." }, { status: 400 });
 	}
 
 	const db = getDb(env);
 	const [user] = await db.select().from(users).where(eq(users.email, parsed.data.email)).limit(1);
 	if (!user || !verifyPassword(parsed.data.password, user.passwordHash)) {
-		return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+		return NextResponse.json({ error: "Credenciales no válidas" }, { status: 401 });
 	}
 	if (user.disabled) {
-		return NextResponse.json({ error: "Account disabled" }, { status: 403 });
+		return NextResponse.json({ error: "Cuenta desactivada" }, { status: 403 });
 	}
 
 	// The password is right but a second factor is on: hand back a short-lived

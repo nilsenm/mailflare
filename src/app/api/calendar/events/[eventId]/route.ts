@@ -16,10 +16,10 @@ export async function PATCH(request: Request, { params }: CalendarEventRoutePara
 	const input = await request.json() as CalendarEventInput;
 	const startsAt = new Date(input.startsAt);
 	const endsAt = new Date(input.endsAt);
-	if (!input.title?.trim() || Number.isNaN(startsAt.getTime()) || Number.isNaN(endsAt.getTime()) || endsAt <= startsAt) return NextResponse.json({ error: "Enter a title and valid event times" }, { status: 400 });
+	if (!input.title?.trim() || Number.isNaN(startsAt.getTime()) || Number.isNaN(endsAt.getTime()) || endsAt <= startsAt) return NextResponse.json({ error: "Ingresa un título y horarios válidos para el evento" }, { status: 400 });
 	const db = getDb(env);
 	const [existing] = await db.select().from(calendarEvents).where(and(eq(calendarEvents.id, eventId), eq(calendarEvents.userId, user.id))).limit(1);
-	if (!existing) return NextResponse.json({ error: "Event not found" }, { status: 404 });
+	if (!existing) return NextResponse.json({ error: "Evento no encontrado" }, { status: 404 });
 	const attendees = (input.attendees ?? []).map((email) => email.trim()).filter((email) => /^\S+@\S+\.\S+$/.test(email));
 	const event = { ...existing, title: input.title.trim(), description: input.description?.trim() ?? "", location: input.location?.trim() ?? "", attendees: JSON.stringify(attendees), startsAt, endsAt };
 	await db.update(calendarEvents).set({ title: event.title, description: event.description, location: event.location, attendees: event.attendees, startsAt, endsAt, updatedAt: new Date() }).where(eq(calendarEvents.id, eventId));

@@ -80,7 +80,7 @@ export default function AccountPermissionsPage() {
 				</table>
 			</div>
 			<Button onClick={() => void savePermissions()} disabled={!account || saving}>
-				{saving ? "Saving..." : "Save permissions"}
+				{saving ? "Guardando..." : "Save permissions"}
 			</Button>
 			{message && <p className="text-sm text-neutral-500">{message}</p>}
 		</div>

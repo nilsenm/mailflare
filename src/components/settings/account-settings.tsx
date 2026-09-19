@@ -47,7 +47,7 @@ export function AccountSettings() {
 	return (
 		<div className="space-y-8 py-4">
 			{/* <div>
-				<h1 className="text-3xl font-medium text-neutral-900">Account</h1>
+				<h1 className="text-3xl font-medium text-neutral-900">Cuenta</h1>
 				<p className="mt-1 text-sm text-neutral-500">Manage your account details and sign-in password.</p>
 			</div> */}
 
@@ -97,7 +97,7 @@ export function AccountSettings() {
 				</div>
 				<div className="space-y-4 rounded-3xl bg-white p-6">
 					<div>
-						<h3 className="text-lg font-semibold text-neutral-900">Two-factor authentication</h3>
+						<h3 className="text-lg font-semibold text-neutral-900">Autenticación de dos factores</h3>
 						<p className="mt-1 text-sm text-neutral-500">Require a code from an authenticator app when signing in.</p>
 					</div>
 					<MfaSettings />

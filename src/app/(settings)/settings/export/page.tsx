@@ -42,7 +42,7 @@ export default function SettingsExportPage() {
 				</div>
 				<div className="space-y-3 rounded-3xl bg-white p-6">
 					<Button type="button" variant="outline" disabled={!selectedMailbox || exportState.loading} onClick={onExport}>
-						{exportState.loading ? "Preparing..." : "Download .mbox"}
+						{exportState.loading ? "Preparando..." : "Descargar .mbox"}
 					</Button>
 					{exportState.error && (
 						<p className="rounded-lg border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">

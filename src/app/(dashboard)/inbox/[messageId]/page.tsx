@@ -90,7 +90,7 @@ export default function MessageDetailPage() {
   if (!data?.message) {
     return (
       <p className="px-6 py-4 text-sm text-neutral-500">
-        {data?.error ?? "Message not found"}
+        {data?.error ?? "Mensaje no encontrado"}
       </p>
     );
   }
@@ -166,7 +166,7 @@ export default function MessageDetailPage() {
       </div>
       <div className="px-6 pb-2 pt-4">
         <h1 className="text-2xl text-neutral-900">
-          {message.subject ?? "(no subject)"}
+          {message.subject ?? "(sin asunto)"}
         </h1>
       </div>
       <SpamScoreDetails

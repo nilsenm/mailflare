@@ -49,7 +49,7 @@ export function ScheduleSendMenu({ disabled, value, onChange }: ScheduleSendMenu
 						>
 							{option.label}
 							<span className="ml-2 text-xs text-neutral-400">
-								{option.value?.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+								{option.value?.toLocaleTimeString("es-PE", { hour: "numeric", minute: "2-digit" })}
 							</span>
 						</DropdownMenu.Item>
 					))}

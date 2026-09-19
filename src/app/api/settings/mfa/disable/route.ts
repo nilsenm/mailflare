@@ -12,12 +12,12 @@ export async function POST(request: Request) {
 	const auth = await requireSessionUser(env, request);
 	if (auth.error) return auth.error;
 	const parsed = mfaDisableSchema.safeParse(await readJsonBody(request, 16 * 1024).catch(() => null));
-	if (!parsed.success) return NextResponse.json({ error: "Enter your password and a code" }, { status: 400 });
+	if (!parsed.success) return NextResponse.json({ error: "Ingresa tu contraseña y un código" }, { status: 400 });
 	if (!verifyPassword(parsed.data.password, auth.user.passwordHash)) {
-		return NextResponse.json({ error: "Password is incorrect" }, { status: 400 });
+		return NextResponse.json({ error: "La contraseña es incorrecta" }, { status: 400 });
 	}
 	if (!(await verifySecondFactor(env, auth.user, parsed.data.code))) {
-		return NextResponse.json({ error: "That code did not match" }, { status: 400 });
+		return NextResponse.json({ error: "Ese código no coincide" }, { status: 400 });
 	}
 	await disableMfa(env, auth.user.id);
 	return NextResponse.json({ ok: true });

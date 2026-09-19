@@ -28,7 +28,7 @@ export async function PATCH(request: Request) {
 		if (error instanceof ZodError) {
 			return NextResponse.json({ error: error.flatten() }, { status: 400 });
 		}
-		return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+		return NextResponse.json({ error: "Solicitud no válida" }, { status: 400 });
 	}
 
 	await getDb(env)

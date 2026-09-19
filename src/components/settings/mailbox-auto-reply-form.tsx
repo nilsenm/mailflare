@@ -104,7 +104,7 @@ export function MailboxAutoReplyForm() {
       {settings.enabled && (
         <>
           <div className="space-y-2">
-            <Label htmlFor="autoReplySubject">Subject</Label>
+            <Label htmlFor="autoReplySubject">Asunto</Label>
             <Input
               id="autoReplySubject"
               value={settings.subject}
@@ -116,7 +116,7 @@ export function MailboxAutoReplyForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="autoReplyBody">Message</Label>
+            <Label htmlFor="autoReplyBody">Mensaje</Label>
             <Textarea
               id="autoReplyBody"
               value={settings.body}
@@ -130,7 +130,7 @@ export function MailboxAutoReplyForm() {
           </div>
           <div className="flex items-center gap-3">
             <Button type="submit" disabled={!canManage || saving || !changed}>
-              {saving ? "Saving..." : "Save"}
+              {saving ? "Guardando..." : "Guardar"}
             </Button>
             {!canManage && (
               <p className="text-sm text-neutral-500">

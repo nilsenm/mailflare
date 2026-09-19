@@ -20,7 +20,7 @@ export async function POST(request: Request) {
 		input = await parseSendRequest(request);
 	} catch (error) {
 		const status = error instanceof RequestBodyTooLargeError ? 413 : 400;
-		return NextResponse.json({ error: "Invalid send request" }, { status });
+		return NextResponse.json({ error: "Solicitud de envío no válida" }, { status });
 	}
 	const { attachments = [], draftId, ...fields } = input;
 	const parsed = sendEmailSchema.omit({ attachments: true }).safeParse(fields);
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
 		const db = getDb(env);
 		const [draft] = await db.select().from(messages).where(eq(messages.id, draftId)).limit(1);
 		if (!userOwnsDraft(draft, user.id)) {
-			return NextResponse.json({ error: "Draft not found" }, { status: 404 });
+			return NextResponse.json({ error: "Borrador no encontrado" }, { status: 404 });
 		}
 		attachments.push(...(await loadMessageAttachmentContents(env, draftId)));
 	}

@@ -23,7 +23,7 @@ export async function PATCH(request: Request) {
 	try {
 		input = await parseUpdateSpamSettingsRequest(request);
 	} catch (error) {
-		return NextResponse.json({ error: error instanceof ZodError ? error.flatten() : "Invalid request" }, { status: 400 });
+		return NextResponse.json({ error: error instanceof ZodError ? error.flatten() : "Solicitud no válida" }, { status: 400 });
 	}
 	await getDb(env).update(users).set({ spamProtectionEnabled: input.enabled }).where(eq(users.id, auth.user.id));
 	return NextResponse.json({ enabled: input.enabled });

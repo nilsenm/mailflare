@@ -34,18 +34,18 @@ export function MessageListRowActions({ message, onAction }: MessageListRowActio
 	return (
 		<>
 			<div className="pointer-events-none absolute right-6 top-1/2 z-10 flex -translate-y-1/2 items-center gap-1 pl-3 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100 bg-[#f2f6fc]">
-				<Tooltip label="Archive">
-					<Button type="button" variant="ghost" size="sm" onClick={() => void onAction("archive")} aria-label="Archive">
+				<Tooltip label="Archivar">
+					<Button type="button" variant="ghost" size="sm" onClick={() => void onAction("archive")} aria-label="Archivar">
 						<Archive className="h-4 w-4" />
 					</Button>
 				</Tooltip>
-				<Tooltip label="Trash">
-					<Button type="button" variant="ghost" size="sm" onClick={() => void onAction("trash")} aria-label="Trash">
+				<Tooltip label="Papelera">
+					<Button type="button" variant="ghost" size="sm" onClick={() => void onAction("trash")} aria-label="Papelera">
 						<Trash2 className="h-4 w-4" />
 					</Button>
 				</Tooltip>
-				<Tooltip label={readAction === "read" ? "Mark as read" : "Mark as unread"}>
-					<Button type="button" variant="ghost" size="sm" onClick={() => void onAction(readAction)} aria-label={readAction === "read" ? "Mark as read" : "Mark as unread"}>
+				<Tooltip label={readAction === "read" ? "Marcar como leído" : "Marcar como no leído"}>
+					<Button type="button" variant="ghost" size="sm" onClick={() => void onAction(readAction)} aria-label={readAction === "read" ? "Marcar como leído" : "Marcar como no leído"}>
 						{readAction === "read" ? <MailOpen className="h-4 w-4" /> : <Mail className="h-4 w-4" />}
 					</Button>
 				</Tooltip>

@@ -102,7 +102,7 @@ export function formatLastMatched(value: DomainRule["lastMatchedAt"]): string {
 	if (!Number.isFinite(numeric)) return "Never";
 	// Drizzle timestamps serialise as seconds when they bypass the mapper.
 	const ms = numeric < 1e12 ? numeric * 1000 : numeric;
-	return new Date(ms).toLocaleString();
+	return new Date(ms).toLocaleString("es-PE");
 }
 
 export function emptyRuleInput(domainId: string): DomainRuleInput {

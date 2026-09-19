@@ -389,9 +389,9 @@ export function ComposeForm({
 						{loadingDraft
 							? "Loading draft"
 							: threading?.inReplyTo
-								? "Reply"
+								? "Responder"
 								: /^fwd?:/i.test(subject)
-									? "Forward"
+									? "Reenviar"
 									: draftId
 										? "Draft saved"
 										: "New Message"}
@@ -425,7 +425,7 @@ export function ComposeForm({
 				</div>
 				<RecipientInput
 					id={`${mode}-to`}
-					label="To"
+					label="Para"
 					value={to}
 					onChange={setTo}
 					placeholder='Recipients, or "Maya Chen" <maya@example.com>'
@@ -440,7 +440,7 @@ export function ComposeForm({
 							)}
 							{!showBcc && (
 								<button type="button" className="rounded px-1 hover:text-neutral-800" onClick={() => setShowBcc(true)}>
-									Bcc
+									Cco
 								</button>
 							)}
 						</>
@@ -460,7 +460,7 @@ export function ComposeForm({
 				{showBcc && (
 					<RecipientInput
 						id={`${mode}-bcc`}
-						label="Bcc"
+						label="Cco"
 						value={bcc}
 						onChange={setBcc}
 						placeholder="Blind carbon copy, hidden from other recipients"
@@ -469,12 +469,12 @@ export function ComposeForm({
 					/>
 				)}
 				<div className="border-b border-neutral-100 px-4 py-1">
-					<Label htmlFor={`${mode}-subject`} className="sr-only">Subject</Label>
+					<Label htmlFor={`${mode}-subject`} className="sr-only">Asunto</Label>
 					<Input
 						id={`${mode}-subject`}
 						value={subject}
 						onChange={(event) => setSubject(event.target.value)}
-						placeholder="Subject"
+						placeholder="Asunto"
 						required
 						disabled={loadingDraft}
 						className="h-8 border-0 px-0 py-1 shadow-none focus-visible:ring-0"
@@ -497,7 +497,7 @@ export function ComposeForm({
 									disabled={loading || loadingDraft || !fromAddr}
 									className="rounded-r-none px-4"
 								>
-									{loading ? "Sending" : scheduledAt ? "Schedule" : "Send"}
+									{loading ? "Sending" : scheduledAt ? "Schedule" : "Enviar"}
 								</Button>
 								<ScheduleSendMenu
 									disabled={loading || loadingDraft || !fromAddr}
@@ -560,7 +560,7 @@ export function ComposeForm({
 									className="rounded-full p-1 text-neutral-400 hover:bg-neutral-200 hover:text-neutral-700"
 								>
 									<X className="h-3.5 w-3.5" />
-									<span className="sr-only">Remove attachment</span>
+									<span className="sr-only">Quitar adjunto</span>
 								</button>
 							</div>
 						))}
@@ -584,7 +584,7 @@ export function ComposeForm({
 									className="rounded-full p-1 text-neutral-400 hover:bg-neutral-200 hover:text-neutral-700"
 								>
 									<X className="h-3.5 w-3.5" />
-									<span className="sr-only">Remove attachment</span>
+									<span className="sr-only">Quitar adjunto</span>
 								</button>
 							</div>
 						))}

@@ -27,7 +27,7 @@ export async function POST(request: Request) {
 
 	const access = await getMailboxAccessLevel(getDb(env), user, input.mailboxId);
 	if (!access?.canManage) {
-		return NextResponse.json({ error: "Mailbox not found" }, { status: 404 });
+		return NextResponse.json({ error: "Buzón no encontrado" }, { status: 404 });
 	}
 	if (input.destination.type === "folder") {
 		const db = getDb(env);
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
 			.where(and(eq(folders.id, input.destination.folderId), eq(folders.mailboxId, access.mailbox.id)))
 			.limit(1);
 		if (!folder) {
-			return NextResponse.json({ error: "Folder not found" }, { status: 404 });
+			return NextResponse.json({ error: "Carpeta no encontrada" }, { status: 404 });
 		}
 	}
 

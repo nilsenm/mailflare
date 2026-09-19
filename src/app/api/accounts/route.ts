@@ -37,13 +37,13 @@ export async function POST(request: Request) {
 	const input: CreateUserAccountInput = parsed.data;
 	const db = getDb(access.env);
 	const domain = await getDomainForAdmin(db, access.user!.id, input.domainId);
-	if (!domain) return NextResponse.json({ error: "Domain not found" }, { status: 404 });
+	if (!domain) return NextResponse.json({ error: "Dominio no encontrado" }, { status: 404 });
 	const username = input.username.toLowerCase().trim();
 	const email = `${username}@${domain.hostname}`;
 	const [existing] = await db.select({ id: users.id }).from(users).where(eq(users.email, email)).limit(1);
-	if (existing) return NextResponse.json({ error: "Email already registered" }, { status: 409 });
+	if (existing) return NextResponse.json({ error: "El correo ya está registrado" }, { status: 409 });
 	const mailbox = await getExistingMailbox(db, domain.id, username);
-	if (mailbox) return NextResponse.json({ error: "Email address is already assigned" }, { status: 409 });
+	if (mailbox) return NextResponse.json({ error: "La dirección de correo ya está asignada" }, { status: 409 });
 
 	const userId = newId("usr");
 	try {

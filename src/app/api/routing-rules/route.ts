@@ -20,7 +20,7 @@ export async function GET(request: Request) {
 	const db = getDb(env);
 	const access = await getMailboxAccessLevel(db, user, mailboxId);
 	if (!access?.canManage) {
-		return NextResponse.json({ error: "Mailbox not found" }, { status: 404 });
+		return NextResponse.json({ error: "Buzón no encontrado" }, { status: 404 });
 	}
 
 	const rows = await db
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
 	const db = getDb(env);
 	const access = await getMailboxAccessLevel(db, user, parsed.data.mailboxId);
 	if (!access?.canManage) {
-		return NextResponse.json({ error: "Mailbox not found" }, { status: 404 });
+		return NextResponse.json({ error: "Buzón no encontrado" }, { status: 404 });
 	}
 	const mailbox = access.mailbox;
 
@@ -50,7 +50,7 @@ export async function POST(request: Request) {
 	const folderId = destination.startsWith("folder:") ? destination.slice("folder:".length) : null;
 
 	if (!systemAction && !folderId) {
-		return NextResponse.json({ error: "Destination is required" }, { status: 400 });
+		return NextResponse.json({ error: "El destino es obligatorio" }, { status: 400 });
 	}
 
 	if (folderId) {
@@ -60,7 +60,7 @@ export async function POST(request: Request) {
 			.where(and(eq(folders.id, folderId), eq(folders.mailboxId, mailbox.id)))
 			.limit(1);
 		if (!folder) {
-			return NextResponse.json({ error: "Folder not found" }, { status: 404 });
+			return NextResponse.json({ error: "Carpeta no encontrada" }, { status: 404 });
 		}
 	}
 

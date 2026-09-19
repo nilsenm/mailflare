@@ -6,7 +6,7 @@ export const settingsNavSections: SettingsNavSection[] = [
 		items: [
 			{
 				href: "/settings/account",
-				label: "Account",
+				label: "Cuenta",
 			},
 			{
 				href: "/settings/inbox",
@@ -19,7 +19,7 @@ export const settingsNavSections: SettingsNavSection[] = [
 		],
 	},
 	{
-		label: "Mailbox",
+		label: "Buzón",
 		items: [
 			{
 				href: "/settings/import",

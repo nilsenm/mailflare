@@ -20,7 +20,7 @@ export async function GET(request: Request) {
 	const db = getDb(env);
 	const access = await getMailboxFolderAccess(db, user, mailboxId);
 	if (!access) {
-		return NextResponse.json({ error: "Mailbox not found" }, { status: 404 });
+		return NextResponse.json({ error: "Buzón no encontrado" }, { status: 404 });
 	}
 
 	const rows = await listFoldersForMailbox(db, mailboxId);
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
 	const db = getDb(env);
 	const access = await getMailboxFolderAccess(db, user, parsed.data.mailboxId);
 	if (!access?.canManage) {
-		return NextResponse.json({ error: "Mailbox not found" }, { status: 404 });
+		return NextResponse.json({ error: "Buzón no encontrado" }, { status: 404 });
 	}
 
 	const name = parsed.data.name.trim();
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
 		.where(and(eq(folders.mailboxId, parsed.data.mailboxId), eq(folders.name, name)))
 		.limit(1);
 	if (existing) {
-		return NextResponse.json({ error: "Folder already exists" }, { status: 409 });
+		return NextResponse.json({ error: "La carpeta ya existe" }, { status: 409 });
 	}
 
 	const id = newId("fld");

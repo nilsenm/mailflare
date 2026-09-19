@@ -48,7 +48,7 @@ const sections = [
 	// },
 	// {
 	// 	href: "/settings/account",
-	// 	title: "Account",
+	// 	title: "Cuenta",
 	// 	description: "View personal account and platform configuration.",
 	// 	icon: Settings,
 	// },

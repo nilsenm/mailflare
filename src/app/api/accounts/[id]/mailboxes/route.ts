@@ -13,7 +13,7 @@ export async function GET(request: Request, { params }: AccountRouteParams) {
 	const db = getDb(access.env);
 	const account = await selectAccountById(db, id);
 	if (!account || (account.id !== access.user!.id && account.createdByUserId !== access.user!.id)) {
-		return NextResponse.json({ error: "Account not found" }, { status: 404 });
+		return NextResponse.json({ error: "Cuenta no encontrada" }, { status: 404 });
 	}
 	const rows = await db.select({
 		id: mailboxes.id,

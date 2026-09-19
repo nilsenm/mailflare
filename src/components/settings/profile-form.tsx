@@ -132,7 +132,7 @@ export function ProfileForm({
             type="submit"
             disabled={savingProfile || name.trim() === savedName}
           >
-            {savingProfile ? "Saving..." : "Save profile"}
+            {savingProfile ? "Guardando..." : "Save profile"}
           </Button>
           {profileStatus && (
             <p className="text-sm text-neutral-500">{profileStatus}</p>
@@ -146,7 +146,7 @@ export function ProfileForm({
       >
         <div>
           <h3 className="text-lg font-semibold text-neutral-900">
-            Recovery email
+            Correo de recuperación
           </h3>
           <p className="mt-1 text-sm text-neutral-500">
             Used to recover access if you cannot sign in.
@@ -167,7 +167,7 @@ export function ProfileForm({
             type="submit"
             disabled={savingRecovery || resetEmail.trim() === savedResetEmail}
           >
-            {savingRecovery ? "Saving..." : "Save recovery email"}
+            {savingRecovery ? "Guardando..." : "Save recovery email"}
           </Button>
           {recoveryStatus && (
             <p className="text-sm text-neutral-500">{recoveryStatus}</p>

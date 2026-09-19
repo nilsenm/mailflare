@@ -20,7 +20,7 @@ export async function GET() {
 			headers: { "Cache-Control": "no-store" },
 		});
 	} catch (error) {
-		const message = error instanceof Error ? error.message : "Could not load setup status";
+		const message = error instanceof Error ? error.message : "No se pudo cargar el estado de configuración";
 		return NextResponse.json({ error: message }, { status: 500 });
 	}
 }

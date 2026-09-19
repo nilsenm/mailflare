@@ -25,7 +25,7 @@ const sections = [
     links: [{ href: "/admin", label: "Overview", icon: Settings }],
   },
   {
-    label: "Email",
+    label: "Correo electrónico",
     links: [
       { href: "/mailboxes", label: "Mailboxes", icon: Mail },
       { href: "/domains", label: "Domains", icon: Globe2 },
@@ -57,7 +57,7 @@ export function AdminNav({ className }: { className?: string }) {
 
   return (
     <nav className={cn("flex min-h-full flex-col gap-1", className)}>
-      <SidebarHeader href="/inbox" label="Admin" />
+      <SidebarHeader href="/inbox" label="Administrador" />
       <div className={cn("space-y-4", minimal && "space-y-2")}>
         {sections.map((section) => {
           const links = section.links.filter(

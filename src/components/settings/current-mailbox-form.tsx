@@ -63,7 +63,7 @@ export function CurrentMailboxForm() {
 	if (!selectedMailbox) {
 		return (
 			<div className="space-y-6">
-				<h1 className="text-3xl font-medium text-neutral-900">Settings</h1>
+				<h1 className="text-3xl font-medium text-neutral-900">Ajustes</h1>
 				<Card className="rounded-3xl border-0 bg-white p-6">
 					<CardContent className="p-6 text-sm text-neutral-500">
 						Select a mailbox to view its settings.
@@ -79,7 +79,7 @@ export function CurrentMailboxForm() {
 	return (
 		<div className="space-y-8">
 			<div>
-				<h1 className="text-3xl font-medium text-neutral-900">Settings</h1>
+				<h1 className="text-3xl font-medium text-neutral-900">Ajustes</h1>
 				<p className="mt-1 text-sm text-neutral-500">{address}</p>
 			</div>
 
@@ -103,7 +103,7 @@ export function CurrentMailboxForm() {
 						<div className="flex items-center gap-3">
 							<Button type="submit" disabled={saving || !hasChanges}>
 								<Save className="h-4 w-4" />
-								{saving ? "Saving..." : "Save changes"}
+								{saving ? "Guardando..." : "Save changes"}
 							</Button>
 							{status && <p className="text-sm text-neutral-500">{status}</p>}
 						</div>

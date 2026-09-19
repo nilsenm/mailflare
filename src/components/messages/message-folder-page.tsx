@@ -118,7 +118,7 @@ function MessageListRow({
 						className={`mt-1 block truncate text-sm ${unread ? "font-semibold text-neutral-900" : "text-neutral-700"
 							}`}
 					>
-						{message.subject ?? "(no subject)"}
+						{message.subject ?? "(sin asunto)"}
 					</span>
 					<span className="mt-0.5 block truncate text-xs leading-5 text-neutral-500">
 						{preview}
@@ -134,7 +134,7 @@ function MessageListRow({
 	const content = (
 		<>
 			{config.folder === "inbox" && message.direction === "inbound" && (
-				<Tooltip label={starred ? "Starred" : "Not starred"}>
+				<Tooltip label={starred ? "Destacados" : "Not starred"}>
 					<Button
 						type="button"
 						variant="ghost"
@@ -144,7 +144,7 @@ function MessageListRow({
 							event.stopPropagation();
 							void toggleMessageStar(message.id).then((result) => setStarred(result.starred));
 						}}
-						aria-label={starred ? "Starred" : "Not starred"}
+						aria-label={starred ? "Destacados" : "Not starred"}
 					>
 						<Icon className={`h-4 w-4 ${starred ? "fill-amber-400 text-amber-400" : "text-neutral-300"}`} />
 					</Button>
@@ -162,7 +162,7 @@ function MessageListRow({
 			</span>
 			<span className="truncate text-neutral-700">
 				<span className={unread ? "font-semibold text-neutral-900" : ""}>
-					{rowMessage.subject ?? "(no subject)"}
+					{rowMessage.subject ?? "(sin asunto)"}
 				</span>
 				<span className="text-neutral-500"> - {getMessagePreview(rowMessage, config.folder)}</span>
 			</span>

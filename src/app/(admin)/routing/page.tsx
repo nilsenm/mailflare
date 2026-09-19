@@ -28,7 +28,7 @@ export default function RoutingPage() {
 
 			<section className="space-y-4">
 				<div>
-					<h2 className="text-xl font-semibold text-neutral-900">Domain</h2>
+					<h2 className="text-xl font-semibold text-neutral-900">Dominio</h2>
 					<p className="mt-1 text-sm text-neutral-500">Choose which domain these global rules apply to.</p>
 				</div>
 				<div className="rounded-3xl bg-white p-6">

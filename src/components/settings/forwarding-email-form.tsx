@@ -46,7 +46,7 @@ export function ForwardingEmailForm({ initialForwardingEmail }: ForwardingEmailF
 			</div>
 			<div className="flex items-center gap-3">
 				<Button type="submit" disabled={saving || forwardingEmail.trim() === savedForwardingEmail}>
-					{saving ? "Saving..." : "Save forwarding"}
+					{saving ? "Guardando..." : "Save forwarding"}
 				</Button>
 				{status && <p className="text-sm text-neutral-500">{status}</p>}
 			</div>

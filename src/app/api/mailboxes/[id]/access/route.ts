@@ -14,7 +14,7 @@ export async function GET(request: Request, { params }: MailboxAccessRouteParams
 	const { id } = await params;
 	const db = getDb(access.env);
 	const mailbox = await getSharedMailboxForAdmin(db, id, access.user!.id);
-	if (!mailbox) return NextResponse.json({ error: "Shared inbox not found" }, { status: 404 });
+	if (!mailbox) return NextResponse.json({ error: "Buzón compartido no encontrado" }, { status: 404 });
 
 	const [members, availableUsers] = await Promise.all([
 		db
@@ -42,17 +42,17 @@ export async function POST(request: Request, { params }: MailboxAccessRouteParam
 	const access = await requireTeamAdmin(request);
 	if (access.error) return access.error;
 	const parsed = mailboxAccessSchema.safeParse(await request.json());
-	if (!parsed.success) return NextResponse.json({ error: "Choose a valid account" }, { status: 400 });
+	if (!parsed.success) return NextResponse.json({ error: "Elige una cuenta válida" }, { status: 400 });
 	const { id } = await params;
 	const db = getDb(access.env);
 	const mailbox = await getSharedMailboxForAdmin(db, id, access.user!.id);
-	if (!mailbox) return NextResponse.json({ error: "Shared inbox not found" }, { status: 404 });
+	if (!mailbox) return NextResponse.json({ error: "Buzón compartido no encontrado" }, { status: 404 });
 	const [user] = await db
 		.select({ id: users.id })
 		.from(users)
 		.where(and(eq(users.id, parsed.data.userId), eq(users.createdByUserId, access.user!.id), eq(users.disabled, false)))
 		.limit(1);
-	if (!user) return NextResponse.json({ error: "Account not found" }, { status: 404 });
+	if (!user) return NextResponse.json({ error: "Cuenta no encontrada" }, { status: 404 });
 
 	await db
 		.insert(mailboxAccess)
@@ -75,10 +75,10 @@ export async function DELETE(request: Request, { params }: MailboxAccessRoutePar
 	if (access.error) return access.error;
 	const { id } = await params;
 	const userId = new URL(request.url).searchParams.get("userId");
-	if (!userId) return NextResponse.json({ error: "Account is required" }, { status: 400 });
+	if (!userId) return NextResponse.json({ error: "La cuenta es obligatoria" }, { status: 400 });
 	const db = getDb(access.env);
 	const mailbox = await getSharedMailboxForAdmin(db, id, access.user!.id);
-	if (!mailbox) return NextResponse.json({ error: "Shared inbox not found" }, { status: 404 });
+	if (!mailbox) return NextResponse.json({ error: "Buzón compartido no encontrado" }, { status: 404 });
 	await db
 		.delete(mailboxAccess)
 		.where(and(eq(mailboxAccess.mailboxId, id), eq(mailboxAccess.userId, userId)));

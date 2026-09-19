@@ -22,7 +22,7 @@ export async function POST(request: Request) {
 	const env = getEnv();
 	const db = getDb(env);
 	if (await hasAdminAccount(env)) {
-		return NextResponse.json({ error: "Registration is closed after the first account is created" }, { status: 403 });
+		return NextResponse.json({ error: "El registro se cierra después de crear la primera cuenta" }, { status: 403 });
 	}
 
 	let body: unknown;
@@ -30,14 +30,14 @@ export async function POST(request: Request) {
 		body = await readJsonBody(request, 16 * 1024);
 	} catch (error) {
 		const status = error instanceof RequestBodyTooLargeError ? 413 : 400;
-		return NextResponse.json({ error: "Invalid registration request" }, { status });
+		return NextResponse.json({ error: "Solicitud de registro no válida" }, { status });
 	}
 	const firstRunParsed = firstRunRegisterSchema.safeParse(body);
 	if (!firstRunParsed.success) {
 		return NextResponse.json({ error: firstRunParsed.error.flatten() }, { status: 400 });
 	}
 	if (!(await verifyTurnstileToken(env, request, (body as Record<string, unknown>).turnstileToken))) {
-		return NextResponse.json({ error: "Verification failed. Please try again." }, { status: 400 });
+		return NextResponse.json({ error: "La verificación falló. Inténtalo de nuevo." }, { status: 400 });
 	}
 
 	const domainName = firstRunParsed.data.domain.toLowerCase().trim();
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
 
 	const [existing] = await db.select().from(users).where(eq(users.email, email)).limit(1);
 	if (existing) {
-		return NextResponse.json({ error: "Email already registered" }, { status: 409 });
+		return NextResponse.json({ error: "El correo ya está registrado" }, { status: 409 });
 	}
 
 	const userId = newId("usr");
@@ -94,7 +94,7 @@ export async function POST(request: Request) {
 		} catch (cleanupError) {
 			console.warn("Failed to remove the partial user after registration failure", cleanupError);
 		}
-		const failure = getDomainProvisioningError(err, "Domain setup failed", 502);
+		const failure = getDomainProvisioningError(err, "No se pudo configurar el dominio", 502);
 		return NextResponse.json(
 			{ error: failure.message, code: failure.code },
 			{ status: failure.status },

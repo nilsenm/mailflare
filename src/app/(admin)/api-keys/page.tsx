@@ -78,7 +78,7 @@ export default function ApiKeysPage() {
 								<p className="text-sm text-red-600">{(create.error as Error).message}</p>
 							)}
 							<Button onClick={() => create.mutate()} disabled={!name || create.isPending}>
-								{create.isPending ? "Creating..." : "Create key"}
+								{create.isPending ? "Creando..." : "Crear clave"}
 							</Button>
 						</div>
 					</DialogContent>

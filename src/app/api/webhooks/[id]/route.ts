@@ -43,7 +43,7 @@ export async function PATCH(request: Request, { params }: WebhookRouteParams) {
 	if (parsed.data.maxAttempts !== undefined) updates.maxAttempts = parsed.data.maxAttempts;
 
 	if (Object.keys(updates).length === 0) {
-		return NextResponse.json({ error: "No changes provided" }, { status: 400 });
+		return NextResponse.json({ error: "No se indicaron cambios" }, { status: 400 });
 	}
 
 	await loaded.db.update(webhooks).set(updates).where(eq(webhooks.id, id));

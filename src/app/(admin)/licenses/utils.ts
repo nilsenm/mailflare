@@ -53,5 +53,5 @@ export function formatLicensePlan(plan: string): string {
 
 export function formatLicenseDate(value: Date | string | null): string | null {
 	if (!value) return null;
-	return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
+	return new Intl.DateTimeFormat("es-PE", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
 }

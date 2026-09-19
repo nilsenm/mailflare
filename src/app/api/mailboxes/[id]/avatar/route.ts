@@ -22,7 +22,7 @@ export async function GET(request: Request, { params }: MailboxAvatarRouteParams
 	const user = await requireUser(env, request);
 	const db = getDb(env);
 	const access = await getMailboxAccessLevel(db, user, id);
-	if (!access?.canRead) return new Response("Not found", { status: 404 });
+	if (!access?.canRead) return new Response("No encontrado", { status: 404 });
 
 	const [mailbox] = await db
 		.select({
@@ -41,10 +41,10 @@ export async function GET(request: Request, { params }: MailboxAvatarRouteParams
 	const avatarKey = mailbox && tracksAccountIdentity(mailbox, mailbox.ownerEmail)
 		? mailbox.ownerAvatarKey
 		: mailbox?.avatarKey;
-	if (!avatarKey) return new Response("Not found", { status: 404 });
+	if (!avatarKey) return new Response("No encontrado", { status: 404 });
 
 	const object = await env.BUCKET.get(avatarKey);
-	if (!object) return new Response("Not found", { status: 404 });
+	if (!object) return new Response("No encontrado", { status: 404 });
 
 	const headers = new Headers();
 	headers.set("Content-Type", object.httpMetadata?.contentType ?? "application/octet-stream");
@@ -61,24 +61,24 @@ export async function POST(request: Request, { params }: MailboxAvatarRouteParam
 	const db = getDb(env);
 	const access = await getMailboxAccessLevel(db, user, id);
 	if (!access?.canManage) {
-		return NextResponse.json({ error: "Mailbox not found" }, { status: 404 });
+		return NextResponse.json({ error: "Buzón no encontrado" }, { status: 404 });
 	}
 
 	let form: FormData;
 	try {
 		form = await request.formData();
 	} catch {
-		return NextResponse.json({ error: "Expected multipart form data" }, { status: 400 });
+		return NextResponse.json({ error: "Se esperaban datos de formulario multipart" }, { status: 400 });
 	}
 	const file = form.get("file");
 	if (!isUploadedAvatarFile(file)) {
-		return NextResponse.json({ error: "Missing image file" }, { status: 400 });
+		return NextResponse.json({ error: "Falta el archivo de imagen" }, { status: 400 });
 	}
 	if (!ALLOWED_AVATAR_TYPES.includes(file.type)) {
-		return NextResponse.json({ error: "Use a JPEG, PNG, WebP, or GIF image" }, { status: 400 });
+		return NextResponse.json({ error: "Usa una imagen JPEG, PNG, WebP o GIF" }, { status: 400 });
 	}
 	if (file.size > MAX_AVATAR_SIZE) {
-		return NextResponse.json({ error: "Image must be 2 MB or smaller" }, { status: 413 });
+		return NextResponse.json({ error: "La imagen debe pesar 2 MB o menos" }, { status: 413 });
 	}
 
 	const [mailbox] = await db
@@ -95,7 +95,7 @@ export async function POST(request: Request, { params }: MailboxAvatarRouteParam
 		.innerJoin(users, eq(mailboxes.userId, users.id))
 		.where(eq(mailboxes.id, id))
 		.limit(1);
-	if (!mailbox) return NextResponse.json({ error: "Mailbox not found" }, { status: 404 });
+	if (!mailbox) return NextResponse.json({ error: "Buzón no encontrado" }, { status: 404 });
 
 	// The primary mailbox shares the account avatar; every other mailbox stores its own.
 	const identity = tracksAccountIdentity(mailbox, mailbox.ownerEmail);

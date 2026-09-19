@@ -89,7 +89,7 @@ export function InboxRules() {
     rule: Pick<InboxRule, "action" | "folderId">,
   ) {
     if (rule.action === "spam") return "Spam";
-    if (rule.action === "trash") return "Trash";
+    if (rule.action === "trash") return "Papelera";
     return folderMap.get(rule.folderId ?? "") ?? "Unknown folder";
   }
 
@@ -260,7 +260,7 @@ export function InboxRules() {
                 >
                   <option value="">Select destination</option>
                   <option value="spam">Spam</option>
-                  <option value="trash">Trash</option>
+                  <option value="trash">Papelera</option>
                   {(folders.data?.folders ?? []).map((folder) => (
                     <option key={folder.id} value={`folder:${folder.id}`}>
                       {folder.name}
@@ -278,7 +278,7 @@ export function InboxRules() {
                 variant="outline"
                 onClick={() => setDialogOpen(false)}
               >
-                Cancel
+                Cancelar
               </Button>
               <Button
                 type="submit"
@@ -290,7 +290,7 @@ export function InboxRules() {
                 }
               >
                 {save.isPending
-                  ? "Saving..."
+                  ? "Guardando..."
                   : editingRule
                     ? "Save changes"
                     : "Create rule"}

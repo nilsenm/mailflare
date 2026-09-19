@@ -103,7 +103,7 @@ export default function AccountMailboxesPage() {
                 variant="ghost"
                 size="icon"
                 onClick={() => void removeMailbox(mailbox.id)}
-                aria-label="Remove inbox"
+                aria-label="Quitar bandeja de entrada"
               >
                 <Trash2 className="h-4 w-4 text-red-600" />
               </Button>
@@ -133,7 +133,7 @@ export default function AccountMailboxesPage() {
           </Select>
           <Button type="submit" disabled={!account || !domainId || saving}>
             <Plus className="h-4 w-4" />
-            {saving ? "Adding..." : "Add inbox"}
+            {saving ? "Agregando..." : "Agregar bandeja de entrada"}
           </Button>
         </form>
       </section>

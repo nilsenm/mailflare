@@ -9,7 +9,7 @@ export async function fetchActivity(): Promise<ActivityLog[]> {
 }
 
 export function formatActivityDate(value: string): string {
-	return new Intl.DateTimeFormat(undefined, {
+	return new Intl.DateTimeFormat("es-PE", {
 		dateStyle: "medium",
 		timeStyle: "short",
 	}).format(new Date(value));

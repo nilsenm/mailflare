@@ -22,8 +22,8 @@ export function BulkMessageToolbar({
 					{selectedCount} selected
 				</span>
 			)}
-			<Tooltip label="Archive">
-				<Button variant="ghost" size="sm" onClick={() => onAction("archive")} disabled={pending} aria-label="Archive">
+			<Tooltip label="Archivar">
+				<Button variant="ghost" size="sm" onClick={() => onAction("archive")} disabled={pending} aria-label="Archivar">
 					<Archive className="h-4 w-4" />
 				</Button>
 			</Tooltip>
@@ -32,18 +32,18 @@ export function BulkMessageToolbar({
 					<ShieldAlert className="h-4 w-4" />
 				</Button>
 			</Tooltip>
-			<Tooltip label="Delete">
-				<Button variant="ghost" size="sm" onClick={() => onAction("trash")} disabled={pending} aria-label="Delete">
+			<Tooltip label="Eliminar">
+				<Button variant="ghost" size="sm" onClick={() => onAction("trash")} disabled={pending} aria-label="Eliminar">
 					<Trash2 className="h-4 w-4" />
 				</Button>
 			</Tooltip>
-			<Tooltip label={hasUnreadSelection ? "Mark as read" : "Mark as unread"}>
+			<Tooltip label={hasUnreadSelection ? "Marcar como leído" : "Marcar como no leído"}>
 				<Button
 					variant="ghost"
 					size="sm"
 					onClick={() => onAction(hasUnreadSelection ? "read" : "unread")}
 					disabled={pending}
-					aria-label={hasUnreadSelection ? "Mark as read" : "Mark as unread"}
+					aria-label={hasUnreadSelection ? "Marcar como leído" : "Marcar como no leído"}
 				>
 					{hasUnreadSelection ? <MailOpen className="h-4 w-4" /> : <Mail className="h-4 w-4" />}
 				</Button>
@@ -64,7 +64,7 @@ export function BulkMessageToolbar({
 						<option value="">Move to</option>
 						<option value="archive">Archived</option>
 						<option value="spam">Spam</option>
-						<option value="trash">Trash</option>
+						<option value="trash">Papelera</option>
 					</Select>
 			</Tooltip>
 			<Tooltip label="Clear selection">

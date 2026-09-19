@@ -16,9 +16,9 @@ export async function GET(
 		assertAdmin(user);
 		const { id } = await params;
 		const [backup] = await getDb(env).select().from(backups).where(eq(backups.id, id)).limit(1);
-		if (!backup?.r2Key) return NextResponse.json({ error: "Backup file not found" }, { status: 404 });
+		if (!backup?.r2Key) return NextResponse.json({ error: "Archivo de copia de seguridad no encontrado" }, { status: 404 });
 		const object = await env.BUCKET.get(backup.r2Key);
-		if (!object) return NextResponse.json({ error: "Backup file not found" }, { status: 404 });
+		if (!object) return NextResponse.json({ error: "Archivo de copia de seguridad no encontrado" }, { status: 404 });
 		return new Response(object.body, {
 			headers: {
 				"Content-Type": "application/sql",
@@ -27,6 +27,6 @@ export async function GET(
 			},
 		});
 	} catch {
-		return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+		return NextResponse.json({ error: "Prohibido" }, { status: 403 });
 	}
 }

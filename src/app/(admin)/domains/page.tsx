@@ -60,14 +60,14 @@ export default function DomainsPage() {
       if (checkedDomain?.hostname !== normalized) {
         const result = await checkDomain(normalized);
         if (!result.ok || !result.domain) {
-          throw new Error(result.error ?? "Domain check failed");
+          throw new Error(result.error ?? "No se pudo comprobar el dominio");
         }
         checkedDomain = result.domain;
         sendingRequested = true;
         setDomainCheck(result.domain);
         setEnableSending(sendingRequested);
       }
-      if (!checkedDomain) throw new Error("Domain check failed");
+      if (!checkedDomain) throw new Error("No se pudo comprobar el dominio");
 
       const res = await authFetch("/api/domains", {
         method: "POST",
@@ -117,7 +117,7 @@ export default function DomainsPage() {
     if (!result.ok || !result.domain) {
       setDomainCheck(null);
       setEnableSending(false);
-      setDomainCheckError(result.error ?? "Domain check failed");
+      setDomainCheckError(result.error ?? "No se pudo comprobar el dominio");
       return;
     }
 
@@ -145,7 +145,7 @@ export default function DomainsPage() {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add domain</DialogTitle>
+              <DialogTitle>Agregar dominio</DialogTitle>
               <DialogDescription>
                 Connect a Cloudflare zone and choose whether Mailflare should
                 provision Email Sending.
@@ -170,15 +170,15 @@ export default function DomainsPage() {
               </div>
               <div className="flex items-center justify-between gap-4 rounded-xl bg-neutral-50 px-4 py-3">
                 <div>
-                  <Label htmlFor="enable-sending">Enable sending</Label>
+                  <Label htmlFor="enable-sending">Activar envío</Label>
                   <p className="mt-1 text-xs leading-5 text-neutral-500">
                     {domainChecking
-                      ? "Checking Cloudflare access..."
+                      ? "Comprobando el acceso a Cloudflare..."
                       : domainCheck
                         ? enableSending
-                          ? "Required to send email."
-                          : "Receive-only mode."
-                        : "Enter the domain and leave the field to verify it."}
+                          ? "Necesario para enviar correos."
+                          : "Modo de solo recepción."
+                        : "Ingresa el dominio y sal del campo para verificarlo."}
                   </p>
                 </div>
                 {domainChecking ? (
@@ -227,7 +227,7 @@ export default function DomainsPage() {
                 onClick={() => create.mutate()}
                 disabled={!hostname || domainChecking || create.isPending}
               >
-                {create.isPending ? "Adding..." : "Add domain"}
+                {create.isPending ? "Agregando..." : "Agregar dominio"}
               </Button>
             </div>
           </DialogContent>

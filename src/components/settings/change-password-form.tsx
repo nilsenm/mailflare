@@ -50,7 +50,7 @@ export function ChangePasswordForm() {
 				/>
 			</div>
 			<div className="space-y-2">
-				<Label htmlFor="newPassword">New password</Label>
+				<Label htmlFor="newPassword">Contraseña nueva</Label>
 				<Input
 					id="newPassword"
 					type="password"
@@ -62,7 +62,7 @@ export function ChangePasswordForm() {
 				/>
 			</div>
 			<div className="space-y-2">
-				<Label htmlFor="confirmPassword">Confirm new password</Label>
+				<Label htmlFor="confirmPassword">Confirma la contraseña nueva</Label>
 				<Input
 					id="confirmPassword"
 					type="password"

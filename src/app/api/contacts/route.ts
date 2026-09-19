@@ -15,13 +15,13 @@ export async function GET(request: Request) {
 	const mailboxId = url.searchParams.get("mailboxId");
 	const email = normalizeEmailAddress(url.searchParams.get("address") ?? "");
 	if (!mailboxId || !email) {
-		return NextResponse.json({ error: "Mailbox and contact are required" }, { status: 400 });
+		return NextResponse.json({ error: "El buzón y el contacto son obligatorios" }, { status: 400 });
 	}
 
 	const db = getDb(env);
 	const access = await getMailboxAccessLevel(db, user, mailboxId);
 	if (!access?.canRead) {
-		return NextResponse.json({ error: "Mailbox not found" }, { status: 404 });
+		return NextResponse.json({ error: "Buzón no encontrado" }, { status: 404 });
 	}
 	const storedContact = toContactDetails(await getContactByEmail(db, access.mailbox.userId, email));
 	const account = await getPersonalIdentityForAddress(db, access.mailbox.userId, email);
@@ -55,18 +55,18 @@ export async function PATCH(request: Request) {
 	const email = normalizeEmailAddress(body.address ?? "");
 	const displayName = body.displayName?.trim() ?? "";
 	if (!body.mailboxId || !email || !displayName || displayName.length > 100) {
-		return NextResponse.json({ error: "A valid contact name is required" }, { status: 400 });
+		return NextResponse.json({ error: "Se requiere un nombre de contacto válido" }, { status: 400 });
 	}
 
 	const db = getDb(env);
 	const access = await getMailboxAccessLevel(db, user, body.mailboxId);
 	if (!access?.canManage) {
-		return NextResponse.json({ error: "Mailbox not found" }, { status: 404 });
+		return NextResponse.json({ error: "Buzón no encontrado" }, { status: 404 });
 	}
 	const account = await getPersonalIdentityForAddress(db, access.mailbox.userId, email);
 	if (account) {
 		if (account.userId !== user.id) {
-			return NextResponse.json({ error: "Only the account owner can change this contact" }, { status: 403 });
+			return NextResponse.json({ error: "Solo el propietario de la cuenta puede modificar este contacto" }, { status: 403 });
 		}
 		await syncPersonalIdentity(db, {
 			userId: account.userId,

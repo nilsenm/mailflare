@@ -100,7 +100,7 @@ export function getAttachmentVisual(
 		return {
 			icon: FileCode,
 			iconClassName: "bg-cyan-50 text-cyan-700",
-			label: "Code",
+			label: "Código",
 			thumbnail: null,
 		};
 	}

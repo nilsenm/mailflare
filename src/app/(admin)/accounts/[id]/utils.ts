@@ -69,7 +69,7 @@ export async function createAccountMailbox(
 		body: JSON.stringify(input),
 	});
 	const json = (await res.json()) as { error?: string };
-	if (!res.ok) throw new Error(json.error ?? "Failed to create mailbox");
+	if (!res.ok) throw new Error(json.error ?? "No se pudo crear el buzón");
 }
 
 export async function grantAccountMailboxAccess(

@@ -13,14 +13,14 @@ export async function POST(request: Request) {
 		body = await readJsonBody(request, 16 * 1024);
 	} catch (error) {
 		const status = error instanceof RequestBodyTooLargeError ? 413 : 400;
-		return NextResponse.json({ error: "Invalid request" }, { status });
+		return NextResponse.json({ error: "Solicitud no válida" }, { status });
 	}
 	const parsed = passwordResetConfirmSchema.safeParse(body);
 	if (!parsed.success) {
-		return NextResponse.json({ error: "Choose a password of at least 8 characters" }, { status: 400 });
+		return NextResponse.json({ error: "Elige una contraseña de al menos 8 caracteres" }, { status: 400 });
 	}
 	if (!(await allowLoginAttempt(env, request))) {
-		return NextResponse.json({ error: "Too many attempts. Try again shortly." }, { status: 429, headers: { "Retry-After": "60" } });
+		return NextResponse.json({ error: "Demasiados intentos. Inténtalo de nuevo en unos minutos." }, { status: 429, headers: { "Retry-After": "60" } });
 	}
 
 	const result = await completePasswordReset(env, parsed.data.token, parsed.data.password, request);

@@ -167,11 +167,11 @@ function EnrollDialog({ open, onOpenChange, onDone }: { open: boolean; onOpenCha
 							<DialogDescription>Confirm your password to begin.</DialogDescription>
 						</DialogHeader>
 						<div className="space-y-2">
-							<Label htmlFor="mfa-password">Password</Label>
+							<Label htmlFor="mfa-password">Contraseña</Label>
 							<Input id="mfa-password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required autoFocus />
 						</div>
 						{error && <p className="text-sm text-red-600">{error}</p>}
-						<Button type="submit" disabled={busy}>{busy ? "Please wait..." : "Continue"}</Button>
+						<Button type="submit" disabled={busy}>{busy ? "Please wait..." : "Continuar"}</Button>
 					</form>
 				)}
 				{step === "scan" && (
@@ -190,7 +190,7 @@ function EnrollDialog({ open, onOpenChange, onDone }: { open: boolean; onOpenCha
 							<Input id="mfa-code" inputMode="numeric" autoComplete="one-time-code" value={code} onChange={(e) => setCode(e.target.value)} placeholder="123 456" required autoFocus />
 						</div>
 						{error && <p className="text-sm text-red-600">{error}</p>}
-						<Button type="submit" disabled={busy}>{busy ? "Checking..." : "Verify and turn on"}</Button>
+						<Button type="submit" disabled={busy}>{busy ? "Comprobando..." : "Verify and turn on"}</Button>
 					</form>
 				)}
 				{step === "codes" && (
@@ -240,11 +240,11 @@ function DisableDialog({ open, onOpenChange, onDone }: { open: boolean; onOpenCh
 						<DialogDescription>Confirm your password and a current code or recovery code.</DialogDescription>
 					</DialogHeader>
 					<div className="space-y-2">
-						<Label htmlFor="mfa-off-password">Password</Label>
+						<Label htmlFor="mfa-off-password">Contraseña</Label>
 						<Input id="mfa-off-password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
 					</div>
 					<div className="space-y-2">
-						<Label htmlFor="mfa-off-code">Code</Label>
+						<Label htmlFor="mfa-off-code">Código</Label>
 						<Input id="mfa-off-code" inputMode="numeric" autoComplete="one-time-code" value={code} onChange={(e) => setCode(e.target.value)} required />
 					</div>
 					{error && <p className="text-sm text-red-600">{error}</p>}
@@ -301,7 +301,7 @@ function RecoveryCodesDialog({ open, onOpenChange, onDone }: { open: boolean; on
 							<DialogDescription>This replaces every existing code. Confirm your password to continue.</DialogDescription>
 						</DialogHeader>
 						<div className="space-y-2">
-							<Label htmlFor="rc-password">Password</Label>
+							<Label htmlFor="rc-password">Contraseña</Label>
 							<Input id="rc-password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required autoFocus />
 						</div>
 						{error && <p className="text-sm text-red-600">{error}</p>}

@@ -32,7 +32,7 @@ export async function GET(request: Request) {
 			configuration: getBackupConfigurationStatus(env),
 		});
 	} catch {
-		return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+		return NextResponse.json({ error: "Prohibido" }, { status: 403 });
 	}
 }
 
@@ -40,11 +40,11 @@ export async function PUT(request: Request) {
 	try {
 		const { env } = await requireAdmin(request);
 		const input = parseBackupSettingsInput(await request.json());
-		if (!input) return NextResponse.json({ error: "Invalid backup settings" }, { status: 400 });
+		if (!input) return NextResponse.json({ error: "Ajustes de copia de seguridad no válidos" }, { status: 400 });
 		await updateBackupSettings(env, input);
 		return NextResponse.json({ ok: true });
 	} catch {
-		return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+		return NextResponse.json({ error: "Prohibido" }, { status: 403 });
 	}
 }
 

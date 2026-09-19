@@ -10,7 +10,7 @@ export async function GET(request: Request, { params }: Params) {
 	const env = getEnv();
 	const user = await requireUser(env, request);
 	const domain = await getDomainForUser(env, user.id, id);
-	if (!domain) return NextResponse.json({ error: "Not found" }, { status: 404 });
+	if (!domain) return NextResponse.json({ error: "No encontrado" }, { status: 404 });
 	return NextResponse.json({ domain });
 }
 

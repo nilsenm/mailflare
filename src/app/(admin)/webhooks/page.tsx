@@ -206,7 +206,7 @@ export default function WebhooksPage() {
 										onClick={() => remove.mutate(hook.id)}
 										aria-label={`Delete ${hook.url}`}
 									>
-										<Trash2 className="h-4 w-4" /> Delete
+										<Trash2 className="h-4 w-4" /> Eliminar
 									</Button>
 								</div>
 							</div>
@@ -291,7 +291,7 @@ export default function WebhooksPage() {
 
 						<div className="flex justify-end gap-2">
 							<Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-								Cancel
+								Cancelar
 							</Button>
 							<Button type="submit" disabled={create.isPending || events.length === 0}>
 								<RefreshCw

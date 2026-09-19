@@ -15,7 +15,7 @@ export function parseImapImportRequest(input: ImapImportRequest): ImapImportInpu
 	const limit = Math.min(Math.max(Number(input.limit ?? 25), 1), 100);
 	const destination = parseImportDestination(input.destination);
 
-	if (!input.mailboxId) throw new Error("Mailbox is required");
+	if (!input.mailboxId) throw new Error("El buzón es obligatorio");
 	if (!host) throw new Error("IMAP host is required");
 	if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error("IMAP port is invalid");
 	if (!username || !password) throw new Error("IMAP username and password are required");

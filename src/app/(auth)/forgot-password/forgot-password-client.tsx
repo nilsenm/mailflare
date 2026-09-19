@@ -23,13 +23,13 @@ export function ForgotPasswordClient() {
 		try {
 			const result = await requestPasswordReset(new FormData(event.currentTarget));
 			if (!result.ok) {
-				setError(result.error ?? "Something went wrong. Please try again.");
+				setError(result.error ?? "Ocurrió un problema. Inténtalo de nuevo.");
 				setTurnstileReset((value) => value + 1);
 				return;
 			}
 			setSent(true);
 		} catch {
-			setError("Unable to reach the server. Please try again.");
+			setError("No se pudo conectar con el servidor. Inténtalo de nuevo.");
 			setTurnstileReset((value) => value + 1);
 		} finally {
 			setLoading(false);
@@ -39,22 +39,22 @@ export function ForgotPasswordClient() {
 	return (
 		<AuthShell
 			icon={KeyRound}
-			title="Reset your password"
+			title="Restablece tu contraseña"
 			description={
 				sent
-					? "If that account has a recovery email, a reset link is on its way. It works for 30 minutes."
-					: "Enter the address you sign in with. We will send a reset link to the recovery email on the account."
+					? "Si esa cuenta tiene un correo de recuperación, recibirás un enlace de restablecimiento. Será válido por 30 minutos."
+					: "Ingresa la dirección con la que inicias sesión. Enviaremos un enlace al correo de recuperación de la cuenta."
 			}
 			footer={
 				<Link href="/login" className="text-sm text-neutral-500 hover:text-neutral-800">
-					Back to sign in
+					Volver a iniciar sesión
 				</Link>
 			}
 		>
 			{!sent && (
 				<form onSubmit={onSubmit} className="space-y-5">
 					<div className="space-y-2">
-						<Label htmlFor="email">Email</Label>
+						<Label htmlFor="email">Correo electrónico</Label>
 						<Input id="email" name="email" type="email" autoComplete="email" required autoFocus />
 					</div>
 					{error && (
@@ -62,7 +62,7 @@ export function ForgotPasswordClient() {
 					)}
 					<TurnstileField resetSignal={turnstileReset} />
 					<Button type="submit" className="h-11 w-full rounded-full px-6 active:scale-[0.98]" disabled={loading}>
-						{loading ? "Sending..." : "Send reset link"}
+						{loading ? "Enviando..." : "Enviar enlace de restablecimiento"}
 					</Button>
 				</form>
 			)}

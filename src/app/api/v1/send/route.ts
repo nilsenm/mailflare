@@ -12,7 +12,7 @@ export async function POST(request: Request) {
 	const env = getEnv();
 	const auth = await authenticateApiKey(env, request.headers.get("authorization"));
 	if (!auth || !requireScope(auth.scopes, "send")) {
-		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+		return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 	}
 
 	let body: unknown;
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
 		body = await readJsonBody(request, 30 * 1024 * 1024);
 	} catch (error) {
 		const status = error instanceof RequestBodyTooLargeError ? 413 : 400;
-		return NextResponse.json({ error: "Invalid send request" }, { status });
+		return NextResponse.json({ error: "Solicitud de envío no válida" }, { status });
 	}
 	const parsed = sendEmailSchema.safeParse(body);
 	if (!parsed.success) {

@@ -20,12 +20,12 @@ export async function DELETE(request: Request, { params }: DraftAttachmentRouteP
 	const [draft] = await db.select().from(messages).where(eq(messages.id, id)).limit(1);
 
 	if (!userOwnsDraft(draft, user.id)) {
-		return NextResponse.json({ error: "Draft not found" }, { status: 404 });
+		return NextResponse.json({ error: "Borrador no encontrado" }, { status: 404 });
 	}
 
 	const removed = await deleteMessageAttachment(env, id, attachmentId);
 	if (!removed) {
-		return NextResponse.json({ error: "Attachment not found" }, { status: 404 });
+		return NextResponse.json({ error: "Adjunto no encontrado" }, { status: 404 });
 	}
 	return NextResponse.json({ ok: true });
 }
