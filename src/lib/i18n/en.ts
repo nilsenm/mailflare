@@ -5,6 +5,7 @@ import { mail } from "./en/mail";
 import { compose } from "./en/compose";
 import { admin } from "./en/admin";
 import { server } from "./en/server";
+import { emails } from "./en/emails";
 
 // Diccionario fuente (inglés). Cada área vive en su propio archivo en ./en/<area>.ts
 // y su traducción en ./es/<area>.ts con exactamente las mismas claves.
@@ -16,6 +17,7 @@ export const en = {
 	...compose,
 	...admin,
 	...server,
+	...emails,
 } as const;
 
 export type AreaDictionary<T> = {
