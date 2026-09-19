@@ -1,0 +1,17 @@
+services:
+  mailflare:
+    build: .
+    image: mailflare:local
+    container_name: mailflare
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3010:3000"   # web solo local; nginx publica mail.lesotur.com
+      - "25:25"                 # correo entrante (MX)
+    env_file: .env.docker
+    volumes:
+      - mailflare-data:/data
+      - ./certs:/certs:ro
+    mem_limit: 768m
+
+volumes:
+  mailflare-data:
