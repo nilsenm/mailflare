@@ -34,3 +34,22 @@ export type MailboxesResponse = {
 	mailboxes: Mailbox[];
 	canCreateShared: boolean;
 };
+
+/** Row of the admin list: every mailbox on the admin's domains, with its owner. */
+export type MailboxListRow = Mailbox & {
+	userId: string | null;
+	ownerEmail: string | null;
+	ownedByMe: boolean;
+	ownership: "independent" | "inside" | null;
+	canMakeIndependent: boolean;
+};
+
+export type MailboxOverviewResponse = {
+	mailboxes?: MailboxListRow[];
+	error?: string;
+};
+
+export type CreatedAccountResponse = {
+	account?: { id: string; email: string; name: string };
+	error?: unknown;
+};

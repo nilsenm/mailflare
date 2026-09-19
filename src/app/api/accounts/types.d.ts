@@ -24,6 +24,8 @@ export type CreateUserAccountInput = {
 	domainId: string;
 	password: string;
 	role: "admin" | "user";
+	displayName?: string;
+	resetEmail?: string | null;
 };
 
 export type AccountListResponse = {

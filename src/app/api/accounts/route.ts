@@ -7,6 +7,7 @@ import { newId } from "@/lib/ids";
 import { createUserAccountSchema } from "@/lib/validators";
 import { ensureEmailRoutingRuleToWorker } from "@/lib/cloudflare-api";
 import { ensureMailboxDomainRouting } from "@/lib/mailboxes/domain-addresses";
+import { resolveNewAccountName } from "@/lib/mailboxes/independent-utils";
 import { getServerLang } from "@/lib/i18n/server";
 import { getDictionary, translate } from "@/lib/i18n";
 import type { CreateUserAccountInput } from "./types";
@@ -49,6 +50,7 @@ export async function POST(request: Request) {
 	const mailbox = await getExistingMailbox(db, domain.id, username);
 	if (mailbox) return NextResponse.json({ error: translate(dict, "server.emailAlreadyAssigned") }, { status: 409 });
 
+	const displayName = resolveNewAccountName(input.displayName, username);
 	const userId = newId("usr");
 	try {
 		await ensureEmailRoutingRuleToWorker(access.env, domain.zoneId, email);
@@ -58,7 +60,8 @@ export async function POST(request: Request) {
 				id: userId,
 				email,
 				passwordHash: hashPassword(input.password),
-				name: username,
+				name: displayName,
+				resetEmail: input.resetEmail ?? null,
 				role: input.role,
 				createdByUserId: access.user!.id,
 			})
@@ -77,7 +80,7 @@ export async function POST(request: Request) {
 			userId,
 			domainId: domain.id,
 			localPart: username,
-			displayName: username,
+			displayName,
 		});
 		await ensureMailboxDomainRouting(access.env, db, { id: mailboxId, domainId: domain.id, localPart: username, useAllDomains: true });
 

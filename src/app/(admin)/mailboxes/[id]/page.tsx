@@ -1,9 +1,14 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AtSign, Save, Trash2, UserPlus } from "lucide-react";
+import { AtSign, CheckCircle2, KeyRound, Save, Trash2, UserPlus } from "lucide-react";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { clearMailboxesCache } from "@/components/mailbox-provider-utils";
+import { authFetch } from "@/lib/auth/client";
+import { MakeIndependentDialog } from "@/components/mailboxes/make-independent-dialog";
+import type { IndependentAccount, MakeIndependentTarget } from "@/components/mailboxes/make-independent-dialog-types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,11 +48,23 @@ export default function MailboxSettingsPage() {
   const [selectedUserId, setSelectedUserId] = useState("");
   const [aliasLocalPart, setAliasLocalPart] = useState("");
   const [aliasDomainId, setAliasDomainId] = useState("");
+  const [convertTarget, setConvertTarget] = useState<MakeIndependentTarget | null>(null);
+  const [converted, setConverted] = useState<IndependentAccount | null>(null);
+
+  // The admin only loads its own mailboxes here, so the current account is the owner.
+  const account = useQuery({
+    queryKey: ["auth", "me"],
+    queryFn: async () => {
+      const res = await authFetch("/api/auth/me", { redirectOnUnauthorized: false });
+      return (await res.json()) as { user?: { id?: string; email?: string; name?: string | null } };
+    },
+  });
 
   const mailbox = useQuery({
     queryKey: ["mailbox", mailboxId],
     queryFn: () => fetchMailbox(mailboxId),
-    enabled: !!mailboxId,
+    // Once converted the mailbox belongs to the new account and is no longer ours to load.
+    enabled: !!mailboxId && !converted,
   });
 
   useEffect(() => {
@@ -78,7 +95,7 @@ export default function MailboxSettingsPage() {
   const aliases = useQuery({
     queryKey: ["mailbox", mailboxId, "aliases"],
     queryFn: () => fetchMailboxAliases(mailboxId),
-    enabled: !!mailboxId,
+    enabled: !!mailboxId && !converted,
   });
   const addAlias = useMutation({
     mutationFn: () =>
@@ -114,6 +131,53 @@ export default function MailboxSettingsPage() {
   });
 
   const address = mailbox.data ? getMailboxAddress(mailbox.data) : "";
+  const canMakeIndependent = mailbox.data?.type === "personal" && !mailbox.data.isPrimary;
+
+  const independentDialog = (
+    <MakeIndependentDialog
+      target={convertTarget}
+      onOpenChange={(open) => {
+        if (!open) setConvertTarget(null);
+      }}
+      onConverted={(account) => {
+        // The page itself switches to the success view, so the dialog closes.
+        setConvertTarget(null);
+        setConverted(account);
+        clearMailboxesCache();
+        qc.invalidateQueries({ queryKey: ["mailboxes"] });
+        qc.invalidateQueries({ queryKey: ["accounts"] });
+      }}
+    />
+  );
+
+  if (converted) {
+    return (
+      <div className="space-y-6">
+        <div className="min-w-0">
+          <h1 className="truncate text-3xl font-medium text-neutral-900">
+            {t("admin.mailboxSettings.title")}
+          </h1>
+          <p className="mt-1 truncate no-font-mono text-sm text-neutral-500">{converted.email}</p>
+        </div>
+        <div className="space-y-4 rounded-3xl bg-white p-6">
+          <p className="flex items-start gap-3 rounded-2xl bg-green-50 px-4 py-3 text-sm text-green-800">
+            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>
+              {t("admin.mailboxes.madeIndependent", { email: converted.email, url: window.location.origin })}
+            </span>
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button asChild>
+              <Link href={`/accounts/${converted.id}`}>{t("admin.mailboxes.viewAccount")}</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/mailboxes">{t("admin.mailboxes.backToMailboxes")}</Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -137,8 +201,26 @@ export default function MailboxSettingsPage() {
           {mailbox.data?.isPrimary && (
             <Badge variant="secondary">{t("admin.mailboxSettings.badgePrimary")}</Badge>
           )}
+          {canMakeIndependent && mailbox.data && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() =>
+                setConvertTarget({
+                  id: mailbox.data.id,
+                  address,
+                  displayName: mailbox.data.displayName,
+                  ownerEmail: account.data?.user?.email ?? "",
+                })
+              }
+            >
+              <KeyRound className="h-4 w-4" />
+              {t("admin.mailboxes.makeIndependent")}
+            </Button>
+          )}
         </div>
       </div>
+      {independentDialog}
 
       {mailbox.isError && (
         <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">

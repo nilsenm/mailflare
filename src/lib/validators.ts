@@ -150,6 +150,21 @@ export const createUserAccountSchema = z.object({
 	domainId: z.string().min(1),
 	password: z.string().min(8).max(128),
 	role: z.enum(["admin", "user"]).default("user"),
+	displayName: z.string().trim().max(100).optional(),
+	resetEmail: z.preprocess(
+		(value) => (typeof value === "string" ? value.trim() : value),
+		z.string().email().or(z.literal("")).optional().transform((value) => value || null),
+	),
+});
+
+/** Give an existing mailbox its own password: it becomes an independent account. */
+export const makeMailboxIndependentSchema = z.object({
+	password: z.string().min(8).max(128),
+	displayName: z.string().trim().max(100).optional(),
+	resetEmail: z.preprocess(
+		(value) => (typeof value === "string" ? value.trim() : value),
+		z.string().email().or(z.literal("")).optional().transform((value) => value || null),
+	),
 });
 
 export const updateAccountSchema = z.object({

@@ -10,6 +10,8 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { authFetch } from "@/lib/auth/client";
 import { LicenseRequiredOverlay } from "@/components/license-required-overlay";
+import { AccountNameField, AccountSecretFields } from "@/components/accounts/account-fields";
+import { accountSecretPayload, apiErrorText, validateAccountSecretFields } from "@/components/accounts/account-fields-utils";
 import { useT } from "@/lib/i18n/client";
 import type { Account, AccountResponse, Domain } from "./types";
 
@@ -21,6 +23,9 @@ export default function AccountsPage() {
 	const [domainId, setDomainId] = useState("");
 	const [role, setRole] = useState<"admin" | "user">("user");
 	const [password, setPassword] = useState("");
+	const [confirmPassword, setConfirmPassword] = useState("");
+	const [displayName, setDisplayName] = useState("");
+	const [resetEmail, setResetEmail] = useState("");
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
 	const [createOpen, setCreateOpen] = useState(false);
@@ -53,18 +58,31 @@ export default function AccountsPage() {
 
 	async function createAccount(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
+		const problem = validateAccountSecretFields({ password, confirmPassword, resetEmail });
+		if (problem) {
+			setMessage(t(problem));
+			return;
+		}
 		setSaving(true);
 		setMessage(null);
 		try {
 			const response = await authFetch("/api/accounts", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ username, domainId, password, role }),
+				body: JSON.stringify({
+					username,
+					domainId,
+					role,
+					...accountSecretPayload({ password, confirmPassword, resetEmail, displayName }),
+				}),
 			});
-			const data = (await response.json()) as AccountResponse;
-			if (!response.ok) throw new Error(data.error ?? t("admin.accounts.createError"));
+			const data = (await response.json()) as Omit<AccountResponse, "error"> & { error?: unknown };
+			if (!response.ok) throw new Error(apiErrorText(data.error, t("admin.accounts.createError")));
 			setUsername("");
 			setPassword("");
+			setConfirmPassword("");
+			setDisplayName("");
+			setResetEmail("");
 			setCreateOpen(false);
 			await loadAccounts();
 		} catch (error) {
@@ -126,12 +144,19 @@ export default function AccountsPage() {
 				</div>
 			</div>
 			<Dialog open={createOpen} onOpenChange={setCreateOpen}>
-				<DialogContent>
+				<DialogContent className="max-h-[calc(100vh-4rem)] overflow-y-auto">
 					<DialogHeader>
 						<DialogTitle>{t("admin.accounts.dialogTitle")}</DialogTitle>
 						<DialogDescription>{t("admin.accounts.dialogDescription")}</DialogDescription>
 					</DialogHeader>
 					<form onSubmit={createAccount} className="space-y-4">
+						<AccountNameField
+							id="account-display-name"
+							value={displayName}
+							onChange={setDisplayName}
+							placeholder={username.trim() || t("admin.accountFields.namePlaceholder")}
+							disabled={saving}
+						/>
 						<div className="space-y-2">
 							<Label htmlFor="account-username">{t("admin.accounts.email")}</Label>
 							<div className="flex h-10 overflow-hidden rounded-md border border-neutral-200 bg-white">
@@ -160,17 +185,16 @@ export default function AccountsPage() {
 								</Select>
 							</div>
 						</div>
-						<div className="space-y-2">
-							<Label htmlFor="account-password">{t("admin.accounts.password")}</Label>
-							<Input
-								id="account-password"
-								type="password"
-								minLength={8}
-								value={password}
-								onChange={(event) => setPassword(event.target.value)}
-								required
-							/>
-						</div>
+						<AccountSecretFields
+							idPrefix="account"
+							password={password}
+							confirmPassword={confirmPassword}
+							resetEmail={resetEmail}
+							onPasswordChange={setPassword}
+							onConfirmPasswordChange={setConfirmPassword}
+							onResetEmailChange={setResetEmail}
+							disabled={saving}
+						/>
 						<div className="space-y-2">
 							<Label htmlFor="account-role">{t("admin.accounts.role")}</Label>
 							<Select
